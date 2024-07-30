@@ -1,4 +1,3 @@
-import start
 import middlewares, handlers
 import asyncio
 import sys
