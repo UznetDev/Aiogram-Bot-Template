@@ -1,85 +1,79 @@
 import logging
-from loader import dp
-from aiogram.exceptions import (AiogramError,
-                                DetailedAiogramError,
-                                ClientDecodeError,
-                                SceneException,
-                                UnsupportedKeywordArgument,
-                                TelegramAPIError,
-                                TelegramNetworkError,
-                                TelegramRetryAfter,
-                                TelegramMigrateToChat,
-                                TelegramBadRequest,
-                                TelegramNotFound,
-                                TelegramConflictError,
-                                TelegramUnauthorizedError,
-                                TelegramForbiddenError,
-                                TelegramServerError,
-                                RestartingTelegram,
-                                TelegramEntityTooLarge,
-                                ClientDecodeError)
-
+from aiogram import types
+from aiogram.exceptions import (
+    AiogramError,
+    DetailedAiogramError,
+    ClientDecodeError,
+    SceneException,
+    UnsupportedKeywordArgument,
+    TelegramAPIError,
+    TelegramNetworkError,
+    TelegramRetryAfter,
+    TelegramMigrateToChat,
+    TelegramBadRequest,
+    TelegramNotFound,
+    TelegramConflictError,
+    TelegramUnauthorizedError,
+    TelegramForbiddenError,
+    TelegramServerError,
+    RestartingTelegram,
+    TelegramEntityTooLarge
+)
 
 @dp.errors()
-async def errors_handler(update, exception):
+async def errors_handler(update: types.Update, exception: Exception):
     """
-    Exceptions handler. Catches all exceptions within task factory tasks.
-    :param update:
-    :param exception:
-    :return: stdout logging and bool
+    Handles exceptions raised by Aiogram during task execution.
+
+    :param update: The update that caused the exception.
+    :param exception: The exception that was raised.
+    :return: True if the exception was handled, otherwise False.
     """
-    if isinstance(exception, AiogramError):
-        logging.exception('Base exception for all aiogram errors.')
-        return True
-    elif isinstance(exception, DetailedAiogramError):
-        logging.exception('Base exception for all aiogram errors with detailed message.')
+    if isinstance(exception, (AiogramError, DetailedAiogramError, TelegramAPIError)):
+        logging.exception('Telegram API or Aiogram related error occurred.')
         return True
     elif isinstance(exception, ClientDecodeError):
-        logging.exception("Exception for callback answer")
+        logging.exception("Client decode error occurred.")
         return True
     elif isinstance(exception, SceneException):
-        logging.exception("Exception for scenes.")
+        logging.exception("Error occurred with scenes.")
         return True
     elif isinstance(exception, UnsupportedKeywordArgument):
-        logging.exception("Exception raised when a keyword argument is passed as filter.")
-        return True
-    elif isinstance(exception, TelegramAPIError):
-        logging.exception("Base exception for all Telegram API errors.")
+        logging.exception("Unsupported keyword argument error occurred.")
         return True
     elif isinstance(exception, TelegramNetworkError):
-        logging.exception("Base exception for all Telegram network errors.")
+        logging.exception("Network error occurred.")
         return True
     elif isinstance(exception, TelegramRetryAfter):
-        logging.exception("Exception raised when flood control exceeds.")
+        logging.exception("Flood control exceeded. Retry after the specified time.")
         return True
     elif isinstance(exception, TelegramMigrateToChat):
-        logging.exception("Exception raised when chat has been migrated to a supergroup.")
+        logging.exception("Chat has been migrated to a supergroup.")
         return True
     elif isinstance(exception, TelegramBadRequest):
-        logging.exception("Exception raised when request is malformed.")
+        logging.exception("Malformed request error.")
         return True
     elif isinstance(exception, TelegramNotFound):
-        logging.exception("Exception raised when chat, message, user, etc. not found.")
+        logging.exception("Requested resource not found.")
         return True
     elif isinstance(exception, TelegramConflictError):
-        logging.exception("Exception raised when bot token is already used by another application in polling mode.")
+        logging.exception("Bot token conflict error.")
         return True
     elif isinstance(exception, TelegramUnauthorizedError):
-        logging.exception("Exception raised when bot token is invalid.")
+        logging.exception("Unauthorized bot token error.")
         return True
     elif isinstance(exception, TelegramForbiddenError):
-        logging.exception("Exception raised when bot is kicked from chat or etc.")
+        logging.exception("Bot is forbidden from accessing the chat.")
         return True
     elif isinstance(exception, TelegramServerError):
-        logging.exception("Exception raised when Telegram server returns 5xx error.")
+        logging.exception("Telegram server error (5xx).")
         return True
     elif isinstance(exception, RestartingTelegram):
-        logging.exception("Exception raised when Telegram server is restarting.")
+        logging.exception("Telegram server is restarting.")
         return True
     elif isinstance(exception, TelegramEntityTooLarge):
-        logging.exception("Exception raised when you are trying to send a file that is too large.")
+        logging.exception("File size is too large to send.")
         return True
-    elif isinstance(exception, ClientDecodeError):
-        logging.exception("Exception raised when client can’t decode response.")
     else:
-        logging.exception(f'Update: {update} \n{exception}')
+        logging.exception(f'Unhandled exception occurred: {exception}')
+        return False
