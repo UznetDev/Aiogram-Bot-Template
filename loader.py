@@ -11,3 +11,5 @@ storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
 db = Database(host=HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, database=MYSQL_DATABASE)
+
+DB = BotDb(file='data/db.json')
