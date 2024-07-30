@@ -1,21 +1,19 @@
 import logging
 from aiogram import types
-from aiogram.filters import CommandStart, CommandObject
+from aiogram.filters import CommandStart
 from function.translator import translator
 from loader import *
 from data.config import yil_oy_kun, soat_minut_sekund
 from keyboards.inline.user import send_url
-from keyboards.inline.user import share_audio
 
 
 @dp.message(CommandStart())
-async def start_handler(msg: types.Message, command: CommandObject):
+async def start_handler(msg: types.Message):
     try:
         cid = msg.from_user.id
         lang = msg.from_user.language_code
         bot_info = await bot.get_me()
         bot_username = bot_info.username
-        first_name = msg.from_user.first_name
 
         text = f'👋Hello dear %s\n'
 
