@@ -1,5 +1,4 @@
 from .users import check_ban
-# from .music import step_music
 from .users import start
 from .admins import main_panel
 
@@ -10,26 +9,9 @@ from .admins.check_usr import send_ads_message
 from .admins.send_ads import get_message
 from .admins import super_admin
 from .users import help
-# from .music import my_playlist
-# from .music import search_music
-# from .music import rekognize_audio
-# from .music import rekognize_video
-# from .music import rekognize_voice
-# from .music import rekognize_video_note
-# from .music import search_youtube_audio
-# from .music import search_spotify_audio
-
-# from .music import like_audio
-#
-# from .inline import inline_search
 
 from .users import check_usr
-# from .music import download_audio
-# from .music import download_youtube_audio
-# from .music import download_spotify_audio
-# from .music import add_playlist
 from .users import check_join
-# from .music import close_audio
 
 from .admins.admin_settings import admin_setting
 from .admins.admin_settings import add_admin_first_step
