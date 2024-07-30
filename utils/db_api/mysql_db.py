@@ -197,9 +197,9 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def update_admin_data(self, cid, colum, value):
+    def update_admin_data(self, cid, column, value):
         try:
-            sql = f"""UPDATE `admins` SET `{colum}` = '{value}' WHERE `cid`=%s"""
+            sql = f"""UPDATE `admins` SET `{column}` = '{value}' WHERE `cid`=%s"""
             values = (cid,)
             self.cursor.execute(sql, values)
             self.connection.commit()
@@ -209,9 +209,9 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def select_admin_colum(self, cid, colum):
+    def select_admin_column(self, cid, column):
         try:
-            self.cursor.execute(f"SELECT {colum} FROM `admins` WHERE `cid`=%s", (cid,))
+            self.cursor.execute(f"SELECT {column} FROM `admins` WHERE `cid`=%s", (cid,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
