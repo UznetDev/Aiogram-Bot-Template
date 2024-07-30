@@ -1,3 +1,5 @@
+import logging
+
 def x_or_y(data):
     try:
         data = bool(data)

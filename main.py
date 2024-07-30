@@ -17,8 +17,6 @@ async def main():
     dp.update.middleware.register(ThrottlingMiddleware())
     try:
         try:
-            music_db.create_like_table()
-            music_db.create_table_playlist()
             db.create_table_admins()
             db.create_table_ban()
             db.create_table_users()
