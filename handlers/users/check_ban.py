@@ -16,13 +16,11 @@ async def start_handler(msg: types.Message):
         logging.info(info)
         admin_info = await bot.get_chat(chat_id=info[2])
         admins = await bot.get_chat(chat_id=ADMIN)
-        tx = f'<b>👩‍💻Super admin @{admins.username}</b>\n'
-        text = translator(text="<b>🛑 You are banned!:\n</b>"
-                               "<i>⚠If you think this is a mistake, contact the admin.</i>",
+        text = translator(text="🛑 You are banned!:\n"
+                               "⚠If you think this is a mistake, contact the admin.",
                           dest=lang)
-        text = f'{text}' \
-               f'\n\n<b>👮‍♂️Admin @{admin_info.username}</b>\n {tx}'
-        await msg.answer(text=text,
+        text += f'\n\n<b>👮‍♂️Admin @{admin_info.username}</b>\n <b>👩‍💻Super admin @{admins.username}</b>\n'
+        await msg.answer(text=f"<b>{text}</b>",
                          reply_markup=close_btn())
         if db.check_user(cid=cid) is None:
             db.add_user(cid=cid,
