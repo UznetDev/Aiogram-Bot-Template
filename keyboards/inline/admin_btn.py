@@ -10,6 +10,16 @@ from function.function import x_or_y
 
 
 def main_btn():
+    """
+    Creates the main button for the admin panel.
+
+    Returns:
+        InlineKeyboardMarkup: The markup for the main button.
+        False: Returns False if an error occurs.
+
+    This function creates a button with the text '🏠Main!' and attaches a callback
+    action to navigate to the main admin panel.
+    """
     try:
         btn = InlineKeyboardBuilder()
         btn.button(text=f'🏠Main!',
@@ -21,6 +31,21 @@ def main_btn():
 
 
 def main_admin_panel_btn(cid, lang):
+    """
+    Creates the inline keyboard for the main admin panel.
+
+    Parameters:
+        cid (int): The ID of the current user.
+        lang (str): The language code for translation.
+
+    Returns:
+        InlineKeyboardMarkup: The markup for the main admin panel buttons.
+        False: Returns False if an error occurs.
+
+    This function creates buttons for various admin actions based on the permissions
+    of the current user. Includes settings for admins, sending advertisements, viewing
+    statistics, checking users, and channel settings.
+    """
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
@@ -55,6 +80,20 @@ def main_admin_panel_btn(cid, lang):
 
 
 async def admin_setting(cid, lang):
+    """
+    Creates the inline keyboard for admin settings.
+
+    Parameters:
+        cid (int): The ID of the current user.
+        lang (str): The language code for translation.
+
+    Returns:
+        InlineKeyboardMarkup: The markup for admin settings buttons.
+        False: Returns False if an error occurs.
+
+    This function creates a button for each existing admin and an option to add a new admin.
+    It lists all admins if the current user is the main admin or only relevant admins otherwise.
+    """
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
@@ -79,6 +118,21 @@ async def admin_setting(cid, lang):
 
 
 def attach_admin(cid, lang):
+    """
+    Creates the inline keyboard for managing admin settings.
+
+    Parameters:
+        cid (int): The ID of the current user.
+        lang (str): The language code for translation.
+
+    Returns:
+        InlineKeyboardMarkup: The markup for admin settings management buttons.
+        False: Returns False if an error occurs.
+
+    This function creates buttons for each admin setting, allowing modifications
+    for sending messages, viewing statistics, downloading statistics, blocking users,
+    channel settings, adding, and deleting admins.
+    """
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
@@ -122,6 +176,22 @@ def attach_admin(cid, lang):
 
 
 def attach_admin_btn(cid, lang):
+    """
+    Creates the inline keyboard for managing admin settings.
+
+    Parameters:
+        cid (int): The ID of the current user.
+        lang (str): The language code for translation.
+
+    Returns:
+        InlineKeyboardMarkup: The markup for admin settings management buttons.
+        False: Returns False if an error occurs.
+
+    This function is similar to `attach_admin` but may serve a slightly different purpose
+    in the application. It allows the modification of admin settings such as sending
+    messages, viewing and downloading statistics, blocking users, channel settings,
+    adding, and deleting admins.
+    """
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
@@ -165,6 +235,19 @@ def attach_admin_btn(cid, lang):
 
 
 def channel_settings(lang):
+    """
+    Creates the inline keyboard for channel settings.
+
+    Parameters:
+        lang (str): The language code for translation.
+
+    Returns:
+        InlineKeyboardMarkup: The markup for channel settings buttons.
+        False: Returns False if an error occurs.
+
+    This function creates buttons to configure channel settings, including adding,
+    removing channels, and setting mandatory membership requirements.
+    """
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
@@ -193,6 +276,22 @@ def channel_settings(lang):
 
 
 def block_user(cid, lang, user_id):
+    """
+    Creates the inline keyboard for blocking or unblocking a user.
+
+    Parameters:
+        cid (int): The ID of the current user.
+        lang (str): The language code for translation.
+        user_id (int): The ID of the user to be blocked or unblocked.
+
+    Returns:
+        InlineKeyboardMarkup: The markup for block/unblock user buttons.
+        False: Returns False if an error occurs.
+
+    This function creates a button to either block or unblock a user, depending on their
+    current status. If the user is not banned, it offers to block them; if they are banned,
+    it offers to unblock them.
+    """
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
@@ -218,6 +317,20 @@ def block_user(cid, lang, user_id):
 
 
 def download_statistika(cid, lang):
+    """
+    Creates the inline keyboard for downloading statistics.
+
+    Parameters:
+        cid (int): The ID of the current user.
+        lang (str): The language code for translation.
+
+    Returns:
+        InlineKeyboardMarkup: The markup for download statistics button.
+        False: Returns False if an error occurs.
+
+    This function creates a button for downloading statistics if the current user has
+    the permission to do so.
+    """
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
@@ -232,3 +345,4 @@ def download_statistika(cid, lang):
     except Exception as err:
         logging.error(err)
         return False
+
