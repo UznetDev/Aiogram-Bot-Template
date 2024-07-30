@@ -1,6 +1,7 @@
 from aiogram import types
 from loader import bot
 
+
 async def set_default_commands():
     """
     Sets default commands for the Telegram bot.
