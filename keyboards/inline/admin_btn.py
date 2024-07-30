@@ -179,11 +179,11 @@ def channel_settings(lang):
                    callback_data=AdminCallback(action="mandatory_membership", data="").pack())
         btn.button(text=translator(text=f"➕ Add channel!",
                                    dest=lang),
-                   callback_data=AdminCallback(action="add_chanel", data="").pack())
+                   callback_data=AdminCallback(action="add_channel", data="").pack())
 
         btn.button(text=translator(text=f"➖ Remove Channel",
                                    dest=lang),
-                   callback_data=AdminCallback(action="remove_chanel", data="").pack())
+                   callback_data=AdminCallback(action="remove_channel", data="").pack())
         btn.adjust(1)
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()

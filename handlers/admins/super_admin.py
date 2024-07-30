@@ -34,8 +34,8 @@ async def super_admin(msg: types.Message):
                       "date_add": date_list,
                       "username": username}
             new_data = pandas.DataFrame(x_data)
-            new_data.to_excel('db/ban.xlsx', index=False)
-            document = types.input_file.FSInputFile(path='db/ban.xlsx')
+            new_data.to_excel('data/ban.xlsx', index=False)
+            document = types.input_file.FSInputFile(path='data/ban.xlsx')
             await bot.send_document(chat_id=cid,
                                     document=document,
                                     caption=f'<b>Ban list</b>')

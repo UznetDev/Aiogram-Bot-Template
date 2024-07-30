@@ -1,5 +1,5 @@
 from .users import check_ban
-from .users import start
+# from .users import start
 from .admins import main_panel
 
 from .admins.admin_settings import add_admin
@@ -12,6 +12,8 @@ from .users import help
 
 from .users import check_usr
 from .users import check_join
+
+from .users import start
 
 from .admins.admin_settings import admin_setting
 from .admins.admin_settings import add_admin_first_step

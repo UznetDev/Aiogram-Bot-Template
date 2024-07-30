@@ -37,8 +37,8 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
                         channel = await bot.get_chat(chat_id=chat_id)
                         text += (f"<b><i>{count}</i>. Name:</b> <i>{channel.full_name}</i>\n"
                                  f"<b>Username:</b> <i>@{channel.username}\n</i>"
-                                 f"<b>Added date:</b> <i>{x[3]}\n</i>"
-                                 f"<b>Added by CID:</b> <i>{x[2]}\n\n</i>")
+                                 f"<b>Added date:</b> <i>{x[2]}\n</i>"
+                                 f"<b>Added by CID:</b> <i>{x[3]}\n\n</i>")
                     except Exception as err:
                         logging.error(err)
             btn = channel_settings(lang=lang)
