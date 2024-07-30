@@ -12,8 +12,8 @@ from data.config import yil_oy_kun, soat_minut_sekund
 
 
 
-@dp.callback_query(IsAdmin(),AdminCallback.filter(F.action == "download_statistika"))
-async def download_statistics(call: types.CallbackQuery,state: FSMContext):
+@dp.callback_query(IsAdmin(), AdminCallback.filter(F.action == "download_statistika"))
+async def download_statistics(call: types.CallbackQuery, state: FSMContext):
     try:
         cid = call.from_user.id
         mid = call.message.message_id
@@ -36,7 +36,7 @@ async def download_statistics(call: types.CallbackQuery,state: FSMContext):
             x_data = {"id": id_list,
                       "cid": cid_list,
                       "date_add": date_list,
-                      "username" : username,
+                      "username": username,
                       "lang": langs}
             new_data = pandas.DataFrame(x_data)
             new_data.to_excel('statistics.xlsx', index=False)

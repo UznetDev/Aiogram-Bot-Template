@@ -18,7 +18,7 @@ async def staristika(call: types.CallbackQuery, state: FSMContext):
         mid = call.message.message_id
         lang = call.from_user.language_code
         is_admin = SelectAdmin(cid=cid)
-        if is_admin.wiew_statistika():
+        if is_admin.view_statistika():
             stat = db.stat()
             ban = db.stat_ban()
             tx = translator(text=f"<b>👥 Bot users count:</b> <i></i>",

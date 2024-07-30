@@ -34,7 +34,7 @@ def main_admin_panel_btn(cid, lang):
             btn.button(text=translator(text=f"✈Send advertisement!",
                                        dest=lang),
                        callback_data=AdminCallback(action="send_advertisement", data="").pack())
-        if is_admin.wiew_statistika():
+        if is_admin.view_statistika():
             btn.button(text=translator(text=f"📜Statistika!",
                                        dest=lang),
                        callback_data=AdminCallback(action="statistika", data="").pack())
@@ -84,7 +84,7 @@ def attach_admin(cid, lang):
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
         is_admin = SelectAdmin(cid=cid)
         send_message_tx = x_or_y(is_admin.send_message())
-        wiew_statistika_tx = x_or_y(is_admin.wiew_statistika())
+        wiew_statistika_tx = x_or_y(is_admin.view_statistika())
         download_statistika_tx = x_or_y(is_admin.download_statistika())
         block_user_tx = x_or_y(is_admin.block_user())
         channel_settings_tx = x_or_y(is_admin.channel_settings())
@@ -127,7 +127,7 @@ def attach_admin_btn(cid, lang):
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
         is_admin = SelectAdmin(cid=cid)
         send_message_tx = x_or_y(is_admin.send_message())
-        wiew_statistika_tx = x_or_y(is_admin.wiew_statistika())
+        wiew_statistika_tx = x_or_y(is_admin.view_statistika())
         download_statistika_tx = x_or_y(is_admin.download_statistika())
         block_user_tx = x_or_y(is_admin.block_user())
         channel_settings_tx = x_or_y(is_admin.channel_settings())

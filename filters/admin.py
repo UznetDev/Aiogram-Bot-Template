@@ -45,7 +45,7 @@ class SelectAdmin:
         else:
             return False
 
-    def wiew_statistika(self):
+    def view_statistika(self):
         if self.cid == self.super_admin:
             return True
         elif self.dada[4] == 1:
