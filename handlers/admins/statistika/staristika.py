@@ -13,6 +13,25 @@ from data.config import yil_oy_kun, soat_minut_sekund
 
 @dp.callback_query(AdminCallback.filter(F.action == "statistika"), IsAdmin())
 async def statistika(call: types.CallbackQuery, state: FSMContext):
+    """
+    Handles the callback query for retrieving and displaying bot statistics to an admin.
+
+    This function:
+    - Checks if the user has the permission to view statistics.
+    - Retrieves and formats bot user count, ban count, and current date/time.
+    - Updates the message with statistics or a permission error message.
+    - Updates the FSM context with the new message ID and manages the reply markup.
+
+    Args:
+        call (types.CallbackQuery): The callback query object containing the data and user information.
+        state (FSMContext): The finite state machine context for managing state data.
+
+    Raises:
+        Exception: Logs any errors encountered during the process.
+
+    Returns:
+        None
+    """
     try:
         user_id = call.from_user.id
         message_id = call.message.message_id
@@ -38,3 +57,4 @@ async def statistika(call: types.CallbackQuery, state: FSMContext):
 
     except Exception as err:
         logging.error(err)
+
