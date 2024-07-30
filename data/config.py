@@ -16,5 +16,4 @@ datas = datetime.datetime.now()
 yil_oy_kun = (datetime.datetime.date(datetime.datetime.now()))
 soat_minut_sekund = f"{datas.hour}:{datas.minute}:{datas.second}"
 
-DB = BotDb(file='db/db.json')
 log_file_name = 'db/logging.log'
