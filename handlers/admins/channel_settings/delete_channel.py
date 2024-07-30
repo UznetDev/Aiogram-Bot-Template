@@ -10,7 +10,7 @@ from data.config import ADMIN
 
 
 @dp.callback_query(IsAdmin(), AdminCallback.filter(F.action == "delete_channel"))
-async def delete_channel(call: types.CallbackQuery, state: FSMContext):
+async def delete_channel(call: types.CallbackQuery, callback_data: AdminCallback, state: FSMContext):
     try:
         cid = call.from_user.id
         mid = call.message.message_id
@@ -19,13 +19,13 @@ async def delete_channel(call: types.CallbackQuery, state: FSMContext):
         btn = close_btn()
 
         if data.channel_settings():
-            ch_cid = call.data.split(':')[2]
+            ch_cid = callback_data.data
             ch_cid100 = str(-100) + str(ch_cid)
             check = db.check_channel(cid=ch_cid)
 
             if not check:
                 text = translator(
-                    text='<b>⭕ Channel not found!</b>\n<i>The channel seems to have been deleted previously!</i>',
+                    text='⭕ Channel not found!\nThe channel seems to have been deleted previously!',
                     dest=lang)
             else:
                 channel = await bot.get_chat(chat_id=ch_cid100)
@@ -39,15 +39,15 @@ async def delete_channel(call: types.CallbackQuery, state: FSMContext):
                             f"<b>Username:</b> <i>@{channel.username}</i>\n"
                             f"<b>ID:</b> <i><code>{ch_cid}</code></i>\n\n")
                 else:
-                    text = translator(text='<b>⭕ Only an admin can delete this channel</b>',
+                    text = translator(text='⭕ Only an admin can delete this channel.',
                                       dest=lang)
         else:
-            text = translator(text='<b>❌ Unfortunately, you do not have this right!</b>',
+            text = translator(text='❌ Unfortunately, you do not have this right!',
                               dest=lang)
 
         await bot.edit_message_text(chat_id=cid,
                                     message_id=mid,
-                                    text=text,
+                                    text=f'{text}',
                                     reply_markup=btn)
         await state.update_data({
             "message_id": call.message.message_id

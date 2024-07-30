@@ -10,9 +10,9 @@ from states.admin_state import AdminState
 
 
 @dp.callback_query(IsAdmin(), BlockUser.filter(F.action == "send_message"))
-async def send_message(call: types.CallbackQuery, state: FSMContext):
+async def send_message(call: types.CallbackQuery, callback_data: BlockUser, state: FSMContext):
     try:
-        target_user_id = call.data.split(':')[2]
+        target_user_id = callback_data.cid
         user_id = call.from_user.id
         message_id = call.message.message_id
         language = call.from_user.language_code
@@ -21,20 +21,20 @@ async def send_message(call: types.CallbackQuery, state: FSMContext):
 
         if admin_check.send_message():
             text = translator(
-                text="<b><i>🗨 Send me the message for the user...</i></b>",
+                text="🗨 Send me the message for the user...",
                 dest=language
             )
             await state.set_state(AdminState.send_message_to_user)
         else:
             text = translator(
-                text="<b>❌ Unfortunately, you do not have this permission!</b>",
+                text="❌ Unfortunately, you do not have this permission!",
                 dest=language
             )
 
         await bot.edit_message_text(
             chat_id=user_id,
             message_id=message_id,
-            text=text,
+            text=f'<b><i>{text}</i></b>',
             reply_markup=button
         )
 

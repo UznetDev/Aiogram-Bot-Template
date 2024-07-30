@@ -11,9 +11,9 @@ from data.config import yil_oy_kun, soat_minut_sekund, ADMIN
 
 
 @dp.callback_query(BlockUser.filter(F.action == "block"), IsAdmin())
-async def block_users(call: types.CallbackQuery, state: FSMContext):
+async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state: FSMContext):
     try:
-        user_id = call.data.split(':')[2]
+        user_id = callback_data.cid
         cid = call.from_user.id
         mid = call.message.message_id
         lang = call.from_user.language_code
@@ -28,37 +28,40 @@ async def block_users(call: types.CallbackQuery, state: FSMContext):
                     db.add_user_ban(cid=user_id,
                                     admin_cid=cid,
                                     date=f'{yil_oy_kun} / {soat_minut_sekund}')
-                    text = (translator(text='<b><i>⛔ User blocked\n\n Username: @</i></b>', dest=lang) +
-                            str(user.username))
+                    text = translator(text='⛔ User blocked\n\n Username: @',
+                                       dest=lang)
+                    text += str(user.username)
                     await bot.send_message(chat_id=user_id,
-                                           text='<b>🚫 You are blocked!</b>'
-                                                '<i>⚠ If you think this is a mistake, contact the admin.</i>',
+                                           text='🚫 You are blocked!'
+                                                '⚠ If you think this is a mistake, contact the admin.',
                                            reply_markup=close_btn())
                 else:
                     if check[2] == cid or cid == ADMIN:
                         db.delete_user_ban(cid=user_id)
-                        text = (translator(text='<b><i>✅ User unblocked!\n\n Username: @</i></b>', dest=lang) +
-                                str(user.username))
+                        text = translator(text='✅ User unblocked!\n\n Username: @', dest=lang)
+                        text += str(user.username)
                         await bot.send_message(chat_id=user_id,
-                                               text='<b>😊 You are unblocked!</b>'
-                                                    '<i>Contact the admin</i>',
+                                               text='😊 You are unblocked!'
+                                                    'Contact the admin',
                                                reply_markup=close_btn())
                     else:
-                        text = (translator(text='<b><i>⭕ Only the person who blocked the user can unblock them!\n\n '
-                                                'Username: @</i></b>', dest=lang) +
-                                str(user.username))
+                        text = translator(text='⭕ Only the person who blocked the user can unblock them!\n\n '
+                                               'Username: @',
+                                          dest=lang)
+                        text += str(user.username)
             else:
-                text = translator(text='<b><i>🚫 I cannot block an admin.</i></b>', dest=lang)
+                text = translator(text='🚫 I cannot block an admin.',
+                                  dest=lang)
                 try:
                     db.delete_user_ban(cid=user_id)
                 except Exception as err:
                     logging.error(err)
             await state.set_state(AdminState.check_user)
         else:
-            text = translator(text='<b>❌ Unfortunately, you do not have this right!</b>', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
         await bot.edit_message_text(chat_id=cid,
                                     message_id=mid,
-                                    text=text,
+                                    text=f'<b><i>{text}</i></b>',
                                     reply_markup=btn)
         await state.update_data({
             "message_id": call.message.message_id

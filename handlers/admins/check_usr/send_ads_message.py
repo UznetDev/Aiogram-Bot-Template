@@ -28,19 +28,19 @@ async def send_ads_message(msg: types.Message, state: FSMContext):
                     reply_markup=msg.reply_markup
                 )
                 text = translator(
-                    text='<b>✅ Message sent</b>',
+                    text='✅ Message sent',
                     dest=language
                 )
             except Exception as err:
                 text = translator(
-                    text='<b>Something went wrong. ERROR:</b>',
+                    text='Something went wrong. ERROR:',
                     dest=language
                 ) + str(err)
                 await state.clear()
                 logging.error(err)
         else:
             text = translator(
-                text='<b>❌ Unfortunately, you do not have this permission!</b>',
+                text='❌ Unfortunately, you do not have this permission!',
                 dest=language
             )
             await state.clear()
@@ -48,7 +48,7 @@ async def send_ads_message(msg: types.Message, state: FSMContext):
         await bot.edit_message_text(
             chat_id=user_id,
             message_id=data_state['message_id'],
-            text=text,
+            text=f'<b><i>{text}</i></b>',
             reply_markup=button
         )
         await state.clear()

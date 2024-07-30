@@ -44,28 +44,28 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
                 "lang": langs
             }
             df = pd.DataFrame(statistics_data)
-            df.to_excel('db/statistics.xlsx', index=False)
+            df.to_excel('data/statistics.xlsx', index=False)
 
-            document = types.input_file.FSInputFile(path='db/statistics.xlsx')
+            document = types.input_file.FSInputFile(path='data/statistics.xlsx')
             user_count = db.stat()
 
-            text = (translator(text="<b>✅ Downloaded! \n\n</b>", dest=language) +
-                    translator(text="<b>👥 Bot users count:</b> <i>", dest=language) +
-                    str(user_count) + '<b> .</b>\n' +
-                    translator(text="<b>⏰ Time:</b>", dest=language) +
-                    f"<i>{soat_minut_sekund}</i>\n" +
+            text = (translator(text="✅ Downloaded! \n\n", dest=language) +
+                    translator(text="\n👥 Bot users count: ", dest=language) +
+                    str(user_count) + ' .\n' +
+                    translator(text="⏰ Time: ", dest=language) +
+                    f"{soat_minut_sekund}\n" +
                     translator(text="<b>📆 Date:</b>", dest=language) +
-                    f"<i> {yil_oy_kun}</i>")
+                    f" {yil_oy_kun}")
 
             await bot.send_document(chat_id=user_id, document=document, caption=text)
-            os.remove('db/statistics.xlsx')
+            os.remove('data/statistics.xlsx')
 
-            text = translator(text="<b>✅ Downloaded!</b>\n", dest=language)
+            text = translator(text="✅ Downloaded!\n", dest=language)
             await state.update_data({"message_id": call.message.message_id})
         else:
-            text = translator(text="<b>❌ Unfortunately, you do not have this permission!</b>", dest=language)
+            text = translator(text="❌ Unfortunately, you do not have this permission!", dest=language)
 
-        await call.message.edit_text(text=text, reply_markup=close_btn())
+        await call.message.edit_text(text=f'<b><i>{text}</i></b>', reply_markup=close_btn())
         await state.update_data({"message_id": message_id})
 
     except Exception as err:

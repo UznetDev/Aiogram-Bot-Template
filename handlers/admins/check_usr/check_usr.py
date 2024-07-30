@@ -20,20 +20,20 @@ async def check_user(call: types.CallbackQuery, state: FSMContext):
 
         if data.block_user():
             text = translator(
-                text='<b><i>🔰Please send the user ID you want to check...</i></b>',
+                text='🔰Please send the user ID you want to check...',
                 dest=language
             )
             await state.set_state(AdminState.check_user)
         else:
             text = translator(
-                text='<b>❌ Unfortunately, you do not have the required permissions!</b>',
+                text='❌ Unfortunately, you do not have the required permissions!',
                 dest=language
             )
 
         await bot.edit_message_text(
             chat_id=user_id,
             message_id=message_id,
-            text=text,
+            text=f'<b><i>{text}</i></b>',
             reply_markup=button
         )
 

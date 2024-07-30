@@ -8,6 +8,7 @@ from aiogram.fsm.context import FSMContext
 from function.translator import translator
 from states.admin_state import AdminState
 
+
 @dp.callback_query(AdminCallback.filter(F.action == "add_channel"), IsAdmin())
 async def add_channel(call: types.CallbackQuery, state: FSMContext):
     try:
@@ -18,11 +19,11 @@ async def add_channel(call: types.CallbackQuery, state: FSMContext):
         btn = close_btn()
         if data.channel_settings():
             await state.set_state(AdminState.add_channel)
-            text = translator(text="<b><i>😊 Please send the channel id...</i></b>", dest=lang)
+            text = translator(text="😊 Please send the channel id...", dest=lang)
             await state.update_data({"message_id": call.message.message_id})
         else:
-            text = translator(text="<b>❌ Unfortunately, you do not have this right!</b>", dest=lang)
-        await bot.edit_message_text(chat_id=cid, message_id=mid, text=text, reply_markup=btn)
+            text = translator(text="❌ Unfortunately, you do not have this right!", dest=lang)
+        await bot.edit_message_text(chat_id=cid, message_id=mid, text=f'{text}', reply_markup=btn)
         await state.update_data({"message_id": call.message.message_id})
     except Exception as err:
         logging.error(err)

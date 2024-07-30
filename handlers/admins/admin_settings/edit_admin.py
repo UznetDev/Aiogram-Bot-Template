@@ -11,29 +11,29 @@ from states.admin_state import AdminState
 from keyboards.inline.button import EditAdminSetting
 from keyboards.inline.admin_btn import attach_admin_btn
 
+
 @dp.callback_query(EditAdminSetting.filter(F.action == "edit"), IsAdmin())
-async def edit_admin(call: types.CallbackQuery, state: FSMContext):
+async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting, state: FSMContext):
     try:
         cid = call.from_user.id
         mid = call.message.message_id
         lang = call.from_user.language_code
-        call_data = call.data.split(':')
-        admin_cid = call_data[2]
-        edit_key = call_data[3]
+        admin_cid = callback_data.cid
+        edit_key = callback_data.data
         data = SelectAdmin(cid=cid)
         add_admin = data.add_admin()
         btn = close_btn()
         if add_admin:
             admin_data = db.select_admin(cid=admin_cid)
             if admin_data is None:
-                text = f'<b>⛔{admin_cid} {translator(text="😪 Not available in admin list</b>", dest=lang)}'
+                text = f'⛔{admin_cid} {translator(text="😪 Not available in admin list!", dest=lang)}'
             else:
                 if admin_data[2] == cid or cid == ADMIN:
                     if edit_key == "delete_admin":
                         db.delete_admin(cid=admin_cid)
                         admin_info = await bot.get_chat(chat_id=admin_cid)
-                        text = f'<b>🔪 @{admin_info.username} {translator(text="✅ Removed from admin!</b>", dest=lang)}'
-                        await bot.send_message(chat_id=admin_cid, text='<b>😪 Your admin rights have been revoked!</b>')
+                        text = f'🔪 @{admin_info.username} {translator(text="✅ Removed from admin!", dest=lang)}'
+                        await bot.send_message(chat_id=admin_cid, text='😪 Your admin rights have been revoked!')
                     else:
                         select_column = db.select_admin_column(cid=admin_cid, column=edit_key)
                         new_value = 0 if select_column[0] == 1 else 1
@@ -54,12 +54,12 @@ async def edit_admin(call: types.CallbackQuery, state: FSMContext):
                                f'<b>Channel settings: {channel_settings_tx}</b>\n' \
                                f'<b>Add admin: {add_admin_tx}</b>\n' \
                                f'<b>Date added: </b>'
-                        text = translator(text=text, dest=lang) + str(admin_data[9])
+                        text += str(admin_data[9])
                 else:
-                    text = translator(text='<b>🛑 You can only change the admin rights you assigned!</b>', dest=lang)
+                    text = translator(text='🛑 You can only change the admin rights you assigned!', dest=lang)
         else:
-            text = translator(text='<b>❌ Unfortunately, you do not have this right!</b>', dest=lang)
-        await bot.edit_message_text(chat_id=cid, message_id=mid, text=text, reply_markup=btn)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+        await bot.edit_message_text(chat_id=cid, message_id=mid, text=f"<b>{text}</b>", reply_markup=btn)
         await state.set_state(AdminState.add_admin)
         await state.update_data({"message_id": call.message.message_id})
     except Exception as err:

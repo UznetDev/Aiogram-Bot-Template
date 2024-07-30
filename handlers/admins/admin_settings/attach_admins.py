@@ -13,12 +13,12 @@ from states.admin_state import AdminState
 
 
 @dp.callback_query(AdminSetting.filter(F.action == "attach_admin"), IsAdmin())
-async def attach_admins(call: types.CallbackQuery, state: FSMContext):
+async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, state: FSMContext):
     try:
         cid = call.from_user.id
         mid = call.message.message_id
         lang = call.from_user.language_code
-        admin_cid = call.data.split(':')[2]
+        admin_cid = callback_data.cid
         data = SelectAdmin(cid=cid)
         btn = close_btn()
         if data.add_admin():
@@ -40,12 +40,11 @@ async def attach_admins(call: types.CallbackQuery, state: FSMContext):
                        f'<b>Channel settings: {channel_settings_tx}</b>\n' \
                        f'<b>Add admin: {add_admin_tx}</b>\n' \
                        f'<b>Date added: </b>'
-                text = translator(text=text, dest=lang) + str(admin_data[9])
             else:
-                text = translator(text='<b>😪You can only change the admin rights you added!</b>', dest=lang)
+                text = translator(text='😪You can only change the admin rights you added!', dest=lang)
         else:
-            text = translator(text='<b>❌ Unfortunately, you do not have this right!</b>', dest=lang)
-        await bot.edit_message_text(chat_id=cid, message_id=mid, text=text, reply_markup=btn)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+        await bot.edit_message_text(chat_id=cid, message_id=mid, text=f'{text}', reply_markup=btn)
         await state.set_state(AdminState.add_admin)
         await state.update_data({"message_id": call.message.message_id})
     except Exception as err:

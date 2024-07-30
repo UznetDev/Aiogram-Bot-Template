@@ -14,9 +14,9 @@ async def main_panel(msg: types.Message, state: FSMContext):
         cid = msg.from_user.id
         mid = msg.message_id
         lang = msg.from_user.language_code
-        tx = translator(text=f'<b><i>👩‍💻Hello, dear admin, welcome to the main panel!</i></b>',
+        tx = translator(text=f'👩‍💻Hello, dear admin, welcome to the main panel!',
                         dest=lang)
-        msg = await msg.answer(text=tx,
+        msg = await msg.answer(text=f'<b>{tx}</b>',
                                reply_markup=main_admin_panel_btn(cid=cid,
                                                                  lang=lang))
         data = await state.get_data()

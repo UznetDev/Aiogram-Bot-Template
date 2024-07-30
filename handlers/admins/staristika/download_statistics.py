@@ -42,7 +42,7 @@ async def download_statistics(call: types.CallbackQuery,state: FSMContext):
             new_data.to_excel('statistics.xlsx', index=False)
             document = types.input_file.FSInputFile(path='statistics.xlsx')
             stat = db.stat()
-            tx = translator(text=f"<b>✅Downloaded! \n\n</b>",
+            tx = translator(text=f"✅Downloaded! \n\n</b>",
                             dest=lang) + translator(text=f"<b>👥 Bot users count:</b> <i></i>",
                                                     dest=lang) + str(stat) + '<b> nafar.</b>\n' + translator(text=f"<b>⏰ Hour: </b>",
                                                                                                              dest=lang) + f"<i>{soat_minut_sekund}</i>\n" + translator(text=f"<b>📆 Date:</b>",

@@ -23,11 +23,13 @@ async def send_ads_message(msg: types.Message, state: FSMContext):
         btn = close_btn()
         if is_admin.send_message():
             users = db.stat()
+            text = translator(text=f"📢 Advertising sending started...\n"
+                                   f'📊 Number of users: {users}\n'
+                                   f"🕒 Wait...\n",
+                              dest=lang)
             await bot.edit_message_text(chat_id=msg.from_user.id,
                                         message_id=data_state['message_id'],
-                                        text=f"<b><i>📢 Advertising sending started...\n</i></b>"
-                                             f'<b>📊 Number of users:</b><i> {users}</i>\n'
-                                             f"🕒 Wait...\n",
+                                        text=f'<b><i>{text}</i></b>',
                                         reply_markup=close_btn())
             try:
                 user = db.select_all_users()
@@ -47,27 +49,27 @@ async def send_ads_message(msg: types.Message, state: FSMContext):
                         logging.error(err)
                 btn = main_admin_panel_btn(cid=cid,
                                            lang=lang)
-                tx = translator(text=f"<b><i>🔰 Ad successfully sent!\n</i></b>"
-                                     f'<b> ✅ Sent successfully!</b><i> {count_done}</i>\n'
-                                     f"<b>🔴 Sending failed!</b><i> {count_not_done}</i>\n\n",
+                tx = translator(text=f"🔰 Ad successfully sent!\n"
+                                     f' ✅ Sent successfully! {count_done}\n'
+                                     f"🔴 Sending failed! {count_not_done}\n\n",
                                 dest=lang)
                 await state.clear()
                 await state.update_data({
                     "message_id": msg.message_id
                 })
             except Exception as err:
-                tx = translator(text=f'<b>Something wrong ERROR:</b> ',
+                tx = translator(text=f'Something wrong ERROR: ',
                                 dest=lang) + err
                 await state.clear()
                 logging.error(err)
         else:
-            tx = translator(text=f'<b>❌ Unfortunately, you do not have this right!</b>',
+            tx = translator(text=f'❌ Unfortunately, you do not have this right!',
                             dest=lang)
             btn = close_btn()
             await state.clear()
         await bot.edit_message_text(chat_id=msg.from_user.id,
                                     message_id=data_state['message_id'],
-                                    text=tx,
+                                    text=f'<b><i>{tx}</i></b>',
                                     reply_markup=btn)
         await state.update_data({
             "message_id": mid

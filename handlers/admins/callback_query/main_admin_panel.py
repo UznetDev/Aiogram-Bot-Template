@@ -14,8 +14,8 @@ async def main_panel(call: types.CallbackQuery, state: FSMContext):
         mid = call.message.message_id
         lang = call.from_user.language_code
 
-        text = translator(text="<b><i>👩‍💻Hello, dear admin, welcome to the main panel!</i></b>", dest=lang)
-        await bot.edit_message_text(chat_id=cid, message_id=mid, text=text, reply_markup=main_admin_panel_btn(cid=cid, lang=lang))
+        text = translator(text="👩‍💻Hello, dear admin, welcome to the main panel!", dest=lang)
+        await bot.edit_message_text(chat_id=cid, message_id=mid, text=f'{text}', reply_markup=main_admin_panel_btn(cid=cid, lang=lang))
         await state.update_data({"message_id": call.message.message_id})
     except Exception as err:
         logging.error(err)

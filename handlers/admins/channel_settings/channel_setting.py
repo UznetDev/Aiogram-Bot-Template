@@ -24,10 +24,10 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
             else:
                 data = db.select_channels_add_cid(add_cid=cid)
             if not data:
-                text = translator(text="<b>❔ The channel list is empty!\n\n</b>",
+                text = translator(text="❔ The channel list is empty!\n\n",
                                   dest=lang)
             else:
-                text = translator(text="<b>🔰 List of channels:\n\n</b>",
+                text = translator(text="🔰 List of channels:\n\n",
                                   dest=lang)
                 count = 0
                 for x in data:
@@ -43,11 +43,11 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
                         logging.error(err)
             btn = channel_settings(lang=lang)
         else:
-            text = translator(text='<b>❌ Unfortunately, you do not have this right!</b>',
+            text = translator(text='❌ Unfortunately, you do not have this right!',
                               dest=lang)
         await bot.edit_message_text(chat_id=cid,
                                     message_id=mid,
-                                    text=text,
+                                    text=f'<b><i>{text}</i></b>',
                                     reply_markup=btn)
         await state.update_data({
             "message_id": call.message.message_id

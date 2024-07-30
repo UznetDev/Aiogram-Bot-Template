@@ -31,29 +31,31 @@ async def add_channel2(msg: types.Message, state: FSMContext):
                     db.add_channel(cid=tx,
                                    date=str(yil_oy_kun) + ' / ' + str(soat_minut_sekund),
                                    add_cid=cid)
-                    text = translator(text="<b>✅ The channel was successfully added</b>\n",
-                                      dest=lang) + f"<b>Name:</b> <i>{channel.full_name}</i>\n" \
-                                                   f"<b>Username:</b> <i>@{channel.username}</i>"
+                    text = translator(text="✅ The channel was successfully added\n",
+                                      dest=lang)
+                    text += f"<b>Name:</b> <i>{channel.full_name}</i>\n" \
+                            f"<b>Username:</b> <i>@{channel.username}</i>"
                 else:
-                    text = translator(text="<b>✅ The channel was previously added</b>\n",
-                                      dest=lang) + f"<b>Name:</b> <i>{channel.full_name}</i>\n" \
-                                                   f"<b>Username:</b> <i>@{channel.username}</i>\n" \
-                                                   f"<b>Added date:</b> <i>{check[3]}</i>"
+                    text = translator(text="✅ The channel was previously added\n",
+                                      dest=lang)
+                    text += f"<b>Name:</b> <i>{channel.full_name}</i>\n" \
+                            f"<b>Username:</b> <i>@{channel.username}</i>\n" \
+                            f"<b>Added date:</b> <i>{check[3]}</i>"
 
                 btn = channel_settings(lang=lang)
             except Exception as err:
-                text = translator(text="<b>🔴 The channel could not be added because the channel was not found!</b>\n"
-                                       "<i>The bot is not an admin on the channel.</i>",
+                text = translator(text="🔴 The channel could not be added because the channel was not found!\n"
+                                       "The bot is not an admin on the channel.",
                                   dest=lang)
                 logging.error(err)
             await state.clear()
         else:
-            text = translator(text='<b>❌ Unfortunately, you do not have this right!</b>',
+            text = translator(text='❌ Unfortunately, you do not have this right!',
                               dest=lang)
 
         await bot.edit_message_text(chat_id=cid,
                                     message_id=data_state['message_id'],
-                                    text=text,
+                                    text=f'{text}',
                                     reply_markup=btn)
         await state.update_data({
             "message_id": mid

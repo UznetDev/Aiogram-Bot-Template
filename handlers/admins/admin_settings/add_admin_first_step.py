@@ -19,13 +19,13 @@ async def add_admin_first(call: types.CallbackQuery, state: FSMContext):
         data = SelectAdmin(cid=cid)
         add_admin = data.add_admin()
         if add_admin:
-            text = translator(text="<b><i>🔰 Please send the admin ID number you want to add...</i></b>", dest=lang)
+            text = translator(text="🔰 Please send the admin ID number you want to add...", dest=lang)
             btn = await admin_setting(cid=cid, lang=lang)
             await state.set_state(AdminState.add_admin)
         else:
-            text = translator(text="<b>❌ Unfortunately, you do not have this right!</b>", dest=lang)
+            text = translator(text="❌ Unfortunately, you do not have this right!", dest=lang)
             btn = close_btn()
-        await bot.edit_message_text(chat_id=cid, message_id=mid, text=text, reply_markup=btn)
+        await bot.edit_message_text(chat_id=cid, message_id=mid, text=f'<b>{text}</b>', reply_markup=btn)
         await state.update_data({"message_id": call.message.message_id})
     except Exception as err:
         logging.error(err)

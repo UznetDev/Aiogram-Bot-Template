@@ -21,18 +21,18 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
         if is_admin.send_message():
             await state.set_state(AdminState.send_ads)
             text = translator(
-                text="<b><i>Send the advertisement...</i></b>",
+                text="Send the advertisement...",
                 dest=language
             )
             await state.update_data({"message_id": call.message.message_id})
         else:
             text = translator(
-                text="<b>❌ Unfortunately, you do not have this permission!</b>",
+                text="❌ Unfortunately, you do not have this permission!",
                 dest=language
             )
 
         await call.message.edit_text(
-            text=text,
+            text=f'<b><i>{text}</i></b>',
             reply_markup=close_btn()
         )
         await state.update_data({"message_id": message_id})

@@ -28,10 +28,10 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
                 data = db.select_channels_add_cid(add_cid=cid)
 
             if not data:
-                text = translator(text="<b>❔ The channel list is empty!\n\n</b>",
+                text = translator(text="❔ The channel list is empty!\n\n",
                                   dest=lang)
             else:
-                text = translator(text="<b>🔰 Choose a channel:\n\n</b>",
+                text = translator(text="🔰 Choose a channel:\n\n",
                                   dest=lang)
                 count = 0
 
@@ -50,12 +50,12 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
             btn.adjust(1)
             btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         else:
-            text = translator(text='<b>❌ Unfortunately, you do not have this right!</b>',
+            text = translator(text='❌ Unfortunately, you do not have this right!',
                               dest=lang)
 
         await bot.edit_message_text(chat_id=call.from_user.id,
                                     message_id=mid,
-                                    text=text,
+                                    text=f'{text}',
                                     reply_markup=btn.as_markup())
         await state.update_data({
             "message_id": call.message.message_id
