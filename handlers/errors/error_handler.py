@@ -24,16 +24,15 @@ from aiogram.exceptions import (AiogramError,
 async def errors_handler(update, exception):
     """
     Exceptions handler. Catches all exceptions within task factory tasks.
-    :param dispatcher:
     :param update:
     :param exception:
     :return: stdout logging and bool
     """
     if isinstance(exception, AiogramError):
-        logging.exception('Aiogram error')
+        logging.exception('Base exception for all aiogram errors.')
         return True
     elif isinstance(exception, DetailedAiogramError):
-        logging.exception('Aiogram errors with detailed message.')
+        logging.exception('Base exception for all aiogram errors with detailed message.')
         return True
     elif isinstance(exception, ClientDecodeError):
         logging.exception("Exception for callback answer")
