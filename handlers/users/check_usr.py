@@ -5,86 +5,119 @@ from middlewares.check_user import User_Check
 from function.translator import translator
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from keyboards.inline.button import MainCallback
-from data.config import yil_oy_kun, soat_minut_sekund
+from data.config import date_day_month, time_hour_minute_second
 
 
 @dp.message(User_Check())
 async def start_handler(msg: types.Message):
+    """
+    Handles the /start command to check if the user has joined the required channels.
+    If the user has not joined, provides a list of channels and their invitation links.
+
+    Args:
+        msg (types.Message): The message from the user.
+
+    Returns:
+        None
+    """
     try:
-        cid = msg.from_user.id
-        lang = msg.from_user.language_code
-        ruyxat = db.select_channels()
-        btn = InlineKeyboardBuilder()
-        text = translator(text="🛑 You are not join the channel!:\n\n",
-                          dest=lang)
-        son = 0
-        for x in ruyxat:
-            ids = str(-100) + str(x[1])
-            kanals = await bot.get_chat(ids)
+        user_id = msg.from_user.id
+        language_code = msg.from_user.language_code
+
+        # Retrieve the list of channels from the database
+        channels_list = db.select_channels()
+
+        # Initialize the keyboard and message text
+        keyboard = InlineKeyboardBuilder()
+        message_text = translator(text="🛑 You have not joined the channel(s)!:\n\n", dest=language_code)
+        count = 0
+
+        # Iterate through the channels
+        for x in channels_list:
+            channel_id = str(-100) + str(x[1])
+            channel = await bot.get_chat(channel_id)
+
             try:
-                res = await bot.get_chat_member(chat_id=ids, user_id=cid)
-            except:
+                chat_member_status = await bot.get_chat_member(chat_id=channel_id, user_id=user_id)
+            except Exception as e:
+                logging.error(f"Error getting chat member status: {e}")
                 continue
-            if res.status == 'member' or res.status == 'administrator' or res.status == 'creator':
-                pass
-            else:
-                son += 1
-                btn.button(text='➕ ' + kanals.title,
-                           url=f"{await kanals.export_invite_link()}")
 
-                text += f"\n{son}<b><i></i>. ⭕ {kanals.full_name}</b> <i>@{kanals.username} ❓</i>\n"
+            # Check if the user is a member of the channel
+            if chat_member_status.status not in ('member', 'administrator', 'creator'):
+                count += 1
+                message_text += f"\n{count}. ⭕ <b>{channel.full_name}</b> <i>@{channel.username} ❓</i>\n"
+                keyboard.button(text='➕ ' + channel.title,
+                                url=f"{await channel.export_invite_link()}")
 
-        btn.button(text=translator(text='♻ Check!',
-                                   dest=lang),
-                   callback_data=MainCallback(action="check_join",
-                                              q='').pack())
-        btn.adjust(1)
-        await msg.answer(text=f"<b>{text}</b>",
-                         reply_markup=btn.as_markup())
-        cid = msg.from_user.id
-        if db.check_user(cid=cid) is None:
-            db.add_user(cid=cid,
-                        date=str(yil_oy_kun) + ' / ' + str(soat_minut_sekund))
+        # Add a button to check again
+        keyboard.button(text=translator(text='♻ Check!', dest=language_code),
+                        callback_data=MainCallback(action="check_join", q='').pack())
+        keyboard.adjust(1)
+
+        # Send the message to the user
+        await msg.answer(text=f"<b>{message_text}</b>", reply_markup=keyboard.as_markup())
+
+        # Add user to the database if not already present
+        if db.check_user(cid=user_id) is None:
+            db.add_user(cid=user_id,
+                        date=f"{date_day_month} / {time_hour_minute_second}")
     except Exception as err:
-        logging.error(err)
+        logging.error(f"Error in start_handler: {err}")
 
 
 @dp.callback_query(User_Check())
 async def start_callback_query(call: types.CallbackQuery):
+    """
+    Handles callback queries to check if the user has joined the required channels.
+    Provides a list of channels and their invitation links if the user has not joined.
+
+    Args:
+        call (types.CallbackQuery): The callback query from the user.
+
+    Returns:
+        None
+    """
     try:
-        cid = call.from_user.id
-        lang = call.from_user.language_code
-        ruyxat = db.select_channels()
-        btn = InlineKeyboardBuilder()
-        text = translator(text="🛑 You are not join the channel!:\n\n",
-                          dest=lang)
-        text1 = translator(text="🛑 You are not join the channel!:\n\n",
-                           dest=lang)
-        son = 0
-        for x in ruyxat:
-            ids = str(-100) + str(x[1])
-            channels = await bot.get_chat(ids)
+        user_id = call.from_user.id
+        language_code = call.from_user.language_code
+
+        # Retrieve the list of channels from the database
+        channels_list = db.select_channels()
+
+        # Initialize the keyboard and message text
+        keyboard = InlineKeyboardBuilder()
+        message_text = translator(text="🛑 You have not joined the channel(s)!:\n\n", dest=language_code)
+        message_text1 = translator(text="🛑 You have not joined the channel(s)!:\n\n", dest=language_code)
+        count = 0
+
+        # Iterate through the channels
+        for x in channels_list:
+            channel_id = str(-100) + str(x[1])
+            channel = await bot.get_chat(channel_id)
+
             try:
-                res = await bot.get_chat_member(chat_id=ids, user_id=cid)
-            except:
+                chat_member_status = await bot.get_chat_member(chat_id=channel_id, user_id=user_id)
+            except Exception as e:
+                logging.error(f"Error getting chat member status: {e}")
                 continue
-            if res.status == 'member' or res.status == 'administrator' or res.status == 'creator':
-                pass
-            else:
-                son += 1
-                text += f"\n{son}<b><i></i>. ⭕ {channels.full_name}</b> <i>@{channels.username} ❓</i>\n"
-                btn.button(text='➕ ' + channels.title,
-                           url=f"{await channels.export_invite_link()}")
-        btn.button(text=translator(text='♻  Check!',
-                                   dest=lang),
-                   callback_data=MainCallback(action="check_join",
-                                              q='').pack())
-        btn.adjust(1)
-        await call.answer(text=text1,
-                          reply_markup=btn.as_markup())
-        await bot.send_message(chat_id=cid,
-                               text=f"<b>{text}</b>",
-                               reply_markup=btn.as_markup())
-        await call.answer('You are not join channel')
+
+            # Check if the user is a member of the channel
+            if chat_member_status.status not in ('member', 'administrator', 'creator'):
+                count += 1
+                message_text += f"\n{count}. ⭕ <b>{channel.full_name}</b> <i>@{channel.username} ❓</i>\n"
+                keyboard.button(text='➕ ' + channel.title,
+                                url=f"{await channel.export_invite_link()}")
+
+        # Add a button to check again
+        keyboard.button(text=translator(text='♻ Check!', dest=language_code),
+                        callback_data=MainCallback(action="check_join", q='').pack())
+        keyboard.adjust(1)
+
+        # Send the message to the user
+        await call.answer(text=message_text1, reply_markup=keyboard.as_markup())
+        await bot.send_message(chat_id=user_id, text=f"<b>{message_text}</b>", reply_markup=keyboard.as_markup())
+        await call.answer('You have not joined the channel(s).')
     except Exception as err:
-        logging.error(err)
+        logging.error(f"Error in start_callback_query: {err}")
+
