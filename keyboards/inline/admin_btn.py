@@ -4,8 +4,8 @@ from .button import AdminCallback, EditAdminSetting, AdminSetting, BlockUser
 from .close_btn import close_btn
 from function.translator import translator
 from filters.admin import SelectAdmin
-from data.config import ADMIN, DB
-from loader import db, bot
+from data.config import ADMIN
+from loader import db, bot, DB
 from function.function import x_or_y
 
 

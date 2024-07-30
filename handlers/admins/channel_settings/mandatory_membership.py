@@ -1,5 +1,5 @@
 import logging
-from loader import dp, bot
+from loader import dp, bot, DB
 from aiogram import types, F
 from keyboards.inline.button import AdminCallback
 from keyboards.inline.admin_btn import channel_settings
@@ -7,7 +7,6 @@ from keyboards.inline.close_btn import close_btn
 from filters.admin import IsAdmin, SelectAdmin
 from aiogram.fsm.context import FSMContext
 from function.translator import translator
-from data.config import DB
 
 
 @dp.callback_query(AdminCallback.filter(F.action == "mandatory_membership"), IsAdmin())

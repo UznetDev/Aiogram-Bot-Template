@@ -1,7 +1,7 @@
 import logging
 from aiogram import BaseMiddleware
-from loader import bot, db
-from data.config import DB, ADMIN
+from loader import bot, db, DB
+from data.config import ADMIN
 from aiogram.filters import BaseFilter
 from aiogram.types import Message, CallbackQuery
 
