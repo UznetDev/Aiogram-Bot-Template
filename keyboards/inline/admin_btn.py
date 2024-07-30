@@ -43,7 +43,7 @@ def main_admin_panel_btn(cid, lang):
                                        dest=lang),
                        callback_data=AdminCallback(action="check_user", data="").pack())
         if is_admin.channel_settings():
-            btn.button(text=translator(text=f"🔰Channel settingr!",
+            btn.button(text=translator(text=f"🔰Channel setting!",
                                        dest=lang),
                        callback_data=AdminCallback(action="channel_setting", data="").pack())
         btn.adjust(1, 2)
