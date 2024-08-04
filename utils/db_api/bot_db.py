@@ -55,10 +55,10 @@ class BotDb:
             json.dump(self.json_data, json_file)
 
 
-class MusicDB:
+class FileDB:
     def __init__(self, file: str):
         """
-        Initializes the MusicDB instance and loads data from the specified JSON file.
+        Initializes the FileDB instance and loads data from the specified JSON file.
 
         Parameters:
         - file (str): The path to the JSON file to be used for storing data.
