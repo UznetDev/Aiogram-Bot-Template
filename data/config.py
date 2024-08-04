@@ -1,6 +1,6 @@
 import datetime
 from environs import Env
-from utils.db_api.bot_db import BotDb
+
 
 # Initialize the Env object to read environment variables
 env = Env()

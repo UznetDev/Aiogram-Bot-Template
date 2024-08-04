@@ -1,30 +1,14 @@
 # db.pyx
-from libc.stdio cimport fopen, fclose, fread, fwrite
-from libc.stdlib cimport malloc, free
-from libc.string cimport strcpy, strlen
 import json
 import logging
 import os
-from cython cimport ctypedef
-
-ctypedef struct {
-    char* file
-    dict json_data
-} BotDb
-
-ctypedef struct {
-    char* file
-    dict json_data
-} FileDB
+from cython cimport bint, dict
 
 cdef class BotDb:
-    def __cinit__(self, file: str):
-        """
-        Initializes the BotDb instance and loads data from the specified JSON file.
+    cdef str file
+    cdef dict json_data
 
-        Parameters:
-        - file (str): The path to the JSON file to be used for storing data.
-        """
+    def __cinit__(self, str file):
         self.file = file
         try:
             with open(self.file, "r") as json_file:
@@ -39,25 +23,19 @@ cdef class BotDb:
             logging.info(f'Created new file: {file} with default data')
 
     def reading_db(self):
-        """
-        Reads and returns the JSON data from the file.
-        """
         with open(self.file, "r") as json_file:
             return json.load(json_file)
 
-    def change_data(self, join_channel: bool):
-        """
-        Updates the 'join_channel' value in the JSON file.
-        """
+    def change_data(self, bint join_channel):
         self.json_data['join_channel'] = join_channel
         with open(self.file, "w") as json_file:
             json.dump(self.json_data, json_file)
 
 cdef class FileDB:
-    def __cinit__(self, file: str):
-        """
-        Initializes the FileDB instance and loads data from the specified JSON file.
-        """
+    cdef str file
+    cdef dict json_data
+
+    def __cinit__(self, str file):
         self.file = file
         try:
             with open(self.file, "r") as json_file:
@@ -72,19 +50,13 @@ cdef class FileDB:
             logging.info(f'Created new file: {file} with default data')
 
     def reading_db(self):
-        """
-        Reads and returns the JSON data from the file.
-        """
         try:
             with open(self.file, "r") as json_file:
                 return json.load(json_file)
         except Exception as err:
             logging.info(f'Error reading the file: {err}')
 
-    def add_data(self, data, key: str):
-        """
-        Adds or updates an entry in the JSON file with the given key and data.
-        """
+    def add_data(self, data, str key):
         try:
             with open(self.file, "r") as json_file:
                 self.json_data = json.load(json_file)
@@ -94,10 +66,7 @@ cdef class FileDB:
         except Exception as err:
             logging.error(f'Error updating the file: {err}')
 
-    def new_data(self, data: dict):
-        """
-        Replaces the entire JSON content of the file with new data.
-        """
+    def new_data(self, dict data):
         try:
             with open(self.file, "w") as json_file:
                 json.dump(data, json_file)

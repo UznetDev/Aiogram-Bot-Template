@@ -3,6 +3,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from data.config import *  # Import all configurations from the config module
 from utils.db_api.mysql_db import Database
+from cython_code.file_db import BotDb
 
 # Initialize the Telegram bot with the given token and parse mode set to HTML
 bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
