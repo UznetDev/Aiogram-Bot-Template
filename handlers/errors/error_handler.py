@@ -1,5 +1,6 @@
 import logging
 from aiogram import types
+from loader import dp
 from aiogram.exceptions import (
     AiogramError,
     DetailedAiogramError,
