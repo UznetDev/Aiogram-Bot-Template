@@ -2,10 +2,13 @@ from setuptools import setup, Extension
 from Cython.Build import cythonize
 import os
 
-cython_files = ["cython_code/my_translator.pyx"]
+cython_files = ["cython_code/my_translator.pyx",
+                "cython_code/user_check.pyx"]
 
 extensions = [
     Extension(name="cython_code.my_translator", sources=["cython_code/my_translator.pyx"]),
+    Extension(name="cython_code.user_check", sources=["cython_code/user_check.pyx"]),
+
 ]
 
 setup(
