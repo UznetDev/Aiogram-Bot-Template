@@ -1,12 +1,12 @@
 # user_check.pyx
 import logging
-from aiogram import BaseMiddleware
 from loader import bot, db, DB
 from data.config import ADMIN
 from aiogram.filters import BaseFilter
 from aiogram.types import Message, CallbackQuery
+from aiogram import BaseMiddleware
 
-cdef class User_Check(BaseFilter, BaseMiddleware):
+class User_Check(BaseFilter, BaseMiddleware):
     """
     Middleware and filter class to check if a user is a member of required channels.
 
@@ -25,7 +25,7 @@ cdef class User_Check(BaseFilter, BaseMiddleware):
         """
         self.ADMIN = ADMIN
 
-    async def __call__(self, Message message, CallbackQuery call=None) -> bool:
+    async def __call__(self, message: Message, call: CallbackQuery = None) -> bool:
         """
         Checks if the user is a member of required channels.
 
