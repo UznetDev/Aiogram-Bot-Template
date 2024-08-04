@@ -21,3 +21,8 @@ soat_minut_sekund = f"{datas.hour}:{datas.minute}:{datas.second}"  # The current
 
 # Define the log file name and path
 log_file_name = 'db/logging.log'  # The log file path for logging database activities
+
+
+datas = datetime.datetime.now()
+date_day_month = (datetime.datetime.date(datetime.datetime.now()))
+time_hour_minute_second = f"{datas.hour}:{datas.minute}:{datas.second}"
