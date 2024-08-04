@@ -1,5 +1,8 @@
 from .errors import error_handler
 from .users import check_ban
+
+from .users import check_usr
+
 from .users import start
 from .admins import main_panel
 
@@ -11,7 +14,7 @@ from .admins.send_ads import get_message
 from .admins import super_admin
 from .users import help
 
-from .users import check_usr
+# from .users import check_usr
 from .users import check_join
 
 

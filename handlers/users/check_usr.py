@@ -1,7 +1,7 @@
 import logging
 from loader import dp, bot, db
 from aiogram import types
-from middlewares.check_user import User_Check
+from cython_code.user_check import User_Check
 from function.translator import translator
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from keyboards.inline.button import MainCallback
