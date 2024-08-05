@@ -41,7 +41,8 @@ cdef class FileDB:
             with open(self.file, "r") as json_file:
                 self.json_data = json.load(json_file)
         except (FileNotFoundError, json.JSONDecodeError):
-            data = {}
+            data = {"ads": False,
+                    "join_channel": False}
             with open(self.file, "w") as json_file:
                 json.dump(data, json_file)
                 os.chmod(self.file, 0o777)

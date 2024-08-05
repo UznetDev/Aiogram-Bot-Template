@@ -217,6 +217,27 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+    def select_users_by_id(self, start_id: int, end_id: int) -> list:
+        """
+        Select user from the 'users' table on id.
+
+        :param start_id: The start ID (integer).
+        :param end_id: The end ID (integer).
+
+        :return list: A list of tuples containing all users.
+        """
+        try:
+            sql = "SELECT * FROM `users` WHERE `id` >= %s AND `id` < %s;"
+            value = (start_id, end_id)
+            self.cursor.execute(sql, value)
+            result = self.cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
     def stat(self):
         """
         Get the total number of users.
