@@ -7,3 +7,4 @@
 /.env
 /_build*
 /.vscode*
+*my_test
