@@ -99,7 +99,6 @@ async def get_message(msg: types.Message, state: FSMContext):
         if is_admin.send_message():
             ads_data = file_db.reading_db().get('ads')
             if ads_data:
-                logging.info(ads_data)
                 tx = (
                     f"Message sending is currently in progress..\n\n"
                     f"Total users: {ads_data['total_users']}\n"
@@ -109,7 +108,6 @@ async def get_message(msg: types.Message, state: FSMContext):
                     f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
                 )
             else:
-                print(2)
                 from_chat_id = cid
                 message_id = msg.message_id
                 caption = msg.caption
@@ -133,13 +131,9 @@ async def get_message(msg: types.Message, state: FSMContext):
 
                 tx = (
                     f"Started sending to {count_users} users.\n\n"
-                    f"Total users: {ads_data['total_users']}\n"
-                    f"Sent: {ads_data['done_count']}\n"
-                    f"Failed: {ads_data['fail_count']}\n"
-                    f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
+                    f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}\n"
                     f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
                 )
-                await msg.answer(tx)
                 time.sleep(1)
                 loop = asyncio.get_event_loop()
                 executor_pool = ProcessPoolExecutor()
