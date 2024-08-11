@@ -164,7 +164,7 @@ async def get_message(msg: types.Message, state: FSMContext):
         is_admin = SelectAdmin(cid=cid)
 
         if is_admin.send_message():
-            btn = main_admin_panel_btn()
+            btn = main_admin_panel_btn(cid=cid, lang=lang)
             ads_data = file_db.reading_db().get('ads')
             if ads_data:
                 tx = (
