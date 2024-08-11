@@ -1,88 +1,88 @@
-import logging
-import time
+import requests
 import asyncio
 import logging
 import time
 from aiogram import types
 from aiogram.fsm.context import FSMContext
-from multiprocessing import Process
+from concurrent.futures import ProcessPoolExecutor
 from filters.admin import SelectAdmin, IsAdmin
 from function.translator import translator
 from keyboards.inline.admin_btn import main_admin_panel_btn
+from data.config import *
 from keyboards.inline.close_btn import close_btn
 from loader import dp, db, bot, file_db
 from states.admin_state import AdminState
 
 
-async def send_message(chat_id, from_chat_id, message_id, caption, reply_markup):
-    try:
-        await bot.copy_message(chat_id=chat_id,
-                               from_chat_id=from_chat_id,
-                               message_id=message_id,
-                               caption=caption,
-                               reply_markup=reply_markup)
-        return True
-    except Exception as e:
-        logging.error(f"Failed to send message to {chat_id}: {e}")
-        return False
-
-
-def send_ads_process(start, from_chat_id, message_id, caption, reply_markup, count_users):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(send_ads(start, from_chat_id, message_id, caption, reply_markup, count_users))
-
-
-async def send_ads(start, from_chat_id, message_id, caption, reply_markup, count_users):
+def copy_message_sync(chat_id, from_chat_id, message_id, **kwargs):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/copyMessage"
     data = {
-        "status": True,
-        "start": start,
-        "done_count": 0,
-        "fail_count": 0,
-        "start-time": time.time(),
+        "chat_id": chat_id,
         "from_chat_id": from_chat_id,
-        "message_id": message_id,
-        "caption": caption,
-        "reply_markup": reply_markup,
-        "count": count_users
+        "message_id": message_id
     }
-    file_db.add_data(data, key='ads')
+    data.update(kwargs)
 
-    total_users = db.stat()
+    response = requests.post(url, data=data)
+    return response.json()
 
-    # Calculate end index for current batch
-    end = min(start + 100, total_users)
+def send_message_sync(chat_id, text, **kwargs):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    data = {
+        "chat_id": chat_id,
+        "text": text
+    }
+    data.update(kwargs)
+    response = requests.post(url, data=data)
+    return response.json()
 
-    users = db.select_users_by_id(start, end)  # Reverse the list
-    logging.info(users)
-    for user in users:
-        chat_id = user[1]  # Assuming cid is the second column
-        result = await send_message(chat_id, from_chat_id, message_id, caption, reply_markup)
-        if result:
-            data["done_count"] += 1
+
+def send_ads():
+    try:
+        ads_data = file_db.reading_db()['ads']
+        if ads_data:
+            start = ads_data['start']
+            from_chat_id = ads_data['from_chat_id']
+            message_id = ads_data['message_id']
+            caption = ads_data['caption']
+            reply_markup = ads_data['reply_markup']
+            total_users = ads_data['total_users']
+            end = min(start + 100, total_users)
+
+            users = db.select_users_by_id(start, end)
+            logging.info(f'Send {start} {end} {len(users)}')
+            for user in users:
+                try:
+                    chat_id = user[1]
+                    copy_message_sync(chat_id,
+                                      from_chat_id,
+                                      message_id,
+                                      caption=caption,
+                                      reply_markup=reply_markup)
+                    ads_data["done_count"] += 1
+                except Exception as err:
+                    logging.error(err)
+                    ads_data["fail_count"] += 1
+            if end < total_users:
+                time.sleep(1)
+                ads_data['start'] = end
+                file_db.add_data(ads_data, key='ads')
+                send_ads()
+            else:
+                file_db.add_data(False, key='ads')
+                stats_message = (
+                    f"Finished sending messages.\n\n"
+                    f"Total users: {total_users}\n"
+                    f"Sent: {ads_data['done_count']}\n"
+                    f"Failed: {ads_data['fail_count']}\n"
+                    f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
+                    f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
+                )
+                send_message_sync(from_chat_id, stats_message)
         else:
-            data["fail_count"] += 1
-        file_db.add_data(data, key='ads')
-
-    if end < total_users:
-        # Schedule the next batch
-        await asyncio.sleep(60)  # Sleep for 1 minute
-        await send_ads(end, from_chat_id, message_id, caption, reply_markup, count_users)
-    else:
-        # Finished sending messages
-        data["status"] = False
-        file_db.add_data(data, key='ads')
-
-        # Send statistics to admin
-        stats_message = (
-            f"Finished sending messages.\n\n"
-            f"Total users: {count_users}\n"
-            f"Sent: {data['done_count']}\n"
-            f"Failed: {data['fail_count']}\n"
-            f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data['start-time']))}\n"
-            f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
-        )
-        await bot.send_message(chat_id=from_chat_id, text=stats_message)
+            pass
+    except Exception as err:
+        logging.error(err)
 
 
 
@@ -97,31 +97,59 @@ async def get_message(msg: types.Message, state: FSMContext):
         btn = close_btn()
 
         if is_admin.send_message():
-            ads_status = file_db.reading_db()
-            if ads_status['ads'] and ads_status['ads']['status']:
-                remaining_time = 60 - (time.time() - ads_status['ads']["start-time"]) % 60
-
-                tx = translator(text=f"Message sending is currently in progress. Please try again in {int(remaining_time)} seconds.",
-                                dest=lang)
+            ads_data = file_db.reading_db().get('ads')
+            if ads_data:
+                logging.info(ads_data)
+                tx = (
+                    f"Message sending is currently in progress..\n\n"
+                    f"Total users: {ads_data['total_users']}\n"
+                    f"Sent: {ads_data['done_count']}\n"
+                    f"Failed: {ads_data['fail_count']}\n"
+                    f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
+                    f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
+                )
             else:
-                from_chat_id = msg.chat.id
+                print(2)
+                from_chat_id = cid
                 message_id = msg.message_id
                 caption = msg.caption
                 reply_markup = msg.reply_markup
-
                 count_users = db.stat()
 
-                process = Process(target=send_ads_process,
-                                  args=(0, from_chat_id, message_id, caption, reply_markup, count_users))
-                process.start()
+                data = {
+                    "status": True,
+                    "start": 0,
+                    "done_count": 0,
+                    "fail_count": 0,
+                    "start-time": time.time(),
+                    "from_chat_id": from_chat_id,
+                    "message_id": message_id,
+                    "caption": caption,
+                    "reply_markup": reply_markup,
+                    "total_users": count_users
+                }
 
-                # await state.clear()
-                # await msg.answer("Started sending messages.")
-                tx = translator(text=f'❌ Unfortunately, you do not have this right!', dest=lang)
+                file_db.add_data(data, key='ads')
 
+                tx = (
+                    f"Started sending to {count_users} users.\n\n"
+                    f"Total users: {ads_data['total_users']}\n"
+                    f"Sent: {ads_data['done_count']}\n"
+                    f"Failed: {ads_data['fail_count']}\n"
+                    f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
+                    f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
+                )
+                await msg.answer(tx)
+                time.sleep(1)
+                loop = asyncio.get_event_loop()
+                executor_pool = ProcessPoolExecutor()
+                loop.run_in_executor(executor_pool, send_ads)
 
         else:
-            tx = translator(text=f'Started sending messages.', dest=lang)
+            tx = translator(
+                text="❌ Unfortunately, you do not have this permission!",
+                dest=lang
+            )
             btn = close_btn()
             await state.clear()
 
