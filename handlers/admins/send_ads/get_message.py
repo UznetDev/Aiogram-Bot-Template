@@ -162,9 +162,9 @@ async def get_message(msg: types.Message, state: FSMContext):
         lang = msg.from_user.language_code
         data_state = await state.get_data()
         is_admin = SelectAdmin(cid=cid)
-        btn = close_btn()
 
         if is_admin.send_message():
+            btn = main_admin_panel_btn()
             ads_data = file_db.reading_db().get('ads')
             if ads_data:
                 tx = (
