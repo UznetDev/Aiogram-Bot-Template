@@ -50,35 +50,41 @@ def send_ads():
             end = min(start + 100, total_users)
 
             users = db.select_users_by_id(start, end)
-            logging.info(f'Send {start} {end} {len(users)}')
-            for user in users:
-                try:
-                    chat_id = user[1]
-                    copy_message_sync(chat_id,
-                                      from_chat_id,
-                                      message_id,
-                                      caption=caption,
-                                      reply_markup=reply_markup)
-                    ads_data["done_count"] += 1
-                except Exception as err:
-                    logging.error(err)
-                    ads_data["fail_count"] += 1
-            if end < total_users:
-                time.sleep(1)
-                ads_data['start'] = end
-                file_db.add_data(ads_data, key='ads')
-                send_ads()
+            if users:
+                logging.info(f'Send {start} {end} {len(users)}')
+                for user in users:
+                    try:
+                        chat_id = user[1]
+                        copy_message_sync(chat_id,
+                                          from_chat_id,
+                                          message_id,
+                                          caption=caption,
+                                          reply_markup=reply_markup)
+                        ads_data["done_count"] += 1
+                    except Exception as err:
+                        logging.error(err)
+                        ads_data["fail_count"] += 1
+                if end < total_users:
+                    time.sleep(1)
+                    ads_data['start'] = end
+                    file_db.add_data(ads_data, key='ads')
+                    send_ads()
+                else:
+                    file_db.add_data(False, key='ads')
+                    stats_message = (
+                        f"Finished sending messages.\n\n"
+                        f"Total users: {total_users}\n"
+                        f"Sent: {ads_data['done_count']}\n"
+                        f"Failed: {ads_data['fail_count']}\n"
+                        f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
+                        f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
+                    )
+                    send_message_sync(from_chat_id, stats_message)
+            elif users is None:
+                db.reconnect()
+                time.sleep(2)
             else:
-                file_db.add_data(False, key='ads')
-                stats_message = (
-                    f"Finished sending messages.\n\n"
-                    f"Total users: {total_users}\n"
-                    f"Sent: {ads_data['done_count']}\n"
-                    f"Failed: {ads_data['fail_count']}\n"
-                    f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
-                    f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
-                )
-                send_message_sync(from_chat_id, stats_message)
+                return
         else:
             pass
     except Exception as err:
