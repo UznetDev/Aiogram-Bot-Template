@@ -1,5 +1,6 @@
 import logging
-from loader import dp
+import time
+from loader import dp, file_db
 from aiogram import types
 from keyboards.inline.button import AdminCallback
 from keyboards.inline.close_btn import close_btn
@@ -37,14 +38,25 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
         is_admin = SelectAdmin(cid=user_id)
 
         if is_admin.send_message():
-            # Set the state to `AdminState.send_ads` to handle advertisement sending.
-            await state.set_state(AdminState.send_ads)
+            ads_data = file_db.reading_db().get('ads')
+            if ads_data:
+                text = (
+                    f"Message sending is currently in progress..\n\n"
+                    f"Total users: {ads_data['total_users']}\n"
+                    f"Sent: {ads_data['done_count']}\n"
+                    f"Failed: {ads_data['fail_count']}\n"
+                    f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
+                    f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
+                )
+            else:
+                # Set the state to `AdminState.send_ads` to handle advertisement sending.
+                await state.set_state(AdminState.send_ads)
 
-            # Inform the admin that the system is ready to receive the advertisement.
-            text = translator(
-                text="Send the advertisement...",
-                dest=language
-            )
+                # Inform the admin that the system is ready to receive the advertisement.
+                text = translator(
+                    text="Send the advertisement...",
+                    dest=language
+                )
 
             # Update state data to include the current message ID.
             await state.update_data({"message_id": call.message.message_id})
