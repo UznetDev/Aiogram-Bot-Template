@@ -39,6 +39,7 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
 
         if is_admin.send_message():
             ads_data = file_db.reading_db().get('ads')
+            # Check status
             if ads_data:
                 text = (
                     f"Message sending is currently in progress..\n\n"
