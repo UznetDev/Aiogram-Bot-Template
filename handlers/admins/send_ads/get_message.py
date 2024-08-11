@@ -2,6 +2,7 @@ import requests
 import asyncio
 import logging
 import time
+import mysql.connector
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 from concurrent.futures import ProcessPoolExecutor
@@ -12,6 +13,67 @@ from data.config import *
 from keyboards.inline.close_btn import close_btn
 from loader import dp, db, bot, file_db
 from states.admin_state import AdminState
+
+
+class MyDatabase:
+    def __init__(self, host, user, password, database):
+        """
+        Initialize the Database object with connection parameters.
+
+        Parameters:
+        host (str): The hostname of the MySQL server.
+        user (str): The username to connect to the MySQL server.
+        password (str): The password to connect to the MySQL server.
+        database (str): The name of the database to connect to.
+        """
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
+        self.reconnect()
+
+    def reconnect(self):
+        """
+        Reconnect to the MySQL database. If the connection fails, log the error and attempt to reconnect.
+        """
+        try:
+            self.connection = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=self.database,
+                autocommit=True
+            )
+            self.cursor = self.connection.cursor()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+    def select_users_by_id(self, start_id: int, end_id: int) -> list:
+        """
+        Select user from the 'users' table on id.
+
+        :param start_id: The start ID (integer).
+        :param end_id: The end ID (integer).
+
+        :return list: A list of tuples containing all users.
+        """
+        try:
+            sql = "SELECT * FROM `users` WHERE `id` >= %s AND `id` < %s;"
+            value = (start_id, end_id)
+            self.cursor.execute(sql, value)
+            result = self.cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+
+my_db = MyDatabase(host=HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, database=MYSQL_DATABASE)
 
 
 def copy_message_sync(chat_id, from_chat_id, message_id, **kwargs):
@@ -49,7 +111,7 @@ def send_ads():
             total_users = ads_data['total_users']
             end = min(start + 100, total_users)
 
-            users = db.select_users_by_id(start, end)
+            users = my_db.select_users_by_id(start, end)
             if users:
                 logging.info(f'Send {start} {end} {len(users)}')
                 for user in users:
