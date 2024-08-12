@@ -62,6 +62,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
                                            text=f'😊Hi @{user.username}, you have been made an admin\n'
                                                 f'To open the panel, use /admin ',
                                            reply_markup=close_btn())
+                    btn = await admin_setting(cid=cid, lang=lang)  # Prepare admin settings buttons
                 else:
                     text = translator(text="✅ Admin was added before\n\nName: ",
                                       dest=lang)
