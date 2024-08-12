@@ -158,12 +158,12 @@ def send_ads():
                 else:
                     file_db.add_data(False, key='ads')
                     summary_message = (
-                        f"📬 <b>Advertisement Sending Completed</b>\n\n"
-                        f"👥 <b>Total Users:</b> {total_users}\n"
-                        f"✅ <b>Sent:</b> {ads_data['done_count']}\n"
-                        f"❌ <b>Failed:</b> {ads_data['fail_count']}\n"
-                        f"⏰ <b>Start Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
-                        f"🕒 <b>End Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
+                        f"📬 Advertisement Sending Completed\n\n"
+                        f"👥 Total Users: {total_users}\n"
+                        f"✅  Sent: {ads_data['done_count']}\n"
+                        f"❌  Failed: {ads_data['fail_count']}\n"
+                        f"⏰ Start Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
+                        f"🕒 End Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
                     )
                     send_message_sync(from_chat_id, summary_message)
             elif users_batch is None:
