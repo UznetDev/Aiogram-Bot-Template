@@ -36,6 +36,7 @@ from .admins.check_usr import block_users
 from .admins.check_usr import send_message
 
 from .admins.send_ads import send_ads
+from .admins.send_ads import stop_ads
 
 from .admins.statistika import staristika
 from .admins.statistika import download_statistics
