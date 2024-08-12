@@ -1,183 +1,17 @@
-import requests
 import asyncio
 import logging
 import time
-import mysql.connector
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 from concurrent.futures import ProcessPoolExecutor
 from filters.admin import SelectAdmin, IsAdmin
 from function.translator import translator
-from keyboards.inline.admin_btn import main_admin_panel_btn
-from data.config import *
+from keyboards.inline.admin_btn import main_admin_panel_btn, stop_advertisement
 from keyboards.inline.close_btn import close_btn
 from loader import dp, db, bot, file_db
+from data.config import *
 from states.admin_state import AdminState
-
-
-class MyDatabase:
-    def __init__(self, host, user, password, database):
-        """
-        Initialize the MyDatabase object with connection parameters.
-
-        Parameters:
-        host (str): The hostname of the MySQL server.
-        user (str): The username to connect to the MySQL server.
-        password (str): The password to connect to the MySQL server.
-        database (str): The name of the database to connect to.
-        """
-        self.host = host
-        self.user = user
-        self.password = password
-        self.database = database
-        self.reconnect()
-
-    def reconnect(self):
-        """
-        Reconnect to the MySQL database. If the connection fails, log the error and attempt to reconnect.
-        """
-        try:
-            self.connection = mysql.connector.connect(
-                host=self.host,
-                user=self.user,
-                password=self.password,
-                database=self.database,
-                autocommit=True
-            )
-            self.cursor = self.connection.cursor()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
-
-    def select_users_by_id(self, start_id: int, end_id: int) -> list:
-        """
-        Select users from the 'users' table by their ID.
-
-        :param start_id: The starting ID (inclusive).
-        :param end_id: The ending ID (exclusive).
-
-        :return list: A list of tuples containing user data.
-        """
-        try:
-            sql_query = "SELECT * FROM `users` WHERE `id` >= %s AND `id` < %s;"
-            query_values = (start_id, end_id)
-            self.cursor.execute(sql_query, query_values)
-            result = self.cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
-
-
-my_db = MyDatabase(host=HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, database=MYSQL_DATABASE)
-
-
-def copy_message_sync(chat_id, from_chat_id, message_id, **kwargs):
-    """
-    Synchronously copy a message from one chat to another using the Telegram API.
-
-    :param chat_id: The target chat ID where the message will be copied.
-    :param from_chat_id: The chat ID where the message originates.
-    :param message_id: The ID of the message to copy.
-    :param kwargs: Additional optional parameters for the API request.
-
-    :return dict: The JSON response from the Telegram API.
-    """
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/copyMessage"
-    data = {
-        "chat_id": chat_id,
-        "from_chat_id": from_chat_id,
-        "message_id": message_id
-    }
-    data.update(kwargs)
-    response = requests.post(url, data=data)
-    return response.json()
-
-def send_message_sync(chat_id, text, **kwargs):
-    """
-    Synchronously send a message to a specific chat using the Telegram API.
-
-    :param chat_id: The target chat ID where the message will be sent.
-    :param text: The text of the message to send.
-    :param kwargs: Additional optional parameters for the API request.
-
-    :return dict: The JSON response from the Telegram API.
-    """
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = {
-        "chat_id": chat_id,
-        "text": text
-    }
-    data.update(kwargs)
-    response = requests.post(url, data=data)
-    return response.json()
-
-
-def send_ads():
-    """
-    Function to handle the advertisement sending process.
-
-    This function reads the advertisement data from the database, selects a batch of users,
-    and sends the advertisement message to each user. It updates the advertisement progress
-    and logs any errors that occur. If the entire batch of users is processed, it terminates
-    the sending process and updates the status in the database.
-    """
-    try:
-        ads_data = file_db.reading_db()['ads']
-        if ads_data:
-            start_index = ads_data['start']
-            from_chat_id = ads_data['from_chat_id']
-            message_id = ads_data['message_id']
-            caption = ads_data['caption']
-            reply_markup = ads_data['reply_markup']
-            total_users = ads_data['total_users']
-            end_index = min(start_index + 100, total_users)
-
-            users_batch = my_db.select_users_by_id(start_index, end_index)
-            if users_batch:
-                logging.info(f'Sending ads to users {start_index} - {end_index} (Total: {len(users_batch)})')
-                for user in users_batch:
-                    try:
-                        chat_id = user[1]
-                        copy_message_sync(chat_id,
-                                          from_chat_id,
-                                          message_id,
-                                          caption=caption,
-                                          reply_markup=reply_markup)
-                        ads_data["done_count"] += 1
-                    except Exception as err:
-                        logging.error(err)
-                        ads_data["fail_count"] += 1
-
-                if end_index < total_users:
-                    time.sleep(1)
-                    ads_data['start'] = end_index
-                    file_db.add_data(ads_data, key='ads')
-                    send_ads()  # Recursive call to continue sending to the next batch
-                else:
-                    file_db.add_data(False, key='ads')
-                    summary_message = (
-                        f"📬 <b>Advertisement Sending Completed</b>\n\n"
-                        f"👥 <b>Total Users:</b> {total_users}\n"
-                        f"✅ <b>Sent:</b> {ads_data['done_count']}\n"
-                        f"❌ <b>Failed:</b> {ads_data['fail_count']}\n"
-                        f"⏰ <b>Start Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
-                        f"🕒 <b>End Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
-                    )
-                    send_message_sync(from_chat_id, summary_message)
-            elif users_batch is None:
-                db.reconnect()
-                time.sleep(2)
-            else:
-                return
-        else:
-            pass
-    except Exception as err:
-        logging.error(err)
+from function.send_ads import send_ads
 
 
 
@@ -217,14 +51,24 @@ async def get_message(msg: types.Message, state: FSMContext):
 
             if ads_data:
                 # If ads are in progress, provide status update
+
+                # Calculate remaining users
+                remaining_users = ads_data['total_users'] - ads_data['done_count'] - ads_data['fail_count']
+                estimated_minutes = (remaining_users / 100)  # 1 minute per 100 users
+
+                # Calculate the estimated end time
+                estimated_end_time = time.localtime(time.time() + estimated_minutes * 60)
+
                 message_text = (
                     f"📢 <b>Advertisement Status:</b>\n\n"
                     f"👥 <b>Total Users:</b> {ads_data['total_users']}\n"
                     f"✅ <b>Messages Sent:</b> {ads_data['done_count']}\n"
                     f"❌ <b>Failed Messages:</b> {ads_data['fail_count']}\n"
-                    f"⏳ <b>Start Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
-                    f"🕒 <b>Current Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
+                    f"⏰ <b>Start Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
+                    f"🕒 <b>Estimated End Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', estimated_end_time)}"
                 )
+                if ads_data['from_chat_id'] == user_id or user_id == ADMIN:
+                    button_markup = stop_advertisement()
             else:
                 # If no ads are in progress, start a new ad campaign
                 from_chat_id = user_id
@@ -247,10 +91,18 @@ async def get_message(msg: types.Message, state: FSMContext):
 
                 file_db.add_data(new_ads_data, key='ads')
 
+
+                # Calculate remaining users
+                remaining_users = total_users
+                estimated_minutes = (remaining_users / 100)  # 1 minute per 100 users
+
+                # Calculate the estimated end time
+                estimated_end_time = time.localtime(time.time() + estimated_minutes * 60)
+
                 message_text = (
                     f"🚀 <b>Started sending to {total_users} users.</b>\n\n"
                     f"⏰ <b>Start Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}\n"
-                    f"🕒 <b>End Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
+                    f"🕒 <b>Estimated End Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', estimated_end_time)}"
                 )
 
                 # Start the ad sending process in a separate thread
