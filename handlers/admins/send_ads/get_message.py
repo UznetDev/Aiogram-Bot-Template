@@ -11,7 +11,7 @@ from keyboards.inline.close_btn import close_btn
 from loader import dp, db, bot, file_db
 from data.config import *
 from states.admin_state import AdminState
-from function.send_ads import send_ads
+from cython_code.send_ads import send_ads
 
 
 
