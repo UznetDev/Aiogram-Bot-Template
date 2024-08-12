@@ -346,3 +346,13 @@ def download_statistika(cid, lang):
         logging.error(err)
         return False
 
+
+def stop_ads():
+    try:
+        btn = InlineKeyboardBuilder()
+        btn.button(text=f'🚫 Stop!',
+                   callback_data=AdminCallback(action="stop_ads", data="").pack())
+        return btn.as_markup()
+    except Exception as err:
+        logging.error(err)
+        return False
