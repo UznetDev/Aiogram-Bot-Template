@@ -4,81 +4,90 @@ from loader import dp, file_db
 from aiogram import types
 from keyboards.inline.button import AdminCallback
 from keyboards.inline.close_btn import close_btn
+from keyboards.inline.admin_btn import stop_advertisement, main_admin_panel_btn
 from aiogram import F
 from aiogram.fsm.context import FSMContext
 from states.admin_state import AdminState
 from filters.admin import SelectAdmin, IsAdmin
 from function.translator import translator
+from data.config import ADMIN
 
 
 @dp.callback_query(AdminCallback.filter(F.action == "send_advertisement"), IsAdmin())
 async def send_ads(call: types.CallbackQuery, state: FSMContext):
     """
-    Handles the initiation of the advertisement sending process.
+    Handles the "Send Advertisement" button click in the admin panel.
 
-    This function:
-    - Checks if the user has the necessary permissions to send advertisements.
-    - Updates the state to allow for the advertisement sending process.
-    - Provides feedback to the user about the status of the operation.
+    This function checks if the user is an admin and initiates or updates the advertisement
+    sending process. It displays the current status of the advertisement campaign, including
+    total users, messages sent, and failed messages. The admin can also stop the advertisement
+    if they have the necessary permissions.
+
+    The function utilizes the FSMContext to maintain the state of the operation, allowing it
+    to track the progress and handle user interactions effectively. If the user doesn't have
+    the required permissions, an error message is displayed.
 
     Args:
-        call (types.CallbackQuery): The callback query object that triggered this handler.
-        state (FSMContext): The finite state machine context for managing state data.
-
-    Raises:
-        Exception: Logs any errors encountered during the process.
+        call (types.CallbackQuery): The callback query from the inline button interaction.
+        state (FSMContext): The finite state machine context for handling states within
+                            the conversation.
 
     Returns:
-        None
+        None: The function sends an appropriate message to the user depending on their
+              permissions and the current status of the advertisement campaign.
+
+    Raises:
+        Exception: If any error occurs during the execution, it is logged using the logging module.
     """
     try:
         user_id = call.from_user.id
         message_id = call.message.message_id
-        language = call.from_user.language_code
+        language_code = call.from_user.language_code
         is_admin = SelectAdmin(cid=user_id)
+        button_markup = close_btn()
 
         if is_admin.send_message():
             ads_data = file_db.reading_db().get('ads')
-            # Check status
+
             if ads_data:
-                text = (
-                    f"Message sending is currently in progress..\n\n"
-                    f"Total users: {ads_data['total_users']}\n"
-                    f"Sent: {ads_data['done_count']}\n"
-                    f"Failed: {ads_data['fail_count']}\n"
-                    f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
-                    f"End time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
+                message_text = (
+                    f"📢 <b>Advertisement Status:</b>\n\n"
+                    f"👥 <b>Total users:</b> {ads_data['total_users']}\n"
+                    f"✅ <b>Messages sent:</b> {ads_data['done_count']}\n"
+                    f"❌ <b>Failed messages:</b> {ads_data['fail_count']}\n"
+                    f"⏳ <b>Start time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
+                    f"🕒 <b>Current time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
                 )
+
+                if ads_data['from_chat_id'] == user_id or user_id == ADMIN:
+                    button_markup = stop_advertisement()
+                else:
+                    button_markup = main_admin_panel_btn(user_id, language_code)
             else:
-                # Set the state to `AdminState.send_ads` to handle advertisement sending.
                 await state.set_state(AdminState.send_ads)
 
-                # Inform the admin that the system is ready to receive the advertisement.
-                text = translator(
-                    text="Send the advertisement...",
-                    dest=language
+                message_text = translator(
+                    text="💬 Send the advertisement...",
+                    dest=language_code
                 )
 
-            # Update state data to include the current message ID.
-            await state.update_data({"message_id": call.message.message_id})
+            await state.update_data({"message_id": message_id})
+
         else:
-            # Inform the admin that they do not have the necessary permissions.
-            text = translator(
-                text="❌ Unfortunately, you do not have this permission!",
-                dest=language
+            message_text = translator(
+                text="❌ You do not have the necessary permissions!",
+                dest=language_code
             )
 
-        # Edit the callback message to provide feedback and close the interaction.
         await call.message.edit_text(
-            text=f'<b><i>{text}</i></b>',
-            reply_markup=close_btn()
+            text=f'<b><i>{message_text}</i></b>',
+            reply_markup=button_markup
         )
 
-        # Update the state with the current message ID.
         await state.update_data({"message_id": message_id})
 
     except Exception as err:
-        # Log any exceptions encountered.
         logging.error(err)
+
 
 
