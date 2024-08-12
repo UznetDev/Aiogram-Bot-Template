@@ -347,7 +347,7 @@ def download_statistika(cid, lang):
         return False
 
 
-def stop_ads():
+def stop_advertisement():
     """
     Creates an inline keyboard with a single "🚫 Stop!" button for stopping advertisements.
 
