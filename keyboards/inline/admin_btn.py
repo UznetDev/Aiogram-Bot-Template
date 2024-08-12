@@ -348,11 +348,52 @@ def download_statistika(cid, lang):
 
 
 def stop_ads():
+    """
+    Creates an inline keyboard with a single "🚫 Stop!" button for stopping advertisements.
+
+    This function utilizes the `InlineKeyboardBuilder` to construct an inline keyboard with a button
+    labeled "🚫 Stop!". The button's callback data is generated using the `AdminCallback` class,
+    specifying the action "stop_ads". This callback data is used by the bot to handle the button
+    press event appropriately.
+
+    The function is wrapped in a try-except block to catch any exceptions that may occur during
+    the creation of the inline keyboard. If an exception is raised, the error is logged, and the
+    function returns `False` to indicate that the operation failed.
+
+    Returns:
+        InlineKeyboardMarkup: The inline keyboard markup object containing the "🚫 Stop!" button,
+                              if successfully created.
+        bool: Returns `False` if an exception occurs during the creation process.
+
+    Exceptions:
+        If an exception is encountered, it is caught and logged using the logging module, with
+        an error message indicating the source of the error.
+
+    Example Usage:
+        To create an inline keyboard for stopping ads:
+
+        keyboard = stop_ads()
+        if keyboard:
+            await message.reply("Press the button to stop ads.", reply_markup=keyboard)
+        else:
+            await message.reply("Failed to create stop button.")
+    """
     try:
+        # Initialize the inline keyboard builder
         btn = InlineKeyboardBuilder()
-        btn.button(text=f'🚫 Stop!',
-                   callback_data=AdminCallback(action="stop_ads", data="").pack())
+
+        # Add a button labeled "🚫 Stop!" with callback data to handle the stop_ads action
+        btn.button(
+            text='🚫 Stop!',
+            callback_data=AdminCallback(action="stop_ads", data="").pack()
+        )
+
+        # Return the constructed inline keyboard markup
         return btn.as_markup()
+
     except Exception as err:
-        logging.error(err)
+        # Log any exceptions that occur during the button creation process
+        logging.error(f"Error in stop_ads function: {err}")
+
+        # Return False to indicate the failure of the operation
         return False
