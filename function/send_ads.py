@@ -118,6 +118,7 @@ def send_ads():
     the sending process and updates the status in the database.
     """
     try:
+        start_time = time.time()
         ads_data = file_db.reading_db()['ads']
         if ads_data:
             start_index = ads_data['start']
@@ -146,9 +147,14 @@ def send_ads():
 
                 if end_index < total_users:
                     time.sleep(1)
+                    end_time = time.time()
+                    total_time = end_time - start_time
+                    per_time = ads_data["per_time"]
+                    if per_time< total_time:
+                        ads_data["per_time"] = per_time
                     ads_data['start'] = end_index
                     file_db.add_data(ads_data, key='ads')
-                    send_ads()  # Recursive call to continue sending to the next batch
+                    return send_ads()  # Recursive call to continue sending to the next batch
                 else:
                     file_db.add_data(False, key='ads')
                     summary_message = (
@@ -166,6 +172,6 @@ def send_ads():
             else:
                 return
         else:
-            pass
+            return
     except Exception as err:
         logging.error(err)

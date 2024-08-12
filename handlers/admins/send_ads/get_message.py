@@ -52,12 +52,27 @@ async def get_message(msg: types.Message, state: FSMContext):
             if ads_data:
                 # If ads are in progress, provide status update
 
-                # Calculate remaining users
-                remaining_users = ads_data['total_users'] - ads_data['done_count'] - ads_data['fail_count']
-                estimated_minutes = (remaining_users / 100)  # 1 minute per 100 users
+                total_users = ads_data['total_users']
+                per_time = ads_data["per_time"]
 
-                # Calculate the estimated end time
-                estimated_end_time = time.localtime(time.time() + estimated_minutes * 60)
+                # Calculate how many full batches of 100 users are needed
+                total_batches = total_users // 100
+
+                # If there are remaining users that don’t fill an entire batch
+                if total_users % 100 != 0:
+                    total_batches += 1
+
+                # Calculate the total time required for all users
+                total_time_required = total_batches * per_time
+
+                # Calculate the estimated end time by adding the total time to the start time
+                start_time = ads_data['start-time']
+                estimated_end_time = start_time + total_time_required
+
+                # Convert estimated end time to a human-readable format
+                estimated_end_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(estimated_end_time))
+
+                # estimated_end_time = time.localtime(time.time() + estimated_minutes * 60)
 
                 message_text = (
                     f"📢 <b>Advertisement Status:</b>\n\n"
@@ -86,7 +101,8 @@ async def get_message(msg: types.Message, state: FSMContext):
                     "message_id": message_id,
                     "caption": caption,
                     "reply_markup": reply_markup,
-                    "total_users": total_users
+                    "total_users": total_users,
+                    "per_time": 30
                 }
 
                 file_db.add_data(new_ads_data, key='ads')
