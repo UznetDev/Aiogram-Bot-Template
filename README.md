@@ -4,6 +4,7 @@ This repository provides a comprehensive template for creating Telegram bots usi
 
 ## Table of Contents
 
+
 1. [About the Project](#about-the-project)
 2. [Project Features](#project-features)
    1. [Admin Panel](#admin-panel)
