@@ -65,65 +65,83 @@ The admin panel is accessible by sending the `/admin` command in the bot. It all
 ```plaintext
 Aiogram-Bot-Template/
 │
-├── README.md                      # Project documentation
-├── main.py                        # Entry point for the bot
-├── loader.py                      # Bot loader
-├── setup.py                       # Setup script for the project
-├── requirements.txt               # Project dependencies
-├── LICENSE                        # License file
+├── README.md                            # Project documentation
+├── main.py                              # Entry point for the bot
+├── loader.py                            # Bot loader
+├── setup.py                             # Setup script for the project
+├── requirements.txt                     # Project dependencies
+├── LICENSE                              # License file
 │
-├── cython_code/                   # Cython optimized code
-│   ├── file_db.pyx                # class for working with data in files
-│   ├── my_translator.pyx          # Tranlator class
-│   ├── send_ads.pyx               # Advertisement sender for all user
-│   ├── throttling_middleware.pyx  # Middleware class to manage throttling of requests to prevent overloading.
-│   └── user_check.pyx             # Check user has joined the required channels
+├── cython_code/                         # Cython optimized code 
+│   ├── file_db.pyx                      # Class for working with data in files
+│   ├── my_translator.pyx                # Translator class
+│   ├── send_ads.pyx                     # Advertisement sender for all users 
+│   ├── throttling_middleware.pyx        # Middleware class to manage throttling of requests to prevent overloading
+│   └── user_check.pyx                   # Check if user has joined the required channels
 │
-├── data/                          # Data-related modules
-│   └── config.py                  # A collection of necessary variables
+├── data/                                # Data-related modules
+│   └── config.py                        # A collection of necessary variables
 │
-├── filters/                       # Custom filters for the bot
-│   ├── admin.py                   # Filters for admin
-│   └── ban.py                     # Filters banned user
+├── filters/                             # Custom filters for the bot
+│   ├── admin.py                         # Filters for admin
+│   └── ban.py                           # Filters for banned users
 │
-├── function/                      # Core bot functionalities
-│   ├── function.py                # A collection of some functions
-│   ├── send_ads.py                # Chaged to cython_code/send_ads.pyx 
-│   └── translator.py              # Tanslator function
+├── function/                            # Core bot functionalities
+│   ├── function.py                      # A collection of various functions
+│   ├── send_ads.py                      # Moved to cython_code/send_ads.pyx 
+│   └── translator.py                    # Translator function
+│ 
+├── handlers/                            # Request handlers
+│   ├── __init__.py                      # Initialize the handlers module
+│   ├── admins/                          # Admin-specific handlers
+│   │   ├── super_admin.py               # Super admin functionalities
+│   │   ├── main_panel.py                # Main admin panel operations
+│   │   ├── admin_settings/              # Admin settings submodule
+│   │   │   ├── attach_admins.py         # Attach admin functionalities
+│   │   │   └── add_admin_first_step.py  # Steps to add a new admin
+│   │   ├── statistika/                  # Statistical data management for admins
+│   │   │   ├── statistika.py            # Main statistics functionalities
+│   │   │   └──  download_statistics.py  # Download statistics data
+│   │   ├── check_usr/                   # Admin user check functionalities│ 
+│   │   │   ├── block_users.py           # Block users functionalities
+│   │   │   ├── attach_usr.py            # Attach users to specific operations
+│   │   │   ├── send_message.py          # Sending messages to users
+│   │   │   └──  send_ads_message.py     # Sending advertisement messages
+│   │   ├── send_ads/                    # Admin advertisement functionalities
+│   │   │   ├── send_ads.py              # Send ads functionalities
+│   │   │   ├── stop_ads.py              # Stop advertisements functionalities
+│   │   │   └──  get_message.py          # Get messages for advertisements
+│   ├── users/                           # User-specific handlers
+│   │   ├── check_ban.py                 # Check if a user is banned
+│   │   ├── check_join.py                # Check if a user has joined required channels
+│   │   ├── check_usr.py                 # General user check functionalities
+│   │   ├── close.py                     # Close user sessions
+│   │   ├── help.py                      # Help command for users
+│   │   └── start.py                     # Start command for users
+│   ├── errors/                          # Error handling module
+│   │   └── error_handler.py            # General error handler functionalities
+│ 
+├── keyboards/                           # Bot keyboards
+│   ├── inline/                          # Inline keyboards
+│   │   ├── admin_btn.py                 # Inline keyboards for admins
+│   │   ├── button.py                    # Base inline keyboards
+│   │   ├── close_btn.py                 # Close button functionality
+│   │   └── user.py                      # User-specific inline keyboards
 │
-├── handlers/                      # Request handlers
-│   ├── __init__.py                # file that gathers all handlers
-│   ├── admins/                    # all admins file
-│   └── users/
-│       ├── __init__.py
-│       ├── check_ban.py           # Handles incoming messages from banned users.
-│       ├── check_join.py          # Handles the 'check_join' callback query to verify
-│       ├── check_usr.py           # Handles the text to check if the user has joined the required channels
-│       ├── close.py               # handlers for colse button
-│       ├── help.py                # handlers for command /help
-│       └── start.py               # handlers for command /start
+├── middlewares/                         # Middlewares for processing requests
+│   ├── __init__.py                      # Initialize middlewares
+│   ├── check_user.py                    # Not used, moved to cython_code/user_check.pyx
+│   └── throttling.py                    # Not used, moved to cython_code/throttling_middleware.pyx
 │
-├── keyboards/                     # Bot keyboards
-│   ├── inline/                    # Inline keyboards
-│       ├── admin_btn.py           # Inline keyboards for admins
-│       ├── button.py              # Base inline keyboards
-│       ├── close_btn.py
-│       └── user.py
+├── states/                              # State management
+│   └── admin_state.py                   # Class state for admin
 │
-├── middlewares/                   # Middlewares for processing requests
-│   ├── __init__.py              
-│   ├── check_user.py              # Not be used, Changed to cython_code/user_check.pyx
-│   └── throttling.py              # Not be used, Changed to cython_code/throttling_middleware.pyx
-│
-├── states/                        # State management
-│   └── admin_state.py             # Class state for admin
-│
-└── utils/                         # Utility scripts
-    ├── notify_admins.py           # The admin will receive information about the bot being started
-    ├── set_bot_commands.py        # Sets up the necessary commands (/) for the bot
+└── utils/                               # Utility scripts
+    ├── notify_admins.py                 # Notify admins when the bot is started
+    ├── set_bot_commands.py              # Set up the necessary commands (/) for the bot
     └── db_api/
-        ├── bot_db.py              # Not be used, Changed to cython_code/file_db.pyx
-        └── mysql_db.py            # Class for working with MySQL database
+        ├── bot_db.py                    # Not used, moved to cython_code/file_db.pyx
+        └── mysql_db.py                  # Class for working with MySQL database
 ```
 
 ## Installation and Usage
