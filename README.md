@@ -108,9 +108,9 @@ Aiogram-Bot-Template/
 │   │   │   ├── send_message.py          # Sending messages to users
 │   │   │   └──  send_ads_message.py     # Sending advertisement messages
 │   │   ├── send_ads/                    # Admin advertisement functionalities
-│   │   │   ├── send_ads.py              # Send ads functionalities
-│   │   │   ├── stop_ads.py              # Stop advertisements functionalities
-│   │   │   └──  get_message.py          # Get messages for advertisements
+│   │       ├── send_ads.py              # Send ads functionalities
+│   │       ├── stop_ads.py              # Stop advertisements functionalities
+│   │       └──  get_message.py          # Get messages for advertisements
 │   ├── users/                           # User-specific handlers
 │   │   ├── check_ban.py                 # Check if a user is banned
 │   │   ├── check_join.py                # Check if a user has joined required channels
@@ -119,14 +119,14 @@ Aiogram-Bot-Template/
 │   │   ├── help.py                      # Help command for users
 │   │   └── start.py                     # Start command for users
 │   ├── errors/                          # Error handling module
-│   │   └── error_handler.py             # General error handler functionalities
+│       └── error_handler.py             # General error handler functionalities
 │ 
 ├── keyboards/                           # Bot keyboards
 │   ├── inline/                          # Inline keyboards
 │   │   ├── admin_btn.py                 # Inline keyboards for admins
 │   │   ├── button.py                    # Base inline keyboards
 │   │   ├── close_btn.py                 # Close button functionality
-│   │   └── user.py                      # User-specific inline keyboards
+│       └── user.py                      # User-specific inline keyboards
 │
 ├── middlewares/                         # Middlewares for processing requests
 │   ├── __init__.py                      # Initialize middlewares
