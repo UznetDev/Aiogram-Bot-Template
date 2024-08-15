@@ -65,72 +65,65 @@ The admin panel is accessible by sending the `/admin` command in the bot. It all
 ```plaintext
 Aiogram-Bot-Template/
 │
-├── README.md                   # Project documentation
-├── main.py                     # Entry point for the bot
-├── loader.py                   # Bot loader
-├── setup.py                    # Setup script for the project
-├── requirements.txt            # Project dependencies
-├── LICENSE                     # License file
+├── README.md                      # Project documentation
+├── main.py                        # Entry point for the bot
+├── loader.py                      # Bot loader
+├── setup.py                       # Setup script for the project
+├── requirements.txt               # Project dependencies
+├── LICENSE                        # License file
 │
-├── cython_code/                # Cython optimized code
-│   ├── file_db.pyx
-│   ├── my_translator.pyx
-│   ├── send_ads.pyx
-│   ├── throttling_middleware.pyx
-│   └── user_check.pyx
+├── cython_code/                   # Cython optimized code
+│   ├── file_db.pyx                # class for working with data in files
+│   ├── my_translator.pyx          # Tranlator class
+│   ├── send_ads.pyx               # Advertisement sender for all user
+│   ├── throttling_middleware.pyx  # Middleware class to manage throttling of requests to prevent overloading.
+│   └── user_check.pyx             # Check user has joined the required channels
 │
-├── data/                       # Data-related modules
-│   ├── __init__.py
-│   └── config.py
+├── data/                          # Data-related modules
+│   └── config.py                  # A collection of necessary variables
 │
-├── filters/                    # Custom filters for the bot
-│   ├── __init__.py
-│   ├── admin.py
-│   └── ban.py
+├── filters/                       # Custom filters for the bot
+│   ├── admin.py                   # Filters for admin
+│   └── ban.py                     # Filters banned user
 │
-├── function/                   # Core bot functionalities
-│   ├── __init__.py
-│   ├── function.py
-│   ├── send_ads.py
-│   └── translator.py
+├── function/                      # Core bot functionalities
+│   ├── function.py                # A collection of some functions
+│   ├── send_ads.py                # Chaged to cython_code/send_ads.pyx 
+│   └── translator.py              # Tanslator function
 │
-├── handlers/                   # Request handlers
-│   ├── __init__.py
-│   ├── admins/
+├── handlers/                      # Request handlers
+│   ├── __init__.py                # file that gathers all handlers
+│   ├── admins/                    # all admins file
 │   └── users/
 │       ├── __init__.py
-│       ├── check_ban.py
-│       ├── check_join.py
-│       ├── check_usr.py
-│       ├── close.py
-│       ├── help.py
-│       └── start.py
+│       ├── check_ban.py           # Handles incoming messages from banned users.
+│       ├── check_join.py          # Handles the 'check_join' callback query to verify
+│       ├── check_usr.py           # Handles the text to check if the user has joined the required channels
+│       ├── close.py               # handlers for colse button
+│       ├── help.py                # handlers for command /help
+│       └── start.py               # handlers for command /start
 │
-├── keyboards/                  # Bot keyboards
-│   ├── __init__.py
-│   ├── inline/
-│       ├── admin_btn.py
-│       ├── button.py
+├── keyboards/                     # Bot keyboards
+│   ├── inline/                    # Inline keyboards
+│       ├── admin_btn.py           # Inline keyboards for admins
+│       ├── button.py              # Base inline keyboards
 │       ├── close_btn.py
 │       └── user.py
 │
-├── middlewares/                # Middlewares for processing requests
-│   ├── __init__.py
-│   ├── check_user.py           # Not be used, Changed to cython_code/user_check.pyx
-│   └── throttling.py           # Not be used, Changed to cython_code/throttling_middleware.pyx
+├── middlewares/                   # Middlewares for processing requests
+│   ├── __init__.py              
+│   ├── check_user.py              # Not be used, Changed to cython_code/user_check.pyx
+│   └── throttling.py              # Not be used, Changed to cython_code/throttling_middleware.pyx
 │
-├── states/                     # State management
-│   ├── __init__.py
-│   └── admin_state.py
+├── states/                        # State management
+│   └── admin_state.py             # Class state for admin
 │
-└── utils/                      # Utility scripts
-    ├── __init__.py
-    ├── notify_admins.py
-    ├── set_bot_commands.py
+└── utils/                         # Utility scripts
+    ├── notify_admins.py           # The admin will receive information about the bot being started
+    ├── set_bot_commands.py        # Sets up the necessary commands (/) for the bot
     └── db_api/
-        ├── __init__.py
-        ├── bot_db.py           # Not be used, Changed to cython_code/file_db.pyx
-        └── mysql_db.py
+        ├── bot_db.py              # Not be used, Changed to cython_code/file_db.pyx
+        └── mysql_db.py            # Class for working with MySQL database
 ```
 
 ## Installation and Usage
