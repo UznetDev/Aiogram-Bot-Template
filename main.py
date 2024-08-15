@@ -43,10 +43,10 @@ if __name__ == "__main__":
     # Configure logging
     format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(
-        #filename=log_file_name,  # Uncomment this line to log to a file
-        level=logging.INFO,  # Set the logging level to INFO
+        filename=log_file_name,  # Save error log on file
+        level=logging.ERROR,  # Set the logging level to INFO
         format=format,  # Set the logging format
-        stream=sys.stdout  # Log to stdout
+        # stream=sys.stdout  # Log to stdout
     )
     # Run the main function asynchronously
     asyncio.run(main())

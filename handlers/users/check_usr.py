@@ -11,7 +11,7 @@ from data.config import date_day_month, time_hour_minute_second
 @dp.message(User_Check())
 async def start_handler(msg: types.Message):
     """
-    Handles the /start command to check if the user has joined the required channels.
+    Handles the text to check if the user has joined the required channels.
     If the user has not joined, provides a list of channels and their invitation links.
 
     Args:
