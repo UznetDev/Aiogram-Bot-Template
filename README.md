@@ -119,7 +119,7 @@ Aiogram-Bot-Template/
 │   │   ├── help.py                      # Help command for users
 │   │   └── start.py                     # Start command for users
 │   ├── errors/                          # Error handling module
-│   │   └── error_handler.py            # General error handler functionalities
+│   │   └── error_handler.py             # General error handler functionalities
 │ 
 ├── keyboards/                           # Bot keyboards
 │   ├── inline/                          # Inline keyboards
