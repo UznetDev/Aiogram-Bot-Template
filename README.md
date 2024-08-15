@@ -116,8 +116,8 @@ Aiogram-Bot-Template/
 │
 ├── middlewares/                # Middlewares for processing requests
 │   ├── __init__.py
-│   ├── check_user.py
-│   └── throttling.py
+│   ├── check_user.py           # Not be used, Changed to cython_code/user_check.pyx
+│   └── throttling.py           # Not be used, Changed to cython_code/throttling_middleware.pyx
 │
 ├── states/                     # State management
 │   ├── __init__.py
@@ -129,7 +129,7 @@ Aiogram-Bot-Template/
     ├── set_bot_commands.py
     └── db_api/
         ├── __init__.py
-        ├── bot_db.py
+        ├── bot_db.py           # Not be used, Changed to cython_code/file_db.pyx
         └── mysql_db.py
 ```
 
