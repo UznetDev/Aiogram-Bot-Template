@@ -36,6 +36,9 @@ The admin panel is accessible by sending the `/admin` command in the bot. It all
 - **Admin Control:** Full rights for the main admin to manage other admins.
 - **Channel Management:** Control only the channels added by the respective admin.
 - **Role-Based Access:** Admins can only perform actions based on their permissions.
+- **Send advertisement:** Send advertisement message for all user.
+- **Control bot:** Admin can control bot and bot user.
+- **View Statistika:** Vaev real Statistika.
 
 ## Technologies Used
 
