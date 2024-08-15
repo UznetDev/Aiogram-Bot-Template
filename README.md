@@ -39,7 +39,7 @@ The admin panel is accessible by sending the `/admin` command in the bot. It all
 
 ## Technologies Used
 
-- **Programming Language:** Python 3+
+- **Programming Language:** Python (3+), Cython (3+)
 - **Framework:** Aiogram 3.5
 - **Database:** Mysql 8+
 - **Dependencies:**
@@ -161,10 +161,6 @@ HOST=<host default localhost>
 MYSQL_USER=<your MySQL user>
 MYSQL_PASSWORD=<your MySQL password>
 MYSQL_DATABASE=<your MySQL database>
-SONG_MYSQL_USER=<music MySQL database user>
-SONG_MYSQL_PASSWORD=<music MySQL database password>
-SONG_MYSQL_DATABASE=<music MySQL database>
-SHAZAM_API=<Shazam recognizer API>
 ```
 6. **Run the setup.py:**
    ```bash
