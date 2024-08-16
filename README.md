@@ -103,7 +103,7 @@ Aiogram-Bot-Template/
 │   │   │   ├── attach_usr.py            # Attach users to specific operations
 │   │   │   ├── send_message.py          # Sending messages to users
 │   │   │   └──  send_ads_message.py     # Sending advertisement messages
-│   │   ├── send_ads/                    # Admin advertisement functionalities
+│   │   └── send_ads/                    # Admin advertisement functionalities
 │   │       ├── send_ads.py              # Send ads functionalities
 │   │       ├── stop_ads.py              # Stop advertisements functionalities
 │   │       └──  get_message.py          # Get messages for advertisements
@@ -114,14 +114,14 @@ Aiogram-Bot-Template/
 │   │   ├── close.py                     # Close user sessions
 │   │   ├── help.py                      # Help command for users
 │   │   └── start.py                     # Start command for users
-│   ├── errors/                          # Error handling module
+│   └── errors/                          # Error handling module
 │       └── error_handler.py             # General error handler functionalities
 │ 
 ├── keyboards/                           # Bot keyboards
-│   ├── inline/                          # Inline keyboards
-│   │   ├── admin_btn.py                 # Inline keyboards for admins
-│   │   ├── button.py                    # Base inline keyboards
-│   │   ├── close_btn.py                 # Close button functionality
+│   └── inline/                          # Inline keyboards
+│       ├── admin_btn.py                 # Inline keyboards for admins
+│       ├── button.py                    # Base inline keyboards
+│       ├── close_btn.py                 # Close button functionality
 │       └── user.py                      # User-specific inline keyboards
 │
 ├── middlewares/                         # Middlewares for processing requests
