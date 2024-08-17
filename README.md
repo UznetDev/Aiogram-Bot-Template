@@ -207,7 +207,7 @@ To run the bot as a Windows Service, you can use tools like NSSM (Non-Sucking Se
 To run the bot as a systemd service on Linux:
 1. Create a service file:
     ```sh
-    nano /etc/systemd/system/tikme_uzbot.service
+    nano /etc/systemd/system/Aiogram-Bot-Template.service
    ```
     ```ini
     [Unit]
@@ -217,7 +217,7 @@ To run the bot as a systemd service on Linux:
     [Service]
     User=yourusername
     WorkingDirectory=/path/to/Aiogram-Bot-Template
-    ExecStart=/usr/bin/python3 /path/to/Aiogram-Bot-Template/start.py
+    ExecStart=/usr/bin/python3 /path/to/Aiogram-Bot-Template/main.py
     Restart=always
 
     [Install]
@@ -251,7 +251,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 If you have any questions or suggestions, please contact:
 - Email: uznetdev@example.com
-- GitHub Issues: [Issues section](https://github.com/UznetDev/TikMe_UzBot/issues)
+- GitHub Issues: [Issues section](https://github.com/UznetDev/Aiogram-Bot-Template/issues)
 - GitHub Profile: [UznetDev](https://github.com/UznetDev/)
 - Telegram: [UZNet_Dev](https://t.me/UZNet_Dev)
 - Linkedin: [Abdurahmon Niyozaliev](https://www.linkedin.com/in/abdurakhmon-niyozaliyev-%F0%9F%87%B5%F0%9F%87%B8-66545222a/)
