@@ -150,11 +150,24 @@ Aiogram-Bot-Template/
    ```bash
    cd Aiogram-Bot-Template
    ```
-3. **Install Dependencies:**
+3. Create a virtual environment:
+   ```sh
+   python -m venv env
+   ```
+4. Activate the virtual environment:
+   - On Windows:
+     ```sh
+     env\Scripts\activate
+     ```
+   - On macOS and Linux:
+     ```sh
+     source env/bin/activate
+     ```
+5. **Install Dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
-5. **Create a .env file:**
+6. **Create a .env file:**
    - On Windows:
      ```sh
      wsl nano .env
@@ -172,11 +185,11 @@ MYSQL_USER=<your MySQL user>
 MYSQL_PASSWORD=<your MySQL password>
 MYSQL_DATABASE=<your MySQL database>
 ```
-6. **Run the setup.py:**
+8. **Run the setup.py:**
    ```bash
    python setup.py build_ext --inplace
    ```
-6. **Run the Bot:**
+9. **Run the Bot:**
    ```bash
    python main.py
    ```
