@@ -44,8 +44,8 @@ The admin panel is accessible by sending the `/admin` command in the bot. It all
 ## Technologies Used
 
 - **Programming Language:** Python (3+), Cython (3+)
-- **Framework:** Aiogram 3.5
-- **Database:** Mysql 8+
+- **Framework:** Aiogram (3.5) absolute.
+- **Database:** Mysql (8+)
 - **Dependencies:**
   - `aiogram==3.5.0` - [Aiogram Documentation](https://docs.aiogram.dev/en/latest/)
   - `deep-translator==1.11.4` - [Deep Translator Documentation](https://deep-translator.readthedocs.io/en/latest/)
