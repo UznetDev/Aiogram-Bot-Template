@@ -61,7 +61,6 @@ The admin panel is accessible by sending the `/admin` command in the bot. It all
 
 ```plaintext
 Aiogram-Bot-Template/
-│
 ├── README.md                            # Project documentation
 ├── main.py                              # Entry point for the bot
 ├── loader.py                            # Bot loader
