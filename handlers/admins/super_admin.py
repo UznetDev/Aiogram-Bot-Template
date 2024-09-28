@@ -1,6 +1,7 @@
 import logging
 import pandas as pd
 import os
+import time
 from aiogram import types
 from aiogram.filters import Command
 from data.config import log_file_name
@@ -34,9 +35,10 @@ async def super_admin(msg: types.Message):
     Returns:
         None
     """
+    start_time = time.perf_counter()
+    user_id = msg.from_user.id
+    user_language = msg.from_user.language_code
     try:
-        logging.info('Generating stats report')
-        cid = msg.from_user.id
         mid = msg.message_id
         data = db.select_all_users_ban()
 
@@ -72,27 +74,52 @@ async def super_admin(msg: types.Message):
 
             # Sending the generated Excel file
             document = types.InputFile(excel_path)
-            await bot.send_document(chat_id=cid,
+            await bot.send_document(chat_id=user_id,
                                     document=document,
                                     caption='<b>Ban list</b>')
             os.remove(excel_path)
-
+            logging.info(f"Super Admin action",
+                         extra={
+                             'chat_id': user_id,
+                             'language_code': user_language,
+                             'execution_time': time.perf_counter() - start_time
+                         })
         except Exception as err:
-            logging.error(f"Error processing ban data: {err}")
+            logging.info(f"Error processing ban data: {err}",
+                         extra={
+                             'chat_id': user_id,
+                             'language_code': user_language,
+                             'execution_time': time.perf_counter() - start_time
+                         })
 
         try:
             # Sending the log file if it exists
             if os.path.exists(log_file_name) and os.path.getsize(log_file_name) > 0:
                 document2 = types.InputFile(log_file_name)
-                await bot.send_document(chat_id=cid,
+                await bot.send_document(chat_id=user_id,
                                         document=document2,
                                         caption='<b>Update log</b>')
+                logging.info(f"Super Admin action",
+                              extra={
+                                  'chat_id': user_id,
+                                  'language_code': user_language,
+                                  'execution_time': time.perf_counter() - start_time
+                              })
         except Exception as err:
-            logging.error(f"Error sending log file: {err}")
-
+            logging.error(f"Error sending log file: {err}",
+                         extra={
+                             'chat_id': user_id,
+                             'language_code': user_language,
+                             'execution_time': time.perf_counter() - start_time
+                         })
         # Deleting the original message
-        await bot.delete_message(chat_id=cid, message_id=mid)
+        await bot.delete_message(chat_id=user_id, message_id=mid)
 
     except Exception as err:
-        logging.error(f"Unhandled error: {err}")
+        logging.error(f"Unhandled error: {err}",
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })
 

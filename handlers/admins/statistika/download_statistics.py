@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 import pandas as pd
 from loader import dp, db, bot
 from aiogram import types
@@ -34,10 +35,11 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
     Returns:
         None
     """
+    start_time = time.perf_counter()
+    user_id = call.from_user.id
+    user_language = call.from_user.language_code
     try:
-        user_id = call.from_user.id
         message_id = call.message.message_id
-        language = call.from_user.language_code
         is_admin = SelectAdmin(cid=user_id)
 
         if is_admin.download_statistika():
@@ -72,26 +74,37 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
             # Send the Excel file to the user
             document = types.input_file.FSInputFile(path='data/statistics.xlsx')
             user_count = db.stat()
-            text = (translator(text="✅ Downloaded! \n\n", dest=language) +
-                    translator(text="\n👥 Bot users count: ", dest=language) +
+            text = (translator(text="✅ Downloaded! \n\n", dest=user_language) +
+                    translator(text="\n👥 Bot users count: ", dest=user_language) +
                     str(user_count) + ' .\n' +
-                    translator(text="⏰ Time: ", dest=language) +
+                    translator(text="⏰ Time: ", dest=user_language) +
                     f"{soat_minut_sekund}\n" +
-                    translator(text="<b>📆 Date:</b>", dest=language) +
+                    translator(text="<b>📆 Date:</b>", dest=user_language) +
                     f" {yil_oy_kun}")
 
             await bot.send_document(chat_id=user_id, document=document, caption=text)
             os.remove('data/statistics.xlsx')
 
             # Update the message with confirmation
-            text = translator(text="✅ Downloaded!\n", dest=language)
+            text = translator(text="✅ Downloaded!\n", dest=user_language)
             await state.update_data({"message_id": call.message.message_id})
         else:
             # Permission error
-            text = translator(text="❌ Unfortunately, you do not have this permission!", dest=language)
+            text = translator(text="❌ Unfortunately, you do not have this permission!", dest=user_language)
 
         await call.message.edit_text(text=f'<b><i>{text}</i></b>', reply_markup=close_btn())
         await state.update_data({"message_id": message_id})
+        logging.info(f'Download statistika.',
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })
 
     except Exception as err:
-        logging.error(err)
+        logging.error(err,
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })

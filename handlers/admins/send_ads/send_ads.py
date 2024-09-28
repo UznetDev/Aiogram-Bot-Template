@@ -39,6 +39,9 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
     Raises:
         Exception: If any error occurs during the execution, it is logged using the logging module.
     """
+    start_time = time.perf_counter()
+    user_id = call.from_user.id
+    user_language = call.from_user.language_code
     try:
         user_id = call.from_user.id
         message_id = call.message.message_id
@@ -93,9 +96,19 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
         )
 
         await state.update_data({"message_id": message_id})
-
+        logging.info("Send ads",
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': time.perf_counter() - start_time
+                     })
     except Exception as err:
-        logging.error(err)
+        logging.info(err,
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': time.perf_counter() - start_time
+                     })
 
 
 

@@ -1,4 +1,5 @@
 import logging
+import time
 from loader import dp, bot
 from aiogram.filters import Command
 from aiogram import types
@@ -26,6 +27,9 @@ async def main_panel(msg: types.Message, state: FSMContext):
     Raises:
         Exception: Logs any errors encountered during the process.
     """
+    start_time = time.perf_counter()
+    user_id = msg.from_user.id
+    user_language = msg.from_user.language_code
     try:
         cid = msg.from_user.id
         mid = msg.message_id
@@ -52,7 +56,17 @@ async def main_panel(msg: types.Message, state: FSMContext):
 
         # Delete the original command message
         await bot.delete_message(chat_id=cid, message_id=mid)
-
+        logging.info(f"Main admin panel",
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': time.perf_counter() - start_time
+                     })
     except Exception as err:
-        logging.error(f"Unhandled error: {err}")
+        logging.error(f"Unhandled error: {err}",
+                         extra={
+                             'chat_id': user_id,
+                             'language_code': user_language,
+                             'execution_time': time.perf_counter() - start_time
+                     })
 

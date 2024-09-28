@@ -34,11 +34,12 @@ async def get_message(msg: types.Message, state: FSMContext):
     Raises:
         Exception: Logs any exceptions that occur during execution.
     """
+    start_time = time.perf_counter()
+    user_id = msg.from_user.id
+    user_language = msg.from_user.language_code
     try:
         # Extract user and message details
-        user_id = msg.from_user.id
         message_id = msg.message_id
-        language_code = msg.from_user.language_code
         state_data = await state.get_data()
 
         # Check if the user has admin permissions
@@ -46,7 +47,7 @@ async def get_message(msg: types.Message, state: FSMContext):
 
         if is_admin.send_message():
             # Prepare the admin panel button and fetch ads data
-            button_markup = main_admin_panel_btn(cid=user_id, lang=language_code)
+            button_markup = main_admin_panel_btn(cid=user_id, lang=user_language)
             ads_data = file_db.reading_db().get('ads')
 
             if ads_data:
@@ -131,7 +132,7 @@ async def get_message(msg: types.Message, state: FSMContext):
             # If the user is not an admin, send a permission error message
             message_text = translator(
                 text="❌ Unfortunately, you do not have this permission!",
-                dest=language_code
+                dest=user_language
             )
             button_markup = close_btn()
             await state.clear()
@@ -146,7 +147,17 @@ async def get_message(msg: types.Message, state: FSMContext):
 
         # Update the state with the current message ID
         await state.update_data({"message_id": message_id})
-
+        logging.info(f"Get message",
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })
     except Exception as err:
-        logging.error(f"Error in get_message: {err}")
+        logging.error(f"Error in get_message: {err}",
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })
 

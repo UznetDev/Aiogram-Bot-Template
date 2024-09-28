@@ -1,5 +1,5 @@
 import logging
-
+import time
 from aiogram import types
 from aiogram.filters import Command
 from function.translator import translator
@@ -19,9 +19,12 @@ async def help_handler(msg: types.Message):
     Returns:
         None
     """
+    start_time = time.perf_counter()
     try:
         # Get the user's language code
         user_language = msg.from_user.language_code
+
+        user_id = msg.chat.id
 
         # Get information about the bot
         bot_info = await bot.get_me()
@@ -42,5 +45,20 @@ async def help_handler(msg: types.Message):
 
         # Send the help text and button to the user
         await msg.answer(translated_help_text, reply_markup=share_button)
+        end_time = time.perf_counter()
+        execution_time = end_time - start_time
+        logging.info(f"Handling /help",
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': execution_time
+                     })
     except Exception as err:
-        logging.error(f"Error in /help handler: {err}")
+        end_time = time.perf_counter()
+        execution_time = end_time - start_time
+        logging.error(f"Error in /help handler: {err}",
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': execution_time
+                      })

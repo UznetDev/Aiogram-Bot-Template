@@ -1,7 +1,9 @@
+import logging
 import time
+
 from aiogram import BaseMiddleware
 from aiogram.types import Update
-import logging
+
 from utils.logger_adapter import ChatLoggerAdapter
 
 

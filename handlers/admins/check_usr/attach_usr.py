@@ -1,4 +1,5 @@
 import logging
+import time
 from loader import dp, bot, db
 from aiogram import types
 from keyboards.inline.close_btn import close_btn
@@ -30,6 +31,9 @@ async def attach_user(msg: types.Message, state: FSMContext):
     Returns:
         None
     """
+    start_time = time.perf_counter()
+    user_id_l = msg.from_user.id
+    user_language = msg.from_user.language_code
     try:
         cid = msg.from_user.id  # Chat ID of the admin
         mid = msg.message_id  # Message ID of the current message
@@ -70,7 +74,12 @@ async def attach_user(msg: types.Message, state: FSMContext):
                     # User not found in the bot's list
                     text = translator(text="🔴 User not found!\nThe user may not be in the bot's list..", dest=lang)
             except Exception as err:
-                logging.error(err)
+                logging.warning(err,
+                                extra={
+                                      'chat_id': user_id_l,
+                                      'language_code': user_language,
+                                      'execution_time': time.perf_counter() - start_time
+                              })
                 text = translator(text="🔴 User not found!\nThe bot may not have found the user..", dest=lang)
             finally:
                 # Update the message with the result and provide the close button
@@ -89,7 +98,18 @@ async def attach_user(msg: types.Message, state: FSMContext):
                                     reply_markup=btn)
         await state.update_data({"message_id": mid})  # Update state data
         await bot.delete_message(chat_id=cid, message_id=mid)  # Delete the original message
+        logging.info(f"Attach user",
+                      extra={
+                          'chat_id': user_id_l,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })
     except Exception as err:
         # Log any exceptions that occur
-        logging.error(err)
+        logging.error(err,
+                      extra={
+                          'chat_id': user_id_l,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })
 

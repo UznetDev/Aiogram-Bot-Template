@@ -1,10 +1,12 @@
 import logging
+import time
 from loader import dp, bot, db
 from aiogram import types
 from function.translator import translator
 from keyboards.inline.close_btn import close_btn
 from data.config import yil_oy_kun, soat_minut_sekund, ADMIN
 from filters.ban import IsBan
+
 
 @dp.message(IsBan())
 async def ban_handler(msg: types.Message):
@@ -18,6 +20,9 @@ async def ban_handler(msg: types.Message):
     Returns:
         None
     """
+    start_time = time.perf_counter()
+    user_id = msg.from_user.id
+    user_language = msg.from_user.language_code
     try:
         # Get the user's language code and ID
         lang = msg.from_user.language_code
@@ -44,6 +49,16 @@ async def ban_handler(msg: types.Message):
         if db.check_user(cid=cid) is None:
             db.add_user(cid=cid,
                         date=f"{yil_oy_kun} / {soat_minut_sekund}")
-
+        logging.info(f"Handling Ban",
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': time.perf_counter() - start_time
+                     })
     except Exception as err:
-        logging.error(f"Error in start_handler: {err}")
+        logging.info(f"Error in start_handler: {err}",
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': time.perf_counter() - start_time
+                     })

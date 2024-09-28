@@ -29,6 +29,9 @@ async def check_user(call: types.CallbackQuery, state: FSMContext):
     Returns:
     - This function is asynchronous and does not return a value but performs actions such as sending messages and updating states.
     """
+    start_time = time.perf_counter()
+    user_id = call.from_user.id
+    user_language = call.from_user.language_code
     try:
         user_id = call.from_user.id  # The ID of the admin initiating the check
         message_id = call.message.message_id  # The ID of the message triggering the callback

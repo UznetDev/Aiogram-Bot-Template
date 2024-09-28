@@ -5,7 +5,6 @@ from loader import *  # Import all from loader module
 from utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup
 from utils.set_bot_commands import set_default_commands # Import the function to set default bot commands
 from middlewares import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
-from middlewares.execution_time_middleware import ExecutionTimeMiddleware
 from data.config import log_file_name  # Import the log file name from config
 from utils.safe_formatter import SafeFormatter
 from utils.db_api.mysql_handler import MySQLHandler  # Import the custom MySQLHandler
@@ -18,7 +17,6 @@ async def main():
     await on_startup_notify()  # Notify admins about the bot startup
     await set_default_commands()  # Set the default commands for the bot
     dp.update.middleware.register(ThrottlingMiddleware())  # Register the ThrottlingMiddleware
-    # dp.update.middleware.register(ExecutionTimeMiddleware())  # Register the ExecutionTimeMiddleware
 
     try:
         # Try to create necessary database tables

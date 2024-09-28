@@ -1,4 +1,5 @@
 import logging
+import time
 from loader import dp, bot
 from aiogram import types
 from keyboards.inline.close_btn import close_btn
@@ -6,6 +7,7 @@ from filters.admin import IsAdmin, SelectAdmin
 from aiogram.fsm.context import FSMContext
 from function.translator import translator
 from states.admin_state import AdminState
+
 
 @dp.message(AdminState.send_message_to_user, IsAdmin())
 async def send_ads_message(msg: types.Message, state: FSMContext):
@@ -27,9 +29,10 @@ async def send_ads_message(msg: types.Message, state: FSMContext):
     Returns:
     - This function is asynchronous and does not return a value but performs actions such as sending messages and updating states.
     """
+    start_time = time.perf_counter()
+    user_id = msg.from_user.id  # The ID of the admin sending the message
+    user_language = msg.from_user.language_code  # The language code of the admin for message translation
     try:
-        user_id = msg.from_user.id  # The ID of the admin sending the message
-        language = msg.from_user.language_code  # The language code of the admin for message translation
         data_state = await state.get_data()  # Retrieve data from the FSM context
         target_user_id = data_state['user_id']  # The ID of the target user who will receive the message
         is_admin = SelectAdmin(cid=user_id)  # Check if the admin is authorized to send messages
@@ -47,21 +50,26 @@ async def send_ads_message(msg: types.Message, state: FSMContext):
                 )
                 text = translator(
                     text='✅ Message sent',
-                    dest=language
+                    dest=user_language
                 )
             except Exception as err:
                 # Handle any errors that occur during the message forwarding
                 text = translator(
                     text='Something went wrong. ERROR:',
-                    dest=language
+                    dest=user_language
                 ) + str(err)
                 await state.clear()  # Clear the state if an error occurs
-                logging.error(err)  # Log the error details
+                logging.error(err,
+                              extra={
+                                  'chat_id': user_id,
+                                  'language_code': user_language,
+                                  'execution_time': time.perf_counter() - start_time
+                              })
         else:
             # Inform the admin that they do not have the necessary permissions
             text = translator(
                 text='❌ Unfortunately, you do not have this permission!',
-                dest=language
+                dest=user_language
             )
             await state.clear()  # Clear the state if the admin lacks permission
 
@@ -73,7 +81,16 @@ async def send_ads_message(msg: types.Message, state: FSMContext):
         )
         await state.clear()  # Clear the FSM state after the operation
         await state.update_data({"message_id": msg.message_id})  # Update the state with the new message ID
-
+        logging.info('Send ads message',
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': time.perf_counter() - start_time
+                     })
     except Exception as err:
-        logging.error(err)  # Log any exceptions that occur
-
+        logging.error(err,
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })

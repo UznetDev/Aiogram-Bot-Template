@@ -1,4 +1,5 @@
 import logging
+import time
 from loader import dp, bot, db
 from aiogram import types, F
 from keyboards.inline.button import BlockUser
@@ -8,6 +9,7 @@ from aiogram.fsm.context import FSMContext
 from function.translator import translator
 from states.admin_state import AdminState
 from data.config import yil_oy_kun, soat_minut_sekund, ADMIN
+
 
 @dp.callback_query(BlockUser.filter(F.action == "block"), IsAdmin())
 async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state: FSMContext):
@@ -34,8 +36,10 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
     Returns:
     - This function is asynchronous and does not return a value but performs actions such as sending messages and updating states.
     """
+    start_time = time.perf_counter()
+    user_id = callback_data.cid  # The ID of the user to be blocked/unblocked
+    user_language = call.from_user.language_code
     try:
-        user_id = callback_data.cid  # The ID of the user to be blocked/unblocked
         cid = call.from_user.id  # The ID of the admin issuing the block/unblock command
         mid = call.message.message_id  # The ID of the message triggering the callback
         lang = call.from_user.language_code  # The language code of the admin for message translation
@@ -72,7 +76,12 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
                 try:
                     db.delete_user_ban(cid=user_id)  # Ensure user is not mistakenly banned
                 except Exception as err:
-                    logging.error(err)  # Log any errors encountered
+                    logging.error(err,
+                                  extra={
+                                      'chat_id': user_id,
+                                      'language_code': user_language,
+                                      'execution_time': time.perf_counter() - start_time
+                                  })
             await state.set_state(AdminState.check_user)  # Update the FSM state
         else:
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
@@ -83,5 +92,16 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
         await state.update_data({
             "message_id": call.message.message_id  # Save the message ID in the FSM context
         })
+        logging.error("Block user",
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })
     except Exception as err:
-        logging.error(err)  # Log any exceptions that occur
+        logging.error(err,
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })

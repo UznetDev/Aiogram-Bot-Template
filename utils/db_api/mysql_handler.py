@@ -56,7 +56,10 @@ class MySQLHandler(logging.Handler):
 
         try:
             self.format(record)
-            if record.filename == 'dispatcher.py' and record.funcName == 'feed_update' and record.lineno == 172:
+            message = record.getMessage()
+            if (record.filename == 'dispatcher.py' and (record.funcName == 'feed_update' or
+                                                       record.funcName == 'start_polling' or
+                                                       record.funcName == '_polling')):
                 pass
             else:
                 created = datetime.datetime.fromtimestamp(record.created).strftime("%Y-%m-%d %H:%M:%S")
@@ -68,7 +71,7 @@ class MySQLHandler(logging.Handler):
                 """
                 values = (
                     created, record.levelname, record.filename, record.funcName, record.lineno,
-                    record.name, record.getMessage(),
+                    record.name, message,
                     getattr(record, 'chat_id', None),
                     getattr(record, 'language_code', None),
                     getattr(record, 'execution_time', None)

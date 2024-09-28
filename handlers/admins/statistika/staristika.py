@@ -1,4 +1,5 @@
 import logging
+import time
 from loader import dp, db
 from aiogram import types
 from keyboards.inline.button import AdminCallback
@@ -32,29 +33,40 @@ async def statistika(call: types.CallbackQuery, state: FSMContext):
     Returns:
         None
     """
+    start_time = time.perf_counter()
+    user_id = call.from_user.id
+    user_language = call.from_user.language_code
     try:
-        user_id = call.from_user.id
         message_id = call.message.message_id
-        language = call.from_user.language_code
         is_admin = SelectAdmin(cid=user_id)
 
         if is_admin.view_statistika():
             user_count = db.stat()
             ban_count = db.stat_ban()
-            text = (translator(text="👥 Bot users count: ", dest=language) + str(user_count) +
-                    ' .\n' + translator(text="⏰ Time:", dest=language) +
-                    f" {soat_minut_sekund}\n" + translator(text="📆 Date:", dest=language) +
-                    f' {yil_oy_kun}\n ' + translator(text="Number of bans: ", dest=language) + str(
+            text = (translator(text="👥 Bot users count: ", dest=user_language) + str(user_count) +
+                    ' .\n' + translator(text="⏰ Time:", dest=user_language) +
+                    f" {soat_minut_sekund}\n" + translator(text="📆 Date:", dest=user_language) +
+                    f' {yil_oy_kun}\n ' + translator(text="Number of bans: ", dest=user_language) + str(
                         ban_count))
-            button = download_statistika(cid=user_id, lang=language)
+            button = download_statistika(cid=user_id, lang=user_language)
             await state.update_data({"message_id": call.message.message_id})
         else:
-            text = translator(text="❌ Unfortunately, you do not have this permission!", dest=language)
+            text = translator(text="❌ Unfortunately, you do not have this permission!", dest=user_language)
             button = close_btn()
 
         await call.message.edit_text(text=f'<b><i>{text}</i></b>', reply_markup=button)
         await state.update_data({"message_id": message_id})
+        logging.info("View statistics",
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': time.perf_counter() - start_time
+                     })
 
     except Exception as err:
-        logging.error(err)
-
+        logging.error(err,
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': time.perf_counter() - start_time
+                      })

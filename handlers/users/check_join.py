@@ -1,4 +1,5 @@
 import logging
+import time
 from loader import dp, bot, db
 from aiogram import types, F
 from function.translator import translator
@@ -18,17 +19,17 @@ async def check_join(call: types.CallbackQuery):
     Returns:
         None
     """
+    start_time = time.perf_counter()
+    user_id = call.from_user.id
+    user_language = call.from_user.language_code
     try:
-        # Extract user ID and language code
-        user_id = call.from_user.id
-        language_code = call.from_user.language_code
 
         # Retrieve the list of channels from the database
         channels_list = db.select_channels()
 
         # Initialize the keyboard and message text
         keyboard = InlineKeyboardBuilder()
-        message_text = translator(text="🛑 You have not joined the channel(s)!:\n\n", dest=language_code)
+        message_text = translator(text="🛑 You have not joined the channel(s)!:\n\n", dest=user_language)
         count = 0
         has_unjoined_channels = False
 
@@ -58,17 +59,28 @@ async def check_join(call: types.CallbackQuery):
 
         # Send the appropriate message to the user
         if has_unjoined_channels:
-            await call.answer(text=translator(text="🛑 You have not joined the channel(s)!", dest=language_code),
+            await call.answer(text=translator(text="🛑 You have not joined the channel(s)!", dest=user_language),
                               reply_markup=keyboard.as_markup())
             await bot.edit_message_text(chat_id=user_id,
                                         message_id=call.message.message_id,
                                         text=f"<b>{message_text}</b>",
                                         reply_markup=keyboard.as_markup())
         else:
-            text = translator(text='You are already a member of all required channels.', dest=language_code)
+            text = translator(text='You are already a member of all required channels.', dest=user_language)
             await bot.edit_message_text(chat_id=user_id,
                                         message_id=call.message.message_id,
                                         text=text)
+            logging.info(f"Check join",
+                         extra={
+                             'chat_id': user_id,
+                             'language_code': user_language,
+                             'execution_time': time.perf_counter() - start_time
+                         })
     except Exception as err:
-        logging.error(f"Error in check_join: {err}")
+        logging.error(f"Error in check_join: {err}",
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': time.perf_counter() - start_time
+                     })
 

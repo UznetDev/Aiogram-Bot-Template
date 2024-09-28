@@ -13,18 +13,17 @@ async def start_handler(msg: types.Message):
     """
     Handles the /start command by sending a greeting message and a button
     for sharing the bot's URL. Also logs the user if they are not already in the database.
+        Args:
+            msg (types.Message): The incoming message object.
 
-    Args:
-        msg (types.Message): The incoming message object.
-
-    Returns:
-        None
+        Returns:
+            None
     """
     start_time = time.perf_counter()
+    user_id = msg.from_user.id
+    user_language = msg.from_user.language_code
     try:
         # User and bot information
-        user_id = msg.from_user.id
-        user_language = msg.from_user.language_code
         bot_info = await bot.get_me()
         bot_username = bot_info.username
 
@@ -50,20 +49,16 @@ async def start_handler(msg: types.Message):
             db.add_user(cid=user_id,
                         date=f'{yil_oy_kun} / {soat_minut_sekund}',
                         lang=user_language)
-        end_time = time.perf_counter()
-        execution_time = end_time - start_time
         logging.info(f"Handling start",
                      extra={
                          'chat_id': user_id,
                          'language_code': user_language,
-                         'execution_time': execution_time
+                         'execution_time': time.perf_counter() - start_time
                      })
     except Exception as err:
-        end_time = time.perf_counter()
-        execution_time = end_time - start_time
         logging.error(f"Error handling /start command: {err}",
                       extra={
                           'chat_id': user_id,
                           'language_code': user_language,
-                          'execution_time': execution_time
+                          'execution_time': time.perf_counter() - start_time
                       })
