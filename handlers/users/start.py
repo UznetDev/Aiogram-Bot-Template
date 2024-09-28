@@ -49,4 +49,9 @@ async def start_handler(msg: types.Message):
                         date=f'{yil_oy_kun} / {soat_minut_sekund}',
                         lang=user_language)
     except Exception as err:
-        logging.error(f"Error handling /start command: {err}")
+        logging.error(f"Error handling /start command: {err}",
+                         extra={
+                             'chat_id': user_id,
+                             'language_code': user_language
+                         }
+                     )
