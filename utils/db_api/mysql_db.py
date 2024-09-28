@@ -377,7 +377,9 @@ class Database:
         tuple: The admin's information if they exist, None otherwise.
         """
         try:
-            self.cursor.execute("SELECT * FROM `admins` WHERE `cid`=%s", (cid,))
+            sql = "SELECT * FROM `admins` WHERE `cid`=%s"
+            logging.info(sql)
+            self.cursor.execute(sql, (cid,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:

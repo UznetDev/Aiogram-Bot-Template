@@ -1,13 +1,12 @@
-import middlewares, handlers  # Import middlewares and handlers modules
 import asyncio
-import sys
-from utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup
 import logging
-from utils.set_bot_commands import set_default_commands  # Import the function to set default bot commands
+import handlers  # Import middlewares and handlers modules
 from loader import *  # Import all from loader module
+from utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup
+from utils.set_bot_commands import set_default_commands # Import the function to set default bot commands
 from middlewares import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
 from data.config import log_file_name  # Import the log file name from config
-
+from utils.db_api.mysql_handler import MySQLHandler  # Import the custom MySQLHandler
 
 async def main():
     """
@@ -38,16 +37,38 @@ async def main():
         logging.info(res)  # Log the database statistics
         await bot.session.close()  # Close the bot session
 
-
 if __name__ == "__main__":
-    # Configure logging
-    format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(
-        filename=log_file_name,  # Save error log on file
-        level=logging.ERROR,  # Set the logging level to INFO
-        format=format,  # Set the logging format
-        # stream=sys.stdout  # Log to stdout
+    # Create a logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)  # Set the logging level to INFO
+
+    # Define the log format
+    format = '%(asctime)s - %(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
+    formatter = logging.Formatter(format)
+
+    # FileHandler - Save logs to a file
+    file_handler = logging.FileHandler(log_file_name)
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    # StreamHandler - Display logs in the terminal
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+    # MySQLHandler - Save logs to MySQL database
+    mysql_handler = MySQLHandler(
+        host=HOST,
+        user=MYSQL_USER,
+        password=MYSQL_PASSWORD,
+        database=MYSQL_DATABASE,
+        table='logs'  # You can change the table name if needed
     )
+    mysql_handler.setLevel(logging.INFO)
+    mysql_handler.setFormatter(formatter)
+    logger.addHandler(mysql_handler)
+
     # Run the main function asynchronously
     asyncio.run(main())
-
