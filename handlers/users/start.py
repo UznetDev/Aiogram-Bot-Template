@@ -1,4 +1,5 @@
 import logging
+import time
 from aiogram import types
 from aiogram.filters import CommandStart
 from function.translator import translator
@@ -19,6 +20,7 @@ async def start_handler(msg: types.Message):
     Returns:
         None
     """
+    start_time = time.perf_counter()
     try:
         # User and bot information
         user_id = msg.from_user.id
@@ -48,10 +50,20 @@ async def start_handler(msg: types.Message):
             db.add_user(cid=user_id,
                         date=f'{yil_oy_kun} / {soat_minut_sekund}',
                         lang=user_language)
+        end_time = time.perf_counter()
+        execution_time = end_time - start_time
+        logging.info(f"Handling start",
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': user_language,
+                         'execution_time': execution_time
+                     })
     except Exception as err:
+        end_time = time.perf_counter()
+        execution_time = end_time - start_time
         logging.error(f"Error handling /start command: {err}",
-                         extra={
-                             'chat_id': user_id,
-                             'language_code': user_language
-                         }
-                     )
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': user_language,
+                          'execution_time': execution_time
+                      })

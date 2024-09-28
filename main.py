@@ -5,8 +5,11 @@ from loader import *  # Import all from loader module
 from utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup
 from utils.set_bot_commands import set_default_commands # Import the function to set default bot commands
 from middlewares import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
+from middlewares.execution_time_middleware import ExecutionTimeMiddleware
 from data.config import log_file_name  # Import the log file name from config
+from utils.safe_formatter import SafeFormatter
 from utils.db_api.mysql_handler import MySQLHandler  # Import the custom MySQLHandler
+
 
 async def main():
     """
@@ -15,6 +18,7 @@ async def main():
     await on_startup_notify()  # Notify admins about the bot startup
     await set_default_commands()  # Set the default commands for the bot
     dp.update.middleware.register(ThrottlingMiddleware())  # Register the ThrottlingMiddleware
+    # dp.update.middleware.register(ExecutionTimeMiddleware())  # Register the ExecutionTimeMiddleware
 
     try:
         # Try to create necessary database tables
@@ -25,7 +29,8 @@ async def main():
             db.create_table_users()  # Create the users table
             db.create_table_channel()  # Create the channel table
         except Exception as err:
-            logging.error(err)  # Log any errors that occur during table creation
+            logger = logging.getLogger(__name__)
+            logger.error(err)  # Log any errors that occur during table creation
 
         # Delete any existing webhook and start polling
         await bot.delete_webhook(drop_pending_updates=True)
@@ -34,41 +39,40 @@ async def main():
     finally:
         # Log the database statistics and close the bot session
         res = db.stat()  # Get database statistics
-        logging.info(res)  # Log the database statistics
+        logger = logging.getLogger(__name__)
+        logger.info(res)  # Log the database statistics
         await bot.session.close()  # Close the bot session
 
 if __name__ == "__main__":
-    # Create a logger
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)  # Set the logging level to INFO
+    logger.setLevel(logging.INFO)
 
-    # Define the log format
-    format = '%(asctime)s - %(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
-    formatter = logging.Formatter(format)
+    # Define log format with execution_time, chat_id, language_code
+    # log_format = '  - %(message)s'
+    log_format = '%(levelname)s - %(filename)s - %(funcName)s - %(lineno)d - %(message)s - %(name)s - %(chat_id)s - %(language_code)s - %(execution_time).6f  - %(asctime)s'
 
-    # FileHandler - Save logs to a file
+    formatter = SafeFormatter(log_format)
+
+    # FileHandler for log file
     file_handler = logging.FileHandler(log_file_name)
-    file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
-    # StreamHandler - Display logs in the terminal
+    # StreamHandler for console logging
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
-    # MySQLHandler - Save logs to MySQL database
+    # MySQLHandler for logging to MySQL
     mysql_handler = MySQLHandler(
         host=HOST,
         user=MYSQL_USER,
         password=MYSQL_PASSWORD,
         database=MYSQL_DATABASE,
-        table='logs'  # You can change the table name if needed
+        table='logs'
     )
-    mysql_handler.setLevel(logging.INFO)
+    mysql_handler.create_table()
     mysql_handler.setFormatter(formatter)
     logger.addHandler(mysql_handler)
 
-    # Run the main function asynchronously
     asyncio.run(main())

@@ -1,6 +1,5 @@
 import logging
 import mysql.connector
-from mysql.connector import Error
 import datetime
 import sys
 
@@ -18,9 +17,6 @@ class MySQLHandler(logging.Handler):
         self.connect()
 
     def connect(self):
-        """
-        MySQL bazasiga ulanish va kerakli jadvalni yaratish.
-        """
         try:
             self.connection = mysql.connector.connect(
                 host=self.host,
@@ -31,73 +27,54 @@ class MySQLHandler(logging.Handler):
             )
             self.cursor = self.connection.cursor()
             self.create_table()
-        except Error as e:
-            logging.error(f"MySQL-ga ulanishda xato: {e}")
-            self.connection = None
+        except mysql.connector.Error as e:
+            print(f"Error connecting to MySQL: {e}", file=sys.stderr)
 
     def create_table(self):
-        """
-        Log ma'lumotlarini saqlash uchun jadvalni yaratish.
-        """
         create_table_sql = f"""
         CREATE TABLE IF NOT EXISTS `{self.table}` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
             `created` DATETIME NOT NULL,
-            `level` VARCHAR(10) NOT NULL,
+            `level_name` VARCHAR(50) NOT NULL,
             `filename` VARCHAR(255) NOT NULL,
             `funcName` VARCHAR(255) NOT NULL,
             `lineno` INT NOT NULL,
             `name` VARCHAR(255) NOT NULL,
-            `levelname` VARCHAR(50) NOT NULL,
             `message` TEXT NOT NULL,
             `chat_id` BIGINT NULL,
-            `language_code` VARCHAR(10) NULL
+            `language_code` VARCHAR(10) NULL,
+            `execution_time` FLOAT NULL
         )
         """
         self.cursor.execute(create_table_sql)
 
     def emit(self, record):
-        """
-        Log yozuvlarini MySQL bazasiga yozish.
-        """
         if self.connection is None:
             self.connect()
         if self.connection is None:
-            return  # Ulanish muvaffaqiyatsiz bo'lsa, chiqish
+            return
 
         try:
-            # Record'ni formatlash
             self.format(record)
-
-            # Log ma'lumotlarini olish
-            if self.formatter:
-                created = self.formatter.formatTime(record, "%Y-%m-%d %H:%M:%S")
+            if record.filename == 'dispatcher.py' and record.funcName == 'feed_update' and record.lineno == 172:
+                pass
             else:
-                # Agar formatter mavjud bo'lmasa, datetime modulidan foydalanamiz
                 created = datetime.datetime.fromtimestamp(record.created).strftime("%Y-%m-%d %H:%M:%S")
 
-            level = record.levelname
-            filename = record.filename
-            funcName = record.funcName
-            lineno = record.lineno
-            name = record.name
-            levelname = record.levelname
-            message = record.getMessage()
-            chat_id = getattr(record, 'chat_id', None)
-            language_code = getattr(record, 'language_code', None)
-
-            sql = f"""
-            INSERT INTO `{self.table}` 
-            (`created`, `level`, `filename`, `funcName`, `lineno`, `name`, `levelname`, `message`, `chat_id`, `language_code`)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            values = (created, level, filename, funcName, lineno, name, levelname, message, chat_id, language_code)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
+                sql = f"""
+                INSERT INTO `{self.table}` 
+                (`created`, `level_name`, `filename`, `funcName`, `lineno`, `name`, `message`, `chat_id`, `language_code`, `execution_time`)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                values = (
+                    created, record.levelname, record.filename, record.funcName, record.lineno,
+                    record.name, record.getMessage(),
+                    getattr(record, 'chat_id', None),
+                    getattr(record, 'language_code', None),
+                    getattr(record, 'execution_time', None)
+                )
+                self.cursor.execute(sql, values)
+                self.connection.commit()
         except Exception as e:
-            # Xatolik yuzaga kelsa, uni to'g'ridan-to'g'ri konsolga chiqaramiz
-            print(f"MySQL-ga log yozishda xato: {e}", file=sys.stderr)
-            # Xatoni qayta ko'tarish (ixtiyoriy)
-            # raise
-            # Yoki handleError funksiyasidan foydalanish
+            print(f"Error writing to MySQL: {e}", file=sys.stderr)
             self.handleError(record)

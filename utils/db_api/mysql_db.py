@@ -31,12 +31,13 @@ class Database:
                 database=self.database,
                 autocommit=True
             )
-            self.cursor = self.connection.cursor()
+            # Use a buffered cursor
+            self.cursor = self.connection.cursor(buffered=True)
         except mysql.connector.Error as err:
-            logging.error(err)
+            logging.error(f"Error connecting to MySQL: {err}")
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            logging.error(f"Unexpected error: {err}")
 
     def create_table_ban(self):
         """
@@ -377,9 +378,8 @@ class Database:
         tuple: The admin's information if they exist, None otherwise.
         """
         try:
-            sql = "SELECT * FROM `admins` WHERE `cid`=%s"
-            logging.info(sql)
-            self.cursor.execute(sql, (cid,))
+            sql = f"SELECT * FROM `admins` WHERE `cid`={cid}"
+            self.cursor.execute(sql)
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
@@ -399,14 +399,20 @@ class Database:
         list: A list of tuples containing the added admins' information.
         """
         try:
+            # Execute the query
             self.cursor.execute("SELECT * FROM `admins` WHERE `add_cid`=%s", (cid,))
+
+            # Fetch all results
             result = self.cursor.fetchall()
+
+            # Return the result
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            logging.error(f"MySQL error: {err}")
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            logging.error(f"Unexpected error: {err}")
+            self.reconnect()
 
     def select_all_admins(self):
         """
