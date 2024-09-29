@@ -23,7 +23,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
     - state (FSMContext): The FSM context for managing the bot's conversation state.
 
     Functionality:
-    - Extracts the current admin's ID (`user_id`), message ID (`mid`), language code (`lang`), target admin ID (`admin_cid`), and the key to be edited (`edit_key`).
+    - Extracts the current admin's ID (`user_id`), message ID (`mid`), language code (`lang`), target admin ID (`admin_user_id`), and the key to be edited (`edit_key`).
     - Checks if the current admin has the right to modify admin settings.
     - If permitted, fetches the target admin's data.
     - Depending on the edit key, either deletes the target admin or updates a specific admin permission.

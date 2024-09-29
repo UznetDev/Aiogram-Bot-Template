@@ -64,7 +64,7 @@ async def super_admin(msg: types.Message):
             x_data = {
                 "id": id_list,
                 "user_id": cid_list,
-                "admin_cid": admin_cid,
+                "admin_user_id": admin_cid,
                 "date_add": date_list,
                 "username": username_list
             }

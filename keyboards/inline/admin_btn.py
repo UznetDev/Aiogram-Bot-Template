@@ -298,7 +298,7 @@ def block_user(cid, lang, user_id):
 
         is_admin = SelectAdmin(user_id=cid)
         if is_admin.block_user():
-            data = db.check_user_ban(cid=user_id)
+            data = db.check_user_ban(user_id=user_id)
             if data is None:
                 btn.button(text=translator(text=f"🚫Userni bloklash!",
                                            dest=lang),

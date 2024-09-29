@@ -29,7 +29,7 @@ class IsBan(BaseFilter):
         try:
             self.cid = message.from_user.id
             self.dada = db.select_admin(cid=self.cid)
-            check_ban = db.check_user_ban(cid=self.cid)
+            check_ban = db.check_user_ban(user_id=self.cid)
 
             # If the user is the super admin, they are not banned
             if self.cid == self.super_admin:

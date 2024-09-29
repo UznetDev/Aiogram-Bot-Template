@@ -29,7 +29,7 @@ async def ban_handler(msg: types.Message):
         cid = msg.from_user.id
 
         # Check if the user is banned and retrieve ban information
-        info = db.check_user_ban(cid=cid)
+        info = db.check_user_ban(user_id=cid)
         logging.info(f"User ban info: {info}")
 
         # Retrieve admin information

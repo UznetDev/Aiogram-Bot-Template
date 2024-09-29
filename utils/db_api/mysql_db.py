@@ -48,7 +48,7 @@ class Database:
             CREATE TABLE IF NOT EXISTS ban (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id bigint(20) NOT NULL UNIQUE,
-                admin_cid bigint(20),
+                admin_user_id bigint(20),
                 date varchar(255)
             )
             """
@@ -60,20 +60,20 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def add_user_ban(self, cid, date, admin_cid):
+    def add_user_ban(self, user_id, date, admin_user_id):
         """
         Add a user to the 'ban' table.
 
         Parameters:
         user_id (int): The user's chat ID.
         date (str): The date the user was banned.
-        admin_cid (int): The admin's chat ID who banned the user.
+        admin_user_id (int): The admin's chat ID who banned the user.
         """
         try:
             sql = """
-            INSERT INTO `ban` (`user_id`,`admin_cid`,`date`) VALUES (%s,%s,%s)
+            INSERT INTO `ban` (`user_id`,`admin_user_id`,`date`) VALUES (%s,%s,%s)
             """
-            values = (cid, admin_cid, date)
+            values = (user_id, admin_user_id, date)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -120,7 +120,7 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def check_user_ban(self, cid):
+    def check_user_ban(self, user_id):
         """
         Check if a user is banned.
 
@@ -131,7 +131,7 @@ class Database:
         tuple: The user's ban information if they are banned, None otherwise.
         """
         try:
-            self.cursor.execute("SELECT * FROM `ban` WHERE `user_id`=%s", (cid,))
+            self.cursor.execute("SELECT * FROM `ban` WHERE `user_id`=%s", (user_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
@@ -140,7 +140,7 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def delete_user_ban(self, cid):
+    def delete_user_ban(self, user_id):
         """
         Delete a user from the 'ban' table.
 
@@ -148,7 +148,7 @@ class Database:
         user_id (int): The user's chat ID.
         """
         try:
-            self.cursor.execute("DELETE FROM `ban` WHERE `user_id`=%s", (cid,))
+            self.cursor.execute("DELETE FROM `ban` WHERE `user_id`=%s", (user_id,))
         except mysql.connector.Error as err:
             logging.error(err)
             self.reconnect()

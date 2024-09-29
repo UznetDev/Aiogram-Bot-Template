@@ -47,7 +47,7 @@ async def attach_user(msg: types.Message, state: FSMContext):
             data_state = await state.get_data()  # Get the current state data
             try:
                 user = await bot.get_chat(chat_id=user_id)  # Get user information
-                check = db.check_user_ban(cid=user_id)  # Check if the user is banned
+                check = db.check_user_ban(user_id=user_id)  # Check if the user is banned
                 check1 = db.check_user(cid=user_id)  # Check if the user exists in the bot's list
 
                 if check1 is not None:
