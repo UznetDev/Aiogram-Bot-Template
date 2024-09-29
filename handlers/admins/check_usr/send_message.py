@@ -34,26 +34,28 @@ async def send_message(call: types.CallbackQuery, callback_data: BlockUser, stat
     """
     start_time = time.perf_counter()
     user_id = call.from_user.id  # The ID of the admin initiating the message send action
-    user_language = call.from_user.language_code  # The language code of the admin for message translation
+    language_code = call.from_user.language_code  # The language code of the admin for message translation
     try:
         target_user_id = callback_data.cid  # The ID of the user to whom the message will be sent
         message_id = call.message.message_id  # The ID of the message triggering the callback
         admin_check = SelectAdmin(user_id=user_id)  # Check if the admin has permission to send messages
         button = close_btn()  # Inline button to close the message
 
+        log = 'Action on send message to user, '
         if admin_check.send_message():
             # Prompt the admin to send the message content for the user
             text = translator(
                 text="🗨 Send me the message for the user...",
-                dest=user_language
+                dest=language_code
             )
             await state.set_state(AdminState.send_message_to_user)  # Set the FSM state for sending a message
         else:
             # Inform the admin that they do not have the necessary permissions
             text = translator(
                 text="❌ Unfortunately, you do not have this permission!",
-                dest=user_language
+                dest=language_code
             )
+            log += 'but do not have this permission, '
 
         await bot.edit_message_text(
             chat_id=user_id,
@@ -66,17 +68,16 @@ async def send_message(call: types.CallbackQuery, callback_data: BlockUser, stat
             "message_id": call.message.message_id,  # Save the message ID in the FSM context
             "user_id": target_user_id  # Save the target user ID in the FSM context
         })
-        logging.info('Send message for user',
-                      extra={
-                          'chat_id': user_id,
-                          'language_code': user_language,
-                          'execution_time': time.perf_counter() - start_time
-                      })
+        logging.info(log,
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': language_code,
+                         'execution_time': time.perf_counter() - start_time
+                     })
     except Exception as err:
         logging.error(err,
                       extra={
                           'chat_id': user_id,
-                          'language_code': user_language,
+                          'language_code': language_code,
                           'execution_time': time.perf_counter() - start_time
                       })
-
