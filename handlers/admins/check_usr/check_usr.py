@@ -1,4 +1,5 @@
 import logging
+import time
 from loader import dp, bot
 from aiogram import types, F
 from keyboards.inline.button import AdminCallback
@@ -7,6 +8,7 @@ from filters.admin import IsAdmin, SelectAdmin
 from aiogram.fsm.context import FSMContext
 from function.translator import translator
 from states.admin_state import AdminState
+
 
 @dp.callback_query(AdminCallback.filter(F.action == "check_user"), IsAdmin())
 async def check_user(call: types.CallbackQuery, state: FSMContext):
@@ -31,27 +33,26 @@ async def check_user(call: types.CallbackQuery, state: FSMContext):
     """
     start_time = time.perf_counter()
     user_id = call.from_user.id
-    user_language = call.from_user.language_code
+    language_code = call.from_user.language_code
     try:
-        user_id = call.from_user.id  # The ID of the admin initiating the check
         message_id = call.message.message_id  # The ID of the message triggering the callback
-        language = call.from_user.language_code  # The language code of the admin for message translation
         data = SelectAdmin(user_id=user_id)  # Check if the admin is authorized to perform the action
         button = close_btn()  # Inline button to close the message
-
+        log = 'Action on check user, '
         if data.block_user():
             # If the admin is authorized, prompt for the user ID to check
             text = translator(
                 text='🔰Please send the user ID you want to check...',
-                dest=language
+                dest=language_code
             )
             await state.set_state(AdminState.check_user)  # Update the FSM state
         else:
             # If the admin is not authorized, inform them of the lack of permissions
             text = translator(
                 text='❌ Unfortunately, you do not have the required permissions!',
-                dest=language
+                dest=language_code
             )
+            log += 'but do not have the required permissions, '
 
         await bot.edit_message_text(
             chat_id=user_id,
@@ -59,7 +60,17 @@ async def check_user(call: types.CallbackQuery, state: FSMContext):
             text=f'<b><i>{text}</i></b>',
             reply_markup=button  # Update the message with a translated response
         )
-
+        logging.info(log,
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': language_code,
+                         'execution_time': time.perf_counter() - start_time
+                     })
         await state.update_data({"message_id": call.message.message_id})  # Save the message ID in the FSM context
     except Exception as err:
-        logging.error(err)  # Log any exceptions that occur
+        logging.error(err,
+                      extra={
+                          'chat_id': user_id,
+                          'language_code': language_code,
+                          'execution_time': time.perf_counter() - start_time
+                      })
