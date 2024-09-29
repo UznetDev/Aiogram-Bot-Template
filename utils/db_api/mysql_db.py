@@ -286,7 +286,7 @@ class Database:
                 CREATE TABLE IF NOT EXISTS admins (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     user_id bigint(20) NOT NULL UNIQUE,
-                    add_cid bigint(20),
+                    add_user_id bigint(20),
                     send_message TINYINT(1),
                     statistika TINYINT(1),
                     download_statistika TINYINT(1),

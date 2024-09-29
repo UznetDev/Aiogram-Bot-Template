@@ -41,7 +41,7 @@ async def main_panel(call: types.CallbackQuery, state: FSMContext):
         await bot.edit_message_text(chat_id=cid,
                                     message_id=mid,
                                     text=f'{text}',
-                                    reply_markup=main_admin_panel_btn(cid=cid, lang=lang))
+                                    reply_markup=main_admin_panel_btn(user_id=cid, lang=lang))
 
         # Update FSM state with the current message ID
         await state.update_data({"message_id": call.message.message_id})

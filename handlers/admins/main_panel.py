@@ -37,7 +37,7 @@ async def main_panel(msg: types.Message, state: FSMContext):
         welcome_text = translator(text=f'👩‍💻Hello, dear admin, welcome to the main panel!',
                                   dest=language_code)
         response_msg = await msg.answer(text=f'<b>{welcome_text}</b>',
-                                        reply_markup=main_admin_panel_btn(cid=user_id, lang=language_code))
+                                        reply_markup=main_admin_panel_btn(user_id=user_id, lang=language_code))
 
         # Manage previous message
         state_data = await state.get_data()

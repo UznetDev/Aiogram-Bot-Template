@@ -39,13 +39,13 @@ async def get_message(msg: types.Message, state: FSMContext):
     message_id = msg.message_id
     try:
         state_data = await state.get_data()
-        log = 'Action on handling message for advertisement, '
+        log = 'action on handling message for advertisement, '
         # Check if the user has admin permissions
         is_admin = SelectAdmin(user_id=user_id)
 
         if is_admin.send_message():
             # Prepare the admin panel button and fetch ads data
-            button_markup = main_admin_panel_btn(cid=user_id, lang=language_code)
+            button_markup = main_admin_panel_btn(user_id=user_id, lang=language_code)
             ads_data = file_db.reading_db().get('ads')
 
             if ads_data:
