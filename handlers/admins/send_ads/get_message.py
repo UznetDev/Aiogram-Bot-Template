@@ -153,7 +153,7 @@ async def get_message(msg: types.Message, state: FSMContext):
                          'execution_time': time.perf_counter() - start_time
                      })
     except Exception as err:
-        logging.error(f"Error in get_message: {err}",
+        logging.error(err,
                       extra={
                           'chat_id': user_id,
                           'language_code': language_code,
