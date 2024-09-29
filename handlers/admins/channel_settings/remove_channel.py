@@ -20,7 +20,7 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the callback query.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the callback query.
     - Checks if the user has the necessary permissions to access channel settings using the `SelectAdmin` filter.
     - If authorized, retrieves the list of channels either for all admins (if the user is the main admin) or for channels added by the specific admin.
     - If the channel list is empty, informs the admin. If not, displays a list of channels with options to delete them.
@@ -34,7 +34,7 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
         cid = call.from_user.id  # The ID of the admin who initiated the action
         mid = call.message.message_id  # The ID of the message to be updated
         lang = call.from_user.language_code  # The language code for translation
-        data = SelectAdmin(cid=cid)  # Check if the user has admin permissions
+        data = SelectAdmin(user_id=cid)  # Check if the user has admin permissions
         btn = InlineKeyboardBuilder()  # Create an instance of InlineKeyboardBuilder for the keyboard
 
         # Attach the main button to the keyboard

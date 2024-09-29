@@ -34,13 +34,14 @@ async def stop_ads(call: types.CallbackQuery, state: FSMContext):
     """
     start_time = time.perf_counter()
     user_id = call.from_user.id
-    user_language = call.from_user.language_code
+    language_code = call.from_user.language_code
     try:
+        log = 'Action on stop ads, '
         # Extract user and message details
         message_id = call.message.message_id
 
         # Check if the user has admin permissions
-        is_admin = SelectAdmin(cid=user_id)
+        is_admin = SelectAdmin(user_id=user_id)
 
         if is_admin.send_message():
             # Fetch the current ads data
@@ -49,6 +50,7 @@ async def stop_ads(call: types.CallbackQuery, state: FSMContext):
             if ads_data:
                 # Check if the user has permission to stop the ads (creator or global admin)
                 if ads_data['from_chat_id'] == user_id or user_id == ADMIN:
+                    log = ' and advertisement stopped! '
                     file_db.add_data(False, key='ads')
                     summary_text = (
                         f"📬 <b>Advertisement Sending Stopped</b>\n\n"
@@ -62,23 +64,26 @@ async def stop_ads(call: types.CallbackQuery, state: FSMContext):
                     # If the user doesn't have permission to stop the ads
                     summary_text = translator(
                         text="❌ You do not have permission to stop this process!",
-                        dest=user_language
+                        dest=language_code
                     )
+                    log += 'but permission to stop this process! '
             else:
                 # If no ads data is found, assume the campaign has ended or doesn't exist
                 await state.set_state(AdminState.send_ads)
                 summary_text = translator(
                     text="⚠️ Advertisement not found!",
-                    dest=user_language
+                    dest=language_code
                 )
+                log += ' but advertisement not found!'
 
             await state.update_data({"message_id": message_id})
         else:
             # If the user is not an admin
             summary_text = translator(
                 text="❌ Unfortunately, you do not have this permission!",
-                dest=user_language
+                dest=language_code
             )
+            log += ' but do not have this permission! '
 
         # Update the message text and close the inline buttons
         await call.message.edit_text(
@@ -88,17 +93,17 @@ async def stop_ads(call: types.CallbackQuery, state: FSMContext):
 
         # Update the state with the current message ID
         await state.update_data({"message_id": message_id})
-        logging.info(f"Stop advertisement",
-                          extra={
-                              'chat_id': user_id,
-                              'language_code': user_language,
-                              'execution_time': time.perf_counter() - start_time
-                      })
+        logging.info(log,
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': language_code,
+                         'execution_time': time.perf_counter() - start_time
+                     })
     except Exception as err:
         # Log any errors that occur during the process
-        logging.error(f"Error in stop_ads: {err}",
+        logging.error(err,
                       extra={
                           'chat_id': user_id,
-                          'language_code': user_language,
+                          'language_code': language_code,
                           'execution_time': time.perf_counter() - start_time
                       })

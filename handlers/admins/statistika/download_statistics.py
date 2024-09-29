@@ -40,7 +40,7 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
     user_language = call.from_user.language_code
     try:
         message_id = call.message.message_id
-        is_admin = SelectAdmin(cid=user_id)
+        is_admin = SelectAdmin(user_id=user_id)
 
         if is_admin.download_statistika():
             # Retrieve user data from the database
@@ -63,7 +63,7 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
             # Create a DataFrame and save it to an Excel file
             statistics_data = {
                 "id": id_list,
-                "cid": cid_list,
+                "user_id": cid_list,
                 "date_add": date_list,
                 "username": usernames,
                 "lang": langs
@@ -88,18 +88,24 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
             # Update the message with confirmation
             text = translator(text="✅ Downloaded!\n", dest=user_language)
             await state.update_data({"message_id": call.message.message_id})
+            logging.info(f'Action on download statistika!',
+                         extra={
+                             'chat_id': user_id,
+                             'language_code': user_language,
+                             'execution_time': time.perf_counter() - start_time
+                         })
         else:
             # Permission error
             text = translator(text="❌ Unfortunately, you do not have this permission!", dest=user_language)
+            logging.info(f'Action on download statistika, but do not have this permission!',
+                         extra={
+                             'chat_id': user_id,
+                             'language_code': user_language,
+                             'execution_time': time.perf_counter() - start_time
+                         })
 
         await call.message.edit_text(text=f'<b><i>{text}</i></b>', reply_markup=close_btn())
         await state.update_data({"message_id": message_id})
-        logging.info(f'Download statistika.',
-                      extra={
-                          'chat_id': user_id,
-                          'language_code': user_language,
-                          'execution_time': time.perf_counter() - start_time
-                      })
 
     except Exception as err:
         logging.error(err,

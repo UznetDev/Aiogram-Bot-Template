@@ -18,7 +18,7 @@ async def main_panel(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the callback query.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the callback query.
     - Translates a greeting message to the admin in their preferred language.
     - Edits the original message in the chat to display the translated greeting and the main admin panel buttons.
     - Updates the FSM state with the current message ID.

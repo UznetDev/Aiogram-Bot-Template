@@ -19,7 +19,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the message.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the message.
     - Checks if the sender has the required permissions to add an admin.
     - Tries to add the new admin using the provided user ID:
         - If the admin is successfully added, sends a confirmation message to both the current admin and the newly added admin.
@@ -36,7 +36,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
         cid = msg.from_user.id  # The ID of the admin who is performing the action
         mid = msg.message_id  # The ID of the message to be updated
         lang = msg.from_user.language_code  # The language code for translation
-        data = SelectAdmin(cid=cid)  # Retrieves admin settings for the current user
+        data = SelectAdmin(user_id=cid)  # Retrieves admin settings for the current user
         add_admin_db = data.add_admin()  # Check if the user has the right to add an admin
         user_id = int(msg.text)  # The ID of the user to be added as an admin
 

@@ -18,7 +18,7 @@ async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the callback query.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the callback query.
     - Checks if the user has the required permissions to modify channel settings using the `SelectAdmin` filter.
     - If authorized, reads the current mandatory membership status from the database.
     - Toggles the membership requirement status:
@@ -35,7 +35,7 @@ async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
         cid = call.from_user.id  # The ID of the admin who initiated the action
         mid = call.message.message_id  # The ID of the message to be updated
         lang = call.from_user.language_code  # The language code for translation
-        data = SelectAdmin(cid=cid)  # Check if the user has admin permissions
+        data = SelectAdmin(user_id=cid)  # Check if the user has admin permissions
         btn = close_btn()  # Create a button for closing the message
 
         if data.channel_settings():

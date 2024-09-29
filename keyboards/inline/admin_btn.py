@@ -50,7 +50,7 @@ def main_admin_panel_btn(cid, lang):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_id=cid)
         if is_admin.add_admin():
             btn.button(text=translator(text=f"👮‍♂️ Admins settings!",
                                        dest=lang),
@@ -136,7 +136,7 @@ def attach_admin(cid, lang):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_id=cid)
         send_message_tx = x_or_y(is_admin.send_message())
         wiew_statistika_tx = x_or_y(is_admin.view_statistika())
         download_statistika_tx = x_or_y(is_admin.download_statistika())
@@ -195,7 +195,7 @@ def attach_admin_btn(cid, lang):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_id=cid)
         send_message_tx = x_or_y(is_admin.send_message())
         wiew_statistika_tx = x_or_y(is_admin.view_statistika())
         download_statistika_tx = x_or_y(is_admin.download_statistika())
@@ -296,7 +296,7 @@ def block_user(cid, lang, user_id):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_id=cid)
         if is_admin.block_user():
             data = db.check_user_ban(cid=user_id)
             if data is None:
@@ -334,7 +334,7 @@ def download_statistika(cid, lang):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_id=cid)
         if is_admin.download_statistika():
             btn.button(text=translator(text=f"📜 Dowload statistika!",
                                        dest=lang),

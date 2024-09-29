@@ -73,8 +73,8 @@ class SelectAdmin:
         dada (list): The admin details from the database.
     """
 
-    def __init__(self, cid):
-        self.cid = cid
+    def __init__(self, user_id):
+        self.cid = user_id
         self.super_admin = ADMIN
         self.dada = db.select_admin(cid=self.cid)
 

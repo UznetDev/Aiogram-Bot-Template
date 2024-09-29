@@ -23,7 +23,7 @@ async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, 
     - state (FSMContext): The FSM context for managing the bot's conversation state.
 
     Functionality:
-    - Extracts the admin's ID (`cid`), message ID (`mid`), language code (`lang`), and the target admin ID (`admin_cid`).
+    - Extracts the admin's ID (`user_id`), message ID (`mid`), language code (`lang`), and the target admin ID (`admin_cid`).
     - Checks if the current admin has the right to modify admin settings.
     - If permitted, fetches the target admin's data and checks the permissions of the current admin.
     - Constructs a response message detailing the target admin's rights.
@@ -41,7 +41,7 @@ async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, 
         mid = call.message.message_id  # Message ID to be updated
         lang = call.from_user.language_code  # Admin's language preference
         admin_cid = callback_data.cid  # ID of the admin to be modified
-        data = SelectAdmin(cid=cid)  # Fetches the current admin's data
+        data = SelectAdmin(user_id=cid)  # Fetches the current admin's data
         btn = close_btn()  # Default button to close the operation
 
         # Check if the admin has rights to add another admin
@@ -50,7 +50,7 @@ async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, 
             if admin_data[2] == cid or cid == ADMIN:
                 # If the current admin added the target admin or is the primary admin
                 btn = attach_admin_btn(cid=admin_cid, lang=lang)  # Buttons for setting admin rights
-                is_admin = SelectAdmin(cid=admin_cid)  # Check target admin's permissions
+                is_admin = SelectAdmin(user_id=admin_cid)  # Check target admin's permissions
 
                 # Format the text showing current permissions of the target admin
                 send_message_tx = x_or_y(is_admin.send_message())

@@ -19,7 +19,7 @@ async def delete_channel(call: types.CallbackQuery, callback_data: AdminCallback
     - state (FSMContext): FSM context used to manage the bot's state for the current conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the callback query.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the callback query.
     - Checks if the user has the necessary permissions to manage channel settings using the `SelectAdmin` filter.
     - If authorized, retrieves the channel ID from `callback_data`, formats it, and checks its existence in the database.
     - If the channel exists and the user is authorized, deletes the channel from the database and notifies the user.
@@ -34,7 +34,7 @@ async def delete_channel(call: types.CallbackQuery, callback_data: AdminCallback
         cid = call.from_user.id  # The ID of the admin making the request
         mid = call.message.message_id  # The ID of the message associated with the callback
         lang = call.from_user.language_code  # The language code for translating responses
-        data = SelectAdmin(cid=cid)  # Check if the user has admin permissions
+        data = SelectAdmin(user_id=cid)  # Check if the user has admin permissions
         btn = close_btn()  # A button for closing the message
 
         if data.channel_settings():

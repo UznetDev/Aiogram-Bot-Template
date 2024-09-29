@@ -19,7 +19,7 @@ async def add_channel2(msg: types.Message, state: FSMContext):
     - state (FSMContext): FSM context used to manage the bot's state for the current conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the message.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the message.
     - Checks if the user has the necessary permissions to manage channel settings using the `SelectAdmin` filter.
     - If authorized, attempts to convert the input text into a channel ID, checks if the channel is already in the database, and adds it if not.
     - If the channel is already in the database, provides details about the existing entry.
@@ -34,7 +34,7 @@ async def add_channel2(msg: types.Message, state: FSMContext):
         cid = msg.from_user.id  # The ID of the admin making the request
         mid = msg.message_id  # The ID of the message associated with the request
         lang = msg.from_user.language_code  # The language code for translating responses
-        data = SelectAdmin(cid=cid)  # Check if the user has admin permissions
+        data = SelectAdmin(user_id=cid)  # Check if the user has admin permissions
         btn = close_btn()  # A button for closing the message
         data_state = await state.get_data()  # Get data stored in the FSM state
 

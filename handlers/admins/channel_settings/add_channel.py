@@ -32,7 +32,7 @@ async def add_channel(call: types.CallbackQuery, state: FSMContext):
         cid = call.from_user.id  # The ID of the admin initiating the action
         mid = call.message.message_id  # The ID of the message triggering the callback
         lang = call.from_user.language_code  # The language code of the admin for message translation
-        data = SelectAdmin(cid=cid)  # Check if the admin has permission to manage channel settings
+        data = SelectAdmin(user_id=cid)  # Check if the admin has permission to manage channel settings
         btn = close_btn()  # Inline button to close the message
 
         if data.channel_settings():

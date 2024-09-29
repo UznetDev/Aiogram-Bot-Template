@@ -47,14 +47,14 @@
 #             if data['join_channel']:
 #                 try:
 #                     # Try to get the user ID from the message object
-#                     cid = message.from_user.id
+#                     user_id = message.from_user.id
 #                 except Exception as err:
 #                     # If message object is not available, use callback query object
-#                     cid = call.from_user.id
+#                     user_id = call.from_user.id
 #                     logging.error(err)
 #
 #                 # If the user is not the admin, perform the channel check
-#                 if cid != self.ADMIN:
+#                 if user_id != self.ADMIN:
 #                     force = False
 #                     result = db.select_channels()
 #                     for x in result:
@@ -64,7 +64,7 @@
 #                             await bot.get_chat(ids)
 #                             try:
 #                                 # Check the user's membership status in the channel
-#                                 res = await bot.get_chat_member(chat_id=ids, user_id=cid)
+#                                 res = await bot.get_chat_member(chat_id=ids, user_id=user_id)
 #                             except:
 #                                 # Continue if unable to retrieve chat member information
 #                                 continue

@@ -14,7 +14,6 @@ from states.admin_state import AdminState
 from cython_code.send_ads import send_ads
 
 
-
 @dp.message(AdminState.send_ads, IsAdmin())
 async def get_message(msg: types.Message, state: FSMContext):
     """
@@ -36,18 +35,17 @@ async def get_message(msg: types.Message, state: FSMContext):
     """
     start_time = time.perf_counter()
     user_id = msg.from_user.id
-    user_language = msg.from_user.language_code
+    language_code = msg.from_user.language_code
+    message_id = msg.message_id
     try:
-        # Extract user and message details
-        message_id = msg.message_id
         state_data = await state.get_data()
-
+        log = 'Action on handling message for advertisement, '
         # Check if the user has admin permissions
-        is_admin = SelectAdmin(cid=user_id)
+        is_admin = SelectAdmin(user_id=user_id)
 
         if is_admin.send_message():
             # Prepare the admin panel button and fetch ads data
-            button_markup = main_admin_panel_btn(cid=user_id, lang=user_language)
+            button_markup = main_admin_panel_btn(cid=user_id, lang=language_code)
             ads_data = file_db.reading_db().get('ads')
 
             if ads_data:
@@ -85,6 +83,7 @@ async def get_message(msg: types.Message, state: FSMContext):
                 )
                 if ads_data['from_chat_id'] == user_id or user_id == ADMIN:
                     button_markup = stop_advertisement()
+                log += 'but already have action, '
             else:
                 # If no ads are in progress, start a new ad campaign
                 from_chat_id = user_id
@@ -107,7 +106,6 @@ async def get_message(msg: types.Message, state: FSMContext):
                 }
 
                 file_db.add_data(new_ads_data, key='ads')
-
 
                 # Calculate remaining users
                 remaining_users = total_users
@@ -132,10 +130,11 @@ async def get_message(msg: types.Message, state: FSMContext):
             # If the user is not an admin, send a permission error message
             message_text = translator(
                 text="❌ Unfortunately, you do not have this permission!",
-                dest=user_language
+                dest=language_code
             )
             button_markup = close_btn()
             await state.clear()
+            log += 'but do not have this permission, '
 
         # Update the message with the new content and buttons
         await bot.edit_message_text(
@@ -147,17 +146,16 @@ async def get_message(msg: types.Message, state: FSMContext):
 
         # Update the state with the current message ID
         await state.update_data({"message_id": message_id})
-        logging.info(f"Get message",
-                      extra={
-                          'chat_id': user_id,
-                          'language_code': user_language,
-                          'execution_time': time.perf_counter() - start_time
-                      })
+        logging.info(log,
+                     extra={
+                         'chat_id': user_id,
+                         'language_code': language_code,
+                         'execution_time': time.perf_counter() - start_time
+                     })
     except Exception as err:
         logging.error(f"Error in get_message: {err}",
                       extra={
                           'chat_id': user_id,
-                          'language_code': user_language,
+                          'language_code': language_code,
                           'execution_time': time.perf_counter() - start_time
                       })
-

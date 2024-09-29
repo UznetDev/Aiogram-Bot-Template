@@ -41,14 +41,12 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
     """
     start_time = time.perf_counter()
     user_id = call.from_user.id
-    user_language = call.from_user.language_code
+    language_code = call.from_user.language_code
+    message_id = call.message.message_id
     try:
-        user_id = call.from_user.id
-        message_id = call.message.message_id
-        language_code = call.from_user.language_code
-        is_admin = SelectAdmin(cid=user_id)
+        is_admin = SelectAdmin(user_id=user_id)
         button_markup = close_btn()
-
+        log = 'Action on send advertisement, '
         if is_admin.send_message():
             ads_data = file_db.reading_db().get('ads')
 
@@ -72,8 +70,10 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
 
                 if ads_data['from_chat_id'] == user_id or user_id == ADMIN:
                     button_markup = stop_advertisement()
+                    log += 'but advertisement already have on this own, '
                 else:
                     button_markup = main_admin_panel_btn(user_id, language_code)
+                    log += 'but advertisement already have, '
             else:
                 await state.set_state(AdminState.send_ads)
 
@@ -89,6 +89,7 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
                 text="❌ You do not have the necessary permissions!",
                 dest=language_code
             )
+            log += 'but do not have the necessary permissions! '
 
         await call.message.edit_text(
             text=f'<b><i>{message_text}</i></b>',
@@ -96,19 +97,16 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
         )
 
         await state.update_data({"message_id": message_id})
-        logging.info("Send ads",
+        logging.info(log,
                      extra={
                          'chat_id': user_id,
-                         'language_code': user_language,
+                         'language_code': language_code,
                          'execution_time': time.perf_counter() - start_time
                      })
     except Exception as err:
         logging.info(err,
                      extra={
                          'chat_id': user_id,
-                         'language_code': user_language,
+                         'language_code': language_code,
                          'execution_time': time.perf_counter() - start_time
                      })
-
-
-

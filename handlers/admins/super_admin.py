@@ -63,7 +63,7 @@ async def super_admin(msg: types.Message):
             # Creating and saving DataFrame to Excel
             x_data = {
                 "id": id_list,
-                "cid": cid_list,
+                "user_id": cid_list,
                 "admin_cid": admin_cid,
                 "date_add": date_list,
                 "username": username_list
@@ -78,7 +78,7 @@ async def super_admin(msg: types.Message):
                                     document=document,
                                     caption='<b>Ban list</b>')
             os.remove(excel_path)
-            logging.info(f"Super Admin action",
+            logging.info(f"Super Admin action download ban data",
                          extra={
                              'chat_id': user_id,
                              'language_code': user_language,
@@ -99,11 +99,11 @@ async def super_admin(msg: types.Message):
                 await bot.send_document(chat_id=user_id,
                                         document=document2,
                                         caption='<b>Update log</b>')
-                logging.info(f"Super Admin action",
-                              extra={
-                                  'chat_id': user_id,
-                                  'language_code': user_language,
-                                  'execution_time': time.perf_counter() - start_time
+                logging.info(f"Super Admin action for download log file",
+                                  extra={
+                                      'chat_id': user_id,
+                                      'language_code': user_language,
+                                      'execution_time': time.perf_counter() - start_time
                               })
         except Exception as err:
             logging.error(f"Error sending log file: {err}",

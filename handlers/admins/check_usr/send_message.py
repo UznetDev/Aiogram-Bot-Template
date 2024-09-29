@@ -38,7 +38,7 @@ async def send_message(call: types.CallbackQuery, callback_data: BlockUser, stat
     try:
         target_user_id = callback_data.cid  # The ID of the user to whom the message will be sent
         message_id = call.message.message_id  # The ID of the message triggering the callback
-        admin_check = SelectAdmin(cid=user_id)  # Check if the admin has permission to send messages
+        admin_check = SelectAdmin(user_id=user_id)  # Check if the admin has permission to send messages
         button = close_btn()  # Inline button to close the message
 
         if admin_check.send_message():

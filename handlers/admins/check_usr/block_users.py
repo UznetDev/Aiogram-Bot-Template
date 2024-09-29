@@ -43,7 +43,7 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
         cid = call.from_user.id  # The ID of the admin issuing the block/unblock command
         mid = call.message.message_id  # The ID of the message triggering the callback
         lang = call.from_user.language_code  # The language code of the admin for message translation
-        data = SelectAdmin(cid=cid)  # Check if the admin is authorized to perform the action
+        data = SelectAdmin(user_id=cid)  # Check if the admin is authorized to perform the action
         btn = close_btn()  # Inline button to close the message
 
         if data.block_user():

@@ -12,7 +12,7 @@ from function.translator import translator
 @dp.message(Command(commands='admin'), IsAdmin())
 async def main_panel(msg: types.Message, state: FSMContext):
     """
-    Handles the '/admin' command for admin users. Sends a welcome message with an admin panel inline keyboard.
+    Handles the '/admin' command for admin users. Sends a welcome message with an main admin panel and  inline keyboard.
 
     - Retrieves the user ID and message ID from the incoming message.
     - Translates and sends a welcome message to the user with an inline keyboard.
@@ -29,23 +29,21 @@ async def main_panel(msg: types.Message, state: FSMContext):
     """
     start_time = time.perf_counter()
     user_id = msg.from_user.id
-    user_language = msg.from_user.language_code
+    language_code = msg.from_user.language_code
     try:
-        cid = msg.from_user.id
         mid = msg.message_id
-        lang = msg.from_user.language_code
 
         # Translate and send the welcome message with admin panel buttons
         welcome_text = translator(text=f'👩‍💻Hello, dear admin, welcome to the main panel!',
-                                  dest=lang)
+                                  dest=language_code)
         response_msg = await msg.answer(text=f'<b>{welcome_text}</b>',
-                                        reply_markup=main_admin_panel_btn(cid=cid, lang=lang))
+                                        reply_markup=main_admin_panel_btn(cid=user_id, lang=language_code))
 
         # Manage previous message
         state_data = await state.get_data()
         try:
             if 'message_id' in state_data and state_data['message_id'] > 1:
-                await bot.delete_message(chat_id=cid, message_id=state_data['message_id'])
+                await bot.delete_message(chat_id=user_id, message_id=state_data['message_id'])
         except Exception as err:
             logging.error(f"Error deleting previous message: {err}")
 
@@ -55,18 +53,18 @@ async def main_panel(msg: types.Message, state: FSMContext):
         })
 
         # Delete the original command message
-        await bot.delete_message(chat_id=cid, message_id=mid)
-        logging.info(f"Main admin panel",
+        await bot.delete_message(chat_id=user_id, message_id=mid)
+        logging.info(f"Open main admin panel.",
                      extra={
                          'chat_id': user_id,
-                         'language_code': user_language,
+                         'language_code': language_code,
                          'execution_time': time.perf_counter() - start_time
                      })
     except Exception as err:
-        logging.error(f"Unhandled error: {err}",
+        logging.error(err,
                          extra={
                              'chat_id': user_id,
-                             'language_code': user_language,
+                             'language_code': language_code,
                              'execution_time': time.perf_counter() - start_time
                      })
 

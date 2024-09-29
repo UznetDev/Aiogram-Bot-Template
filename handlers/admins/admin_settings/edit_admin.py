@@ -23,7 +23,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
     - state (FSMContext): The FSM context for managing the bot's conversation state.
 
     Functionality:
-    - Extracts the current admin's ID (`cid`), message ID (`mid`), language code (`lang`), target admin ID (`admin_cid`), and the key to be edited (`edit_key`).
+    - Extracts the current admin's ID (`user_id`), message ID (`mid`), language code (`lang`), target admin ID (`admin_cid`), and the key to be edited (`edit_key`).
     - Checks if the current admin has the right to modify admin settings.
     - If permitted, fetches the target admin's data.
     - Depending on the edit key, either deletes the target admin or updates a specific admin permission.
@@ -43,7 +43,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
         lang = call.from_user.language_code  # Admin's language preference
         admin_cid = callback_data.cid  # ID of the target admin to be modified
         edit_key = callback_data.data  # The key indicating what action to perform
-        data = SelectAdmin(cid=cid)  # Fetches the current admin's data
+        data = SelectAdmin(user_id=cid)  # Fetches the current admin's data
         add_admin = data.add_admin()  # Checks if the current admin can add admins
         btn = close_btn()  # Default button to close the operation
 
@@ -66,7 +66,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
                         new_value = 0 if select_column[0] == 1 else 1
                         db.update_admin_data(cid=admin_cid, column=edit_key, value=new_value)
                         btn = attach_admin_btn(cid=admin_cid, lang=lang)
-                        is_admin = SelectAdmin(cid=admin_cid)
+                        is_admin = SelectAdmin(user_id=admin_cid)
                         send_message_tx = x_or_y(is_admin.send_message())
                         view_statistika_tx = x_or_y(is_admin.view_statistika())
                         download_statistika_tx = x_or_y(is_admin.download_statistika())

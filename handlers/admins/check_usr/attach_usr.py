@@ -38,7 +38,7 @@ async def attach_user(msg: types.Message, state: FSMContext):
         cid = msg.from_user.id  # Chat ID of the admin
         mid = msg.message_id  # Message ID of the current message
         lang = msg.from_user.language_code  # Language code of the admin
-        is_admin = SelectAdmin(cid=cid)  # Check admin permissions
+        is_admin = SelectAdmin(user_id=cid)  # Check admin permissions
         user_id = int(msg.text)  # Extract user ID from the message
         btn = close_btn()  # Initialize the close button
         text = translator(text="🔴 Something went wrong!\n", dest=lang)  # Default error message

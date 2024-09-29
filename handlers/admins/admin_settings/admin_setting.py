@@ -18,7 +18,7 @@ async def admin_settings(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the ID of the admin (`cid`), the message ID (`mid`), and the language code (`lang`).
+    - Retrieves the ID of the admin (`user_id`), the message ID (`mid`), and the language code (`lang`).
     - Checks if the admin has the permissions to access the Admin settings.
     - If permissions are granted, presents the admin with the settings options.
     - If permissions are denied, informs the admin that they lack the necessary rights.
@@ -34,7 +34,7 @@ async def admin_settings(call: types.CallbackQuery, state: FSMContext):
         cid = call.from_user.id  # ID of the admin initiating the request
         mid = call.message.message_id  # ID of the message to be updated
         lang = call.from_user.language_code  # Language code for translation
-        data = SelectAdmin(cid=cid)  # Retrieves admin settings for the current user
+        data = SelectAdmin(user_id=cid)  # Retrieves admin settings for the current user
         add_admin = data.add_admin()  # Checks if the user has the right to access admin settings
 
         if add_admin:
