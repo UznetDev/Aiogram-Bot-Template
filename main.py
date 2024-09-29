@@ -52,9 +52,9 @@ if __name__ == "__main__":
     formatter = SafeFormatter(log_format)
 
     # FileHandler for log file
-    file_handler = logging.FileHandler(log_file_name)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    # file_handler = logging.FileHandler(log_file_name)
+    # file_handler.setFormatter(formatter)
+    # logger.addHandler(file_handler)
 
     # StreamHandler for console logging
     console_handler = logging.StreamHandler()

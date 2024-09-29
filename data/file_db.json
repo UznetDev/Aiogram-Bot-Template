@@ -1,1 +1,1 @@
-{"ads": false, "join_channel": false}
+{"ads": {"status": true, "start": 0, "done_count": 0, "fail_count": 0, "start-time": 1727620453.4777555, "from_chat_id": 835558445, "message_id": 29517, "caption": null, "reply_markup": null, "total_users": 1, "per_time": 30}, "join_channel": false}
