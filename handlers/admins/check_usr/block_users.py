@@ -42,6 +42,7 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
     message_id = call.message.message_id  # The ID of the message triggering the callback
     language_code = call.from_user.language_code  # The language code of the admin for message translation
     try:
+        log = 'Action on block user, '
         data = SelectAdmin(cid=user_id)  # Check if the admin is authorized to perform the action
         btn = close_btn()  # Inline button to close the message
 
@@ -59,6 +60,7 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
                     await bot.send_message(chat_id=target_user_id,
                                            text='🚫 You are blocked! If you think this is a mistake, contact the admin.',
                                            reply_markup=close_btn())  # Notify the user of the block
+                    log += 'blocked, '
                 else:
                     if check[2] == user_id or user_id == ADMIN:  # Check if the unblocking is authorized
                         db.delete_user_ban(user_id=target_user_id)  # Remove user from ban list
@@ -67,13 +69,16 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
                         await bot.send_message(chat_id=target_user_id,
                                                text='😊 You are unblocked! Contact the admin.',
                                                reply_markup=close_btn())  # Notify the user of the unblock
+                        log += 'unblocked '
                     else:
                         text = translator(
                             text='⭕ Only the person who blocked the user can unblock them!\n\n Username: @',
                             dest=language_code)
                         text += str(user.username)  # Inform that only the original admin can unblock
+                        log += 'but Only the person who blocked the user can unblock them, '
             else:
                 text = translator(text='🚫 I cannot block an admin.', dest=language_code)
+                log += 'but cannot block an admin, '
                 try:
                     db.delete_user_ban(user_id=target_user_id)  # Ensure user is not mistakenly banned
                 except Exception as err:
@@ -81,6 +86,7 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
             await state.set_state(AdminState.check_user)  # Update the FSM state
         else:
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
+            log += 'but do not have permission, '
         await bot.edit_message_text(chat_id=user_id,
                                     message_id=message_id,
                                     text=f'<b><i>{text}</i></b>',
