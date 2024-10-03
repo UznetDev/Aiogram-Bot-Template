@@ -41,6 +41,7 @@ async def main():
         logger.info(res)  # Log the database statistics
         await bot.session.close()  # Close the bot session
 
+
 if __name__ == "__main__":
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
