@@ -360,6 +360,7 @@ class Database:
 
     ## ------------------ Select ------------------ ##
 
+    # Select a setting from the 'settings' table.
     def select_setting(self, key: str):
         """
         Select a setting from the 'settings' table.
@@ -381,6 +382,7 @@ class Database:
             logging.error(err)
 
 
+    # Select all users from the 'ban' table.
     def select_all_users_ban(self):
         """
         Select all users from the 'ban' table.
@@ -458,6 +460,7 @@ class Database:
             logging.error(err)
 
 
+    # Select all users from the 'users' table.
     def select_all_users(self):
         """
         Select all users from the 'users' table.
@@ -541,6 +544,7 @@ class Database:
             logging.error(err)
 
 
+    # Select admin from admins table
     def select_admin_column(self, user_id, column):
         """
         Select a specific column for an admin from the 'admins' table.
@@ -661,6 +665,7 @@ class Database:
             logging.error(err)
 
 
+    # Select channels from the 'channels' table
     def select_channels(self):
         """
         Select all channels from the 'channels' table.
@@ -758,5 +763,3 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
-
-
