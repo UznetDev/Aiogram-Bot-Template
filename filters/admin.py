@@ -53,9 +53,9 @@ class IsAdmin(BaseFilter):
         Returns:
             bool: True if the user is an admin or the super admin, False otherwise.
         """
-        self.cid = message.from_user.id
-        self.dada = db.select_admin(cid=self.cid)
-        if self.cid == ADMIN:
+        self.user_ud = message.from_user.id
+        self.dada = db.select_admin(user_ud=self.user_ud)
+        if self.user_ud == ADMIN:
             return True
         elif self.dada is not None:
             return True
@@ -68,15 +68,15 @@ class SelectAdmin:
     Class to handle various admin-related actions.
 
     Attributes:
-        cid (int): The user ID.
+        user_ud (int): The user ID.
         super_admin (int): The ID of the super admin.
         dada (list): The admin details from the database.
     """
 
-    def __init__(self, cid):
-        self.cid = cid
+    def __init__(self, user_ud):
+        self.user_ud = user_ud
         self.super_admin = ADMIN
-        self.dada = db.select_admin(cid=self.cid)
+        self.dada = db.select_admin(user_ud=self.user_ud)
 
     def send_message(self) -> bool:
         """
@@ -85,7 +85,7 @@ class SelectAdmin:
         Returns:
             bool: True if the user can send messages, False otherwise.
         """
-        if self.cid == self.super_admin:
+        if self.user_ud == self.super_admin:
             return True
         elif self.dada[3] == 1:
             return True
@@ -99,7 +99,7 @@ class SelectAdmin:
         Returns:
             bool: True if the user can view statistics, False otherwise.
         """
-        if self.cid == self.super_admin:
+        if self.user_ud == self.super_admin:
             return True
         elif self.dada[4] == 1:
             return True
@@ -113,7 +113,7 @@ class SelectAdmin:
         Returns:
             bool: True if the user can download statistics, False otherwise.
         """
-        if self.cid == self.super_admin:
+        if self.user_ud == self.super_admin:
             return True
         elif self.dada[5] == 1:
             return True
@@ -127,7 +127,7 @@ class SelectAdmin:
         Returns:
             bool: True if the user can block users, False otherwise.
         """
-        if self.cid == self.super_admin:
+        if self.user_ud == self.super_admin:
             return True
         elif self.dada[6] == 1:
             return True
@@ -141,7 +141,7 @@ class SelectAdmin:
         Returns:
             bool: True if the user can change channel settings, False otherwise.
         """
-        if self.cid == self.super_admin:
+        if self.user_ud == self.super_admin:
             return True
         elif self.dada[7] == 1:
             return True
@@ -155,7 +155,7 @@ class SelectAdmin:
         Returns:
             bool: True if the user can add new admins, False otherwise.
         """
-        if self.cid == self.super_admin:
+        if self.user_ud == self.super_admin:
             return True
         elif self.dada[8] == 1:
             return True

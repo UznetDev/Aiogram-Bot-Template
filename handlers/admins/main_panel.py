@@ -27,7 +27,7 @@ async def main_panel(msg: types.Message, state: FSMContext):
         Exception: Logs any errors encountered during the process.
     """
     try:
-        cid = msg.from_user.id
+        user_ud = msg.from_user.id
         mid = msg.message_id
         lang = msg.from_user.language_code
 
@@ -35,13 +35,13 @@ async def main_panel(msg: types.Message, state: FSMContext):
         welcome_text = translator(text=f'👩‍💻Hello, dear admin, welcome to the main panel!',
                                   dest=lang)
         response_msg = await msg.answer(text=f'<b>{welcome_text}</b>',
-                                        reply_markup=main_admin_panel_btn(cid=cid, lang=lang))
+                                        reply_markup=main_admin_panel_btn(user_ud=user_ud, lang=lang))
 
         # Manage previous message
         state_data = await state.get_data()
         try:
             if 'message_id' in state_data and state_data['message_id'] > 1:
-                await bot.delete_message(chat_id=cid, message_id=state_data['message_id'])
+                await bot.delete_message(chat_id=user_ud, message_id=state_data['message_id'])
         except Exception as err:
             logging.error(f"Error deleting previous message: {err}")
 
@@ -51,7 +51,7 @@ async def main_panel(msg: types.Message, state: FSMContext):
         })
 
         # Delete the original command message
-        await bot.delete_message(chat_id=cid, message_id=mid)
+        await bot.delete_message(chat_id=user_ud, message_id=mid)
 
     except Exception as err:
         logging.error(f"Unhandled error: {err}")

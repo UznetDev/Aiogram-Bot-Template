@@ -31,11 +31,11 @@ async def send_message(call: types.CallbackQuery, callback_data: BlockUser, stat
     - This function is asynchronous and does not return a value but performs actions such as sending messages and updating states.
     """
     try:
-        target_user_id = callback_data.cid  # The ID of the user to whom the message will be sent
+        target_user_id = callback_data.user_ud  # The ID of the user to whom the message will be sent
         user_id = call.from_user.id  # The ID of the admin initiating the message send action
         message_id = call.message.message_id  # The ID of the message triggering the callback
         language = call.from_user.language_code  # The language code of the admin for message translation
-        admin_check = SelectAdmin(cid=user_id)  # Check if the admin has permission to send messages
+        admin_check = SelectAdmin(user_ud=user_id)  # Check if the admin has permission to send messages
         button = close_btn()  # Inline button to close the message
 
         if admin_check.send_message():

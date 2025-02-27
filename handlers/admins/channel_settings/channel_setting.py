@@ -32,19 +32,19 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
     - This function is asynchronous and does not return a value but performs actions such as sending messages and updating states.
     """
     try:
-        cid = call.from_user.id  # The ID of the admin initiating the action
+        user_ud = call.from_user.id  # The ID of the admin initiating the action
         mid = call.message.message_id  # The ID of the message triggering the callback
         lang = call.from_user.language_code  # The language code of the admin for message translation
-        data = SelectAdmin(cid=cid)  # Check if the admin has permission to manage channel settings
+        data = SelectAdmin(user_ud=user_ud)  # Check if the admin has permission to manage channel settings
         btn = close_btn()  # Inline button to close the message
 
         if data.channel_settings():
-            if cid == ADMIN:
+            if user_ud == ADMIN:
                 # Retrieve all channels if the admin is the main ADMIN
                 data = db.select_channels()
             else:
                 # Retrieve channels added by the current admin
-                data = db.select_channels_add_cid(add_cid=cid)
+                data = db.select_channels_add_user_ud(add_user_ud=user_ud)
 
             if not data:
                 # If no channels are found, indicate that the list is empty
@@ -61,7 +61,7 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
                         text += (f"<b><i>{count}</i>. Name:</b> <i>{channel.full_name}</i>\n"
                                  f"<b>Username:</b> <i>@{channel.username}\n</i>"
                                  f"<b>Added date:</b> <i>{x[2]}\n</i>"
-                                 f"<b>Added by CID:</b> <i>{x[3]}\n\n</i>")
+                                 f"<b>Added by user_ud:</b> <i>{x[3]}\n\n</i>")
                     except Exception as err:
                         logging.error(err)  # Log any errors in retrieving channel details
             btn = channel_settings(lang=lang)  # Button for channel settings
@@ -70,7 +70,7 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
 
         await bot.edit_message_text(
-            chat_id=cid,
+            chat_id=user_ud,
             message_id=mid,
             text=f'<b><i>{text}</i></b>',
             reply_markup=btn  # Update the message with a translated response and appropriate buttons

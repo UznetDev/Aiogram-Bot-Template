@@ -35,21 +35,21 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
     - This function is asynchronous and does not return a value but performs actions such as sending messages and updating states.
     """
     try:
-        user_id = callback_data.cid  # The ID of the user to be blocked/unblocked
-        cid = call.from_user.id  # The ID of the admin issuing the block/unblock command
+        user_id = callback_data.user_ud  # The ID of the user to be blocked/unblocked
+        user_ud = call.from_user.id  # The ID of the admin issuing the block/unblock command
         mid = call.message.message_id  # The ID of the message triggering the callback
         lang = call.from_user.language_code  # The language code of the admin for message translation
-        data = SelectAdmin(cid=cid)  # Check if the admin is authorized to perform the action
+        data = SelectAdmin(user_ud=user_ud)  # Check if the admin is authorized to perform the action
         btn = close_btn()  # Inline button to close the message
 
         if data.block_user():
-            check1 = db.select_admin(cid=user_id)  # Check if the user is an admin
+            check1 = db.select_admin(user_ud=user_id)  # Check if the user is an admin
             if check1 is None:
-                check = db.check_user_ban(cid=user_id)  # Check if the user is already banned
+                check = db.check_user_ban(user_ud=user_id)  # Check if the user is already banned
                 user = await bot.get_chat(chat_id=user_id)  # Get user details
                 if check is None:
-                    db.insert_user_ban(cid=user_id,
-                                       admin_cid=cid,
+                    db.insert_user_ban(user_ud=user_id,
+                                       admin_user_ud=user_ud,
                                        date=f'{yil_oy_kun} / {soat_minut_sekund}')  # Add user to ban list
                     text = translator(text='⛔ User blocked\n\n Username: @', dest=lang)
                     text += str(user.username)
@@ -57,8 +57,8 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
                                            text='🚫 You are blocked! If you think this is a mistake, contact the admin.',
                                            reply_markup=close_btn())  # Notify the user of the block
                 else:
-                    if check[2] == cid or cid == ADMIN:  # Check if the unblocking is authorized
-                        db.delete_user_ban(cid=user_id)  # Remove user from ban list
+                    if check[2] == user_ud or user_ud == ADMIN:  # Check if the unblocking is authorized
+                        db.delete_user_ban(user_ud=user_id)  # Remove user from ban list
                         text = translator(text='✅ User unblocked!\n\n Username: @', dest=lang)
                         text += str(user.username)
                         await bot.send_message(chat_id=user_id,
@@ -70,13 +70,13 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
             else:
                 text = translator(text='🚫 I cannot block an admin.', dest=lang)
                 try:
-                    db.delete_user_ban(cid=user_id)  # Ensure user is not mistakenly banned
+                    db.delete_user_ban(user_ud=user_id)  # Ensure user is not mistakenly banned
                 except Exception as err:
                     logging.error(err)  # Log any errors encountered
             await state.set_state(AdminState.check_user)  # Update the FSM state
         else:
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
-        await bot.edit_message_text(chat_id=cid,
+        await bot.edit_message_text(chat_id=user_ud,
                                     message_id=mid,
                                     text=f'<b><i>{text}</i></b>',
                                     reply_markup=btn)  # Edit the original message with the result

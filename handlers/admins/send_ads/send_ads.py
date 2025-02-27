@@ -43,7 +43,7 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
         user_id = call.from_user.id
         message_id = call.message.message_id
         language_code = call.from_user.language_code
-        is_admin = SelectAdmin(cid=user_id)
+        is_admin = SelectAdmin(user_ud=user_id)
         button_markup = close_btn()
 
         if is_admin.send_message():

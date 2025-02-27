@@ -23,7 +23,7 @@ async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, 
     - state (FSMContext): The FSM context for managing the bot's conversation state.
 
     Functionality:
-    - Extracts the admin's ID (`cid`), message ID (`mid`), language code (`lang`), and the target admin ID (`admin_cid`).
+    - Extracts the admin's ID (`user_ud`), message ID (`mid`), language code (`lang`), and the target admin ID (`admin_user_ud`).
     - Checks if the current admin has the right to modify admin settings.
     - If permitted, fetches the target admin's data and checks the permissions of the current admin.
     - Constructs a response message detailing the target admin's rights.
@@ -37,20 +37,20 @@ async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, 
     - Catches and logs any exceptions that occur during the execution of the function.
     """
     try:
-        cid = call.from_user.id  # Current admin's ID
+        user_ud = call.from_user.id  # Current admin's ID
         mid = call.message.message_id  # Message ID to be updated
         lang = call.from_user.language_code  # Admin's language preference
-        admin_cid = callback_data.cid  # ID of the admin to be modified
-        data = SelectAdmin(cid=cid)  # Fetches the current admin's data
+        admin_user_ud = callback_data.user_ud  # ID of the admin to be modified
+        data = SelectAdmin(user_ud=user_ud)  # Fetches the current admin's data
         btn = close_btn()  # Default button to close the operation
 
         # Check if the admin has rights to add another admin
         if data.add_admin():
-            admin_data = db.select_admin(cid=admin_cid)  # Fetch data for the target admin
-            if admin_data[2] == cid or cid == ADMIN:
+            admin_data = db.select_admin(user_ud=admin_user_ud)  # Fetch data for the target admin
+            if admin_data[2] == user_ud or user_ud == ADMIN:
                 # If the current admin added the target admin or is the primary admin
-                btn = attach_admin_btn(cid=admin_cid, lang=lang)  # Buttons for setting admin rights
-                is_admin = SelectAdmin(cid=admin_cid)  # Check target admin's permissions
+                btn = attach_admin_btn(user_ud=admin_user_ud, lang=lang)  # Buttons for setting admin rights
+                is_admin = SelectAdmin(user_ud=admin_user_ud)  # Check target admin's permissions
 
                 # Format the text showing current permissions of the target admin
                 send_message_tx = x_or_y(is_admin.send_message())
@@ -76,7 +76,7 @@ async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, 
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
 
         # Update the message with the admin rights information or error message
-        await bot.edit_message_text(chat_id=cid, message_id=mid, text=f'{text}', reply_markup=btn)
+        await bot.edit_message_text(chat_id=user_ud, message_id=mid, text=f'{text}', reply_markup=btn)
         await state.set_state(AdminState.add_admin)  # Set the state to add admin
         await state.update_data({"message_id": call.message.message_id})  # Update the state data with the message ID
     except Exception as err:

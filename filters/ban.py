@@ -27,12 +27,12 @@ class IsBan(BaseFilter):
             bool: True if the user is banned, False otherwise.
         """
         try:
-            self.cid = message.from_user.id
-            self.dada = db.select_admin(cid=self.cid)
-            check_ban = db.check_user_ban(cid=self.cid)
+            self.user_ud = message.from_user.id
+            self.dada = db.select_admin(user_ud=self.user_ud)
+            check_ban = db.check_user_ban(user_ud=self.user_ud)
 
             # If the user is the super admin, they are not banned
-            if self.cid == self.super_admin:
+            if self.user_ud == self.super_admin:
                 return False
             # If the user is an admin, they are not banned
             elif self.dada is not None:

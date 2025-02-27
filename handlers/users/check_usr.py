@@ -59,8 +59,8 @@ async def start_handler(msg: types.Message):
         await msg.answer(text=f"<b>{message_text}</b>", reply_markup=keyboard.as_markup())
 
         # Add user to the database if not already present
-        if db.check_user(cid=user_id) is None:
-            db.insert_user(cid=user_id,
+        if db.check_user(user_ud=user_id) is None:
+            db.insert_user(user_ud=user_id,
                            date=f"{date_day_month} / {time_hour_minute_second}")
     except Exception as err:
         logging.error(f"Error in start_handler: {err}")

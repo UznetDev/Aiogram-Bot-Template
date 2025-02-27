@@ -19,7 +19,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the message.
+    - Retrieves the admin's user ID (`user_ud`), the message ID (`mid`), and the language code (`lang`) from the message.
     - Checks if the sender has the required permissions to add an admin.
     - Tries to add the new admin using the provided user ID:
         - If the admin is successfully added, sends a confirmation message to both the current admin and the newly added admin.
@@ -33,27 +33,27 @@ async def add_admin(msg: types.Message, state: FSMContext):
     - Catches and logs any exceptions that occur during the addition of the new admin or message editing.
     """
     try:
-        cid = msg.from_user.id  # The ID of the admin who is performing the action
+        user_ud = msg.from_user.id  # The ID of the admin who is performing the action
         mid = msg.message_id  # The ID of the message to be updated
         lang = msg.from_user.language_code  # The language code for translation
-        data = SelectAdmin(cid=cid)  # Retrieves admin settings for the current user
+        data = SelectAdmin(user_ud=user_ud)  # Retrieves admin settings for the current user
         add_admin_db = data.add_admin()  # Check if the user has the right to add an admin
         user_id = int(msg.text)  # The ID of the user to be added as an admin
 
         if add_admin_db:
             data_state = await state.get_data()  # Get current state data
-            btn = await admin_setting(cid=cid, lang=lang)  # Prepare admin settings buttons
+            btn = await admin_setting(user_ud=user_ud, lang=lang)  # Prepare admin settings buttons
             text = "🔴 Admin failed because admin was not found!\n"
 
             try:
                 user = await bot.get_chat(chat_id=user_id)  # Get user information
-                check = db.select_admin(cid=user_id)  # Check if the user is already an admin
+                check = db.select_admin(user_ud=user_id)  # Check if the user is already an admin
 
                 if check is None:
                     # Add the new admin to the database
-                    db.insert_admin(cid=user_id,
+                    db.insert_admin(user_ud=user_id,
                                     date=f"{yil_oy_kun} / {soat_minut_sekund}",
-                                    add=cid)
+                                    add=user_ud)
                     text = translator(text="✅ Admin has been successfully added\n\nName: ",
                                       dest=lang)
                     text += f"{user.full_name}\n"
@@ -62,7 +62,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
                                            text=f'😊Hi @{user.username}, you have been made an admin\n'
                                                 f'To open the panel, use /admin ',
                                            reply_markup=close_btn())
-                    btn = await admin_setting(cid=cid, lang=lang)  # Prepare admin settings buttons
+                    btn = await admin_setting(user_ud=user_ud, lang=lang)  # Prepare admin settings buttons
                 else:
                     text = translator(text="✅ Admin was added before\n\nName: ",
                                       dest=lang)
@@ -81,7 +81,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
             finally:
                 text = translator(text=text,
                                   dest=lang)
-                await bot.edit_message_text(chat_id=cid,
+                await bot.edit_message_text(chat_id=user_ud,
                                             message_id=data_state['message_id'],
                                             text=text,
                                             reply_markup=btn)
@@ -89,7 +89,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
             text = translator(text='❌ Unfortunately, you do not have this right!',
                               dest=lang)
             btn = close_btn()
-        await bot.edit_message_text(chat_id=cid,
+        await bot.edit_message_text(chat_id=user_ud,
                                     message_id=mid,
                                     text=f"<b>{text}</b>",
                                     reply_markup=btn)

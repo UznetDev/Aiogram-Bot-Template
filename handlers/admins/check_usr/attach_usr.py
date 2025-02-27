@@ -31,10 +31,10 @@ async def attach_user(msg: types.Message, state: FSMContext):
         None
     """
     try:
-        cid = msg.from_user.id  # Chat ID of the admin
+        user_ud = msg.from_user.id  # Chat ID of the admin
         mid = msg.message_id  # Message ID of the current message
         lang = msg.from_user.language_code  # Language code of the admin
-        is_admin = SelectAdmin(cid=cid)  # Check admin permissions
+        is_admin = SelectAdmin(user_ud=user_ud)  # Check admin permissions
         user_id = int(msg.text)  # Extract user ID from the message
         btn = close_btn()  # Initialize the close button
         text = translator(text="🔴 Something went wrong!\n", dest=lang)  # Default error message
@@ -43,14 +43,14 @@ async def attach_user(msg: types.Message, state: FSMContext):
             data_state = await state.get_data()  # Get the current state data
             try:
                 user = await bot.get_chat(chat_id=user_id)  # Get user information
-                check = db.check_user_ban(cid=user_id)  # Check if the user is banned
-                check1 = db.check_user(cid=user_id)  # Check if the user exists in the bot's list
+                check = db.check_user_ban(user_ud=user_id)  # Check if the user is banned
+                check1 = db.check_user(user_ud=user_id)  # Check if the user exists in the bot's list
 
                 if check1 is not None:
-                    btn = block_user(cid=cid, user_id=user_id, lang=lang)  # Button for blocking/unblocking user
+                    btn = block_user(user_ud=user_ud, user_id=user_id, lang=lang)  # Button for blocking/unblocking user
                     if check is None:
-                        check2 = db.select_admin(cid=user_id)  # Check if the user is an admin
-                        select_user = db.check_user(cid)  # Get information about the user
+                        check2 = db.select_admin(user_ud=user_id)  # Check if the user is an admin
+                        select_user = db.check_user(user_ud)  # Get information about the user
 
                         if check2 is None:
                             # User is successfully unblocked
@@ -74,7 +74,7 @@ async def attach_user(msg: types.Message, state: FSMContext):
                 text = translator(text="🔴 User not found!\nThe bot may not have found the user..", dest=lang)
             finally:
                 # Update the message with the result and provide the close button
-                await bot.edit_message_text(chat_id=cid,
+                await bot.edit_message_text(chat_id=user_ud,
                                             message_id=data_state['message_id'],
                                             text=f'<b><i>{text}</i></b>',
                                             reply_markup=btn)
@@ -83,12 +83,12 @@ async def attach_user(msg: types.Message, state: FSMContext):
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
 
         # Edit the original message to reflect the result
-        await bot.edit_message_text(chat_id=cid,
+        await bot.edit_message_text(chat_id=user_ud,
                                     message_id=mid,
                                     text=f'<b><i>{text}</i></b>',
                                     reply_markup=btn)
         await state.update_data({"message_id": mid})  # Update state data
-        await bot.delete_message(chat_id=cid, message_id=mid)  # Delete the original message
+        await bot.delete_message(chat_id=user_ud, message_id=mid)  # Delete the original message
     except Exception as err:
         # Log any exceptions that occur
         logging.error(err)

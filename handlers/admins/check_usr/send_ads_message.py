@@ -32,7 +32,7 @@ async def send_ads_message(msg: types.Message, state: FSMContext):
         language = msg.from_user.language_code  # The language code of the admin for message translation
         data_state = await state.get_data()  # Retrieve data from the FSM context
         target_user_id = data_state['user_id']  # The ID of the target user who will receive the message
-        is_admin = SelectAdmin(cid=user_id)  # Check if the admin is authorized to send messages
+        is_admin = SelectAdmin(user_ud=user_id)  # Check if the admin is authorized to send messages
         button = close_btn()  # Inline button to close the message
 
         if is_admin.send_message():

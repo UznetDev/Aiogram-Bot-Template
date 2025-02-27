@@ -33,7 +33,7 @@ async def check_user(call: types.CallbackQuery, state: FSMContext):
         user_id = call.from_user.id  # The ID of the admin initiating the check
         message_id = call.message.message_id  # The ID of the message triggering the callback
         language = call.from_user.language_code  # The language code of the admin for message translation
-        data = SelectAdmin(cid=user_id)  # Check if the admin is authorized to perform the action
+        data = SelectAdmin(user_ud=user_id)  # Check if the admin is authorized to perform the action
         button = close_btn()  # Inline button to close the message
 
         if data.block_user():

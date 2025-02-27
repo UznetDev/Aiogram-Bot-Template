@@ -19,7 +19,7 @@ async def add_admin_first(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the ID of the admin who initiated the request (`cid`), the message ID (`mid`), and the language code (`lang`).
+    - Retrieves the ID of the admin who initiated the request (`user_ud`), the message ID (`mid`), and the language code (`lang`).
     - Checks if the requesting admin has the rights to add a new admin.
     - If the requesting admin has the necessary permissions, prompts them to send the ID of the new admin to be added.
     - Sets the state to `AdminState.add_admin` to handle the next step of the process.
@@ -33,16 +33,16 @@ async def add_admin_first(call: types.CallbackQuery, state: FSMContext):
     - Catches and logs any exceptions that occur during the process of handling the callback query or updating the message.
     """
     try:
-        cid = call.from_user.id  # ID of the admin initiating the request
+        user_ud = call.from_user.id  # ID of the admin initiating the request
         mid = call.message.message_id  # ID of the message to be updated
         lang = call.from_user.language_code  # Language code for translation
-        data = SelectAdmin(cid=cid)  # Retrieves admin settings for the current user
+        data = SelectAdmin(user_ud=user_ud)  # Retrieves admin settings for the current user
         add_admin = data.add_admin()  # Checks if the user has the right to add an admin
 
         if add_admin:
             # Prompt the user to provide the ID of the new admin
             text = translator(text="🔰 Please send the admin ID number you want to add...", dest=lang)
-            btn = await admin_setting(cid=cid, lang=lang)  # Prepare admin settings buttons
+            btn = await admin_setting(user_ud=user_ud, lang=lang)  # Prepare admin settings buttons
             await state.set_state(AdminState.add_admin)  # Set the FSM state for adding an admin
         else:
             # Inform the user that they do not have the necessary permissions
@@ -50,7 +50,7 @@ async def add_admin_first(call: types.CallbackQuery, state: FSMContext):
             btn = close_btn()  # Prepare close button
 
         # Update the message with the appropriate response and buttons
-        await bot.edit_message_text(chat_id=cid,
+        await bot.edit_message_text(chat_id=user_ud,
                                     message_id=mid,
                                     text=f'<b>{text}</b>',
                                     reply_markup=btn)

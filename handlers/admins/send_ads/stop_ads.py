@@ -39,7 +39,7 @@ async def stop_ads(call: types.CallbackQuery, state: FSMContext):
         language_code = call.from_user.language_code
 
         # Check if the user has admin permissions
-        is_admin = SelectAdmin(cid=user_id)
+        is_admin = SelectAdmin(user_ud=user_id)
 
         if is_admin.send_message():
             # Fetch the current ads data

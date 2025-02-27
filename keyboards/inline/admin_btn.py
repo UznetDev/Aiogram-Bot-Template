@@ -30,12 +30,12 @@ def main_btn():
         return False
 
 
-def main_admin_panel_btn(cid, lang):
+def main_admin_panel_btn(user_ud, lang):
     """
     Creates the inline keyboard for the main admin panel.
 
     Parameters:
-        cid (int): The ID of the current user.
+        user_ud (int): The ID of the current user.
         lang (str): The language code for translation.
 
     Returns:
@@ -50,7 +50,7 @@ def main_admin_panel_btn(cid, lang):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_ud=user_ud)
         if is_admin.add_admin():
             btn.button(text=translator(text=f"👮‍♂️ Admins settings!",
                                        dest=lang),
@@ -79,12 +79,12 @@ def main_admin_panel_btn(cid, lang):
         return False
 
 
-async def admin_setting(cid, lang):
+async def admin_setting(user_ud, lang):
     """
     Creates the inline keyboard for admin settings.
 
     Parameters:
-        cid (int): The ID of the current user.
+        user_ud (int): The ID of the current user.
         lang (str): The language code for translation.
 
     Returns:
@@ -97,15 +97,15 @@ async def admin_setting(cid, lang):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        if cid == ADMIN:
+        if user_ud == ADMIN:
             data = db.select_all_admins()
         else:
-            data = db.select_add_admin(cid=cid)
+            data = db.select_add_admin(user_ud=user_ud)
         if data is not None:
             for x in data:
                 info = await bot.get_chat(chat_id=x[1])
                 btn.button(text=f"👮‍♂️ @{info.username}: {info.full_name}!",
-                           callback_data=AdminSetting(action="attach_admin", cid=x[1]).pack())
+                           callback_data=AdminSetting(action="attach_admin", user_ud=x[1]).pack())
         btn.button(text=translator(text=f"👮‍♂️ ADD Admin!",
                                    dest=lang),
                    callback_data=AdminCallback(action="add_admin", data="").pack())
@@ -117,12 +117,12 @@ async def admin_setting(cid, lang):
         return False
 
 
-def attach_admin(cid, lang):
+def attach_admin(user_ud, lang):
     """
     Creates the inline keyboard for managing admin settings.
 
     Parameters:
-        cid (int): The ID of the current user.
+        user_ud (int): The ID of the current user.
         lang (str): The language code for translation.
 
     Returns:
@@ -136,7 +136,7 @@ def attach_admin(cid, lang):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_ud=user_ud)
         send_message_tx = x_or_y(is_admin.send_message())
         wiew_statistika_tx = x_or_y(is_admin.view_statistika())
         download_statistika_tx = x_or_y(is_admin.download_statistika())
@@ -145,28 +145,28 @@ def attach_admin(cid, lang):
         add_admin_tx = x_or_y(is_admin.add_admin())
         btn.button(text=translator(text=f"{send_message_tx} Send a message!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='send_message').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='send_message').pack())
 
         btn.button(text=translator(text=f"{wiew_statistika_tx} Wiew statistics!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='statistika').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='statistika').pack())
 
         btn.button(text=translator(text=f"{download_statistika_tx} Download statistics!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='download_statistika').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='download_statistika').pack())
 
         btn.button(text=translator(text=f"{block_user_tx} Block user!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='block_user').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='block_user').pack())
         btn.button(text=translator(text=f"{channel_settings_tx} Channel settings!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='channel_settings').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='channel_settings').pack())
         btn.button(text=translator(text=f"{add_admin_tx} Add a admin!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='add_admin').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='add_admin').pack())
         btn.button(text=translator(text=f"🔪Delete admin!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='delete_admin').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='delete_admin').pack())
         btn.adjust(1)
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
@@ -175,12 +175,12 @@ def attach_admin(cid, lang):
         return False
 
 
-def attach_admin_btn(cid, lang):
+def attach_admin_btn(user_ud, lang):
     """
     Creates the inline keyboard for managing admin settings.
 
     Parameters:
-        cid (int): The ID of the current user.
+        user_ud (int): The ID of the current user.
         lang (str): The language code for translation.
 
     Returns:
@@ -195,7 +195,7 @@ def attach_admin_btn(cid, lang):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_ud=user_ud)
         send_message_tx = x_or_y(is_admin.send_message())
         wiew_statistika_tx = x_or_y(is_admin.view_statistika())
         download_statistika_tx = x_or_y(is_admin.download_statistika())
@@ -204,28 +204,28 @@ def attach_admin_btn(cid, lang):
         add_admin_tx = x_or_y(is_admin.add_admin())
         btn.button(text=translator(text=f"{send_message_tx} Send a message!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='send_message').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='send_message').pack())
 
         btn.button(text=translator(text=f"{wiew_statistika_tx} Wiew statistics!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='statistika').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='statistika').pack())
 
         btn.button(text=translator(text=f"{download_statistika_tx} Download statistics!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='download_statistika').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='download_statistika').pack())
 
         btn.button(text=translator(text=f"{block_user_tx} Block user!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='block_user').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='block_user').pack())
         btn.button(text=translator(text=f"{channel_settings_tx} Channel settings!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='channel_settings').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='channel_settings').pack())
         btn.button(text=translator(text=f"{add_admin_tx} Add a admin!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='add_admin').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='add_admin').pack())
         btn.button(text=translator(text=f"🔪Delete admin!",
                                    dest=lang),
-                   callback_data=EditAdminSetting(action="edit", cid=cid, data='delete_admin').pack())
+                   callback_data=EditAdminSetting(action="edit", user_ud=user_ud, data='delete_admin').pack())
         btn.adjust(1)
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
@@ -275,12 +275,12 @@ def channel_settings(lang):
         return False
 
 
-def block_user(cid, lang, user_id):
+def block_user(user_ud, lang, user_id):
     """
     Creates the inline keyboard for blocking or unblocking a user.
 
     Parameters:
-        cid (int): The ID of the current user.
+        user_ud (int): The ID of the current user.
         lang (str): The language code for translation.
         user_id (int): The ID of the user to be blocked or unblocked.
 
@@ -296,18 +296,18 @@ def block_user(cid, lang, user_id):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_ud=user_ud)
         if is_admin.block_user():
-            data = db.check_user_ban(cid=user_id)
+            data = db.check_user_ban(user_ud=user_id)
             if data is None:
                 btn.button(text=translator(text=f"🚫Userni bloklash!",
                                            dest=lang),
-                           callback_data=BlockUser(action="block", cid=user_id).pack())
+                           callback_data=BlockUser(action="block", user_ud=user_id).pack())
             else:
-                if data[2] == cid or cid == ADMIN:
+                if data[2] == user_ud or user_ud == ADMIN:
                     btn.button(text=translator(text=f"✅Unblock user!",
                                                dest=lang),
-                               callback_data=BlockUser(action="block", cid=user_id).pack())
+                               callback_data=BlockUser(action="block", user_ud=user_id).pack())
         btn.adjust(1, 2)
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
@@ -316,12 +316,12 @@ def block_user(cid, lang, user_id):
         return False
 
 
-def download_statistika(cid, lang):
+def download_statistika(user_ud, lang):
     """
     Creates the inline keyboard for downloading statistics.
 
     Parameters:
-        cid (int): The ID of the current user.
+        user_ud (int): The ID of the current user.
         lang (str): The language code for translation.
 
     Returns:
@@ -334,7 +334,7 @@ def download_statistika(cid, lang):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = SelectAdmin(cid=cid)
+        is_admin = SelectAdmin(user_ud=user_ud)
         if is_admin.download_statistika():
             btn.button(text=translator(text=f"📜 Dowload statistika!",
                                        dest=lang),

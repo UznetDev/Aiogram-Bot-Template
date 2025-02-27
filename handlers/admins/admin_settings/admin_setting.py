@@ -18,7 +18,7 @@ async def admin_settings(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the ID of the admin (`cid`), the message ID (`mid`), and the language code (`lang`).
+    - Retrieves the ID of the admin (`user_ud`), the message ID (`mid`), and the language code (`lang`).
     - Checks if the admin has the permissions to access the Admin settings.
     - If permissions are granted, presents the admin with the settings options.
     - If permissions are denied, informs the admin that they lack the necessary rights.
@@ -31,23 +31,23 @@ async def admin_settings(call: types.CallbackQuery, state: FSMContext):
     - Catches and logs any exceptions that occur during the process of handling the callback query or updating the message.
     """
     try:
-        cid = call.from_user.id  # ID of the admin initiating the request
+        user_ud = call.from_user.id  # ID of the admin initiating the request
         mid = call.message.message_id  # ID of the message to be updated
         lang = call.from_user.language_code  # Language code for translation
-        data = SelectAdmin(cid=cid)  # Retrieves admin settings for the current user
+        data = SelectAdmin(user_ud=user_ud)  # Retrieves admin settings for the current user
         add_admin = data.add_admin()  # Checks if the user has the right to access admin settings
 
         if add_admin:
             # The admin has the right to access settings
             text = translator(text="❗ You are in the Admin settings section!", dest=lang)
-            btn = await admin_setting(cid=cid, lang=lang)  # Prepare admin settings buttons
+            btn = await admin_setting(user_ud=user_ud, lang=lang)  # Prepare admin settings buttons
         else:
             # The admin does not have the necessary rights
             text = translator(text="❌ Unfortunately, you do not have this right!", dest=lang)
             btn = close_btn()  # Prepare close button
 
         # Update the message with the appropriate response and buttons
-        await bot.edit_message_text(chat_id=cid,
+        await bot.edit_message_text(chat_id=user_ud,
                                     message_id=mid,
                                     text=f'<b>{text}</b>',
                                     reply_markup=btn)

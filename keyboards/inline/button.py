@@ -28,11 +28,11 @@ class EditAdminSetting(CallbackData, prefix="edit_setting"):
 
     Attributes:
         action (str): The specific action to be performed on settings.
-        cid (int): The ID of the admin or user related to the setting.
+        user_ud (int): The ID of the admin or user related to the setting.
         data (str): The specific setting to be edited.
     """
     action: str
-    cid: int
+    user_ud: int
     data: str
 
 class AdminSetting(CallbackData, prefix="admin_setting"):
@@ -41,10 +41,10 @@ class AdminSetting(CallbackData, prefix="admin_setting"):
 
     Attributes:
         action (str): The specific action related to admin settings.
-        cid (int): The ID of the admin or user related to the setting.
+        user_ud (int): The ID of the admin or user related to the setting.
     """
     action: str
-    cid: int
+    user_ud: int
 
 class BlockUser(CallbackData, prefix="block_user"):
     """
@@ -52,7 +52,7 @@ class BlockUser(CallbackData, prefix="block_user"):
 
     Attributes:
         action (str): The specific action to be performed (block/unblock).
-        cid (int): The ID of the user to be blocked or unblocked.
+        user_ud (int): The ID of the user to be blocked or unblocked.
     """
     action: str
-    cid: int
+    user_ud: int
