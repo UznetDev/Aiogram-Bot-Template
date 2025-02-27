@@ -84,8 +84,8 @@ class Database:
             sql = """
             CREATE TABLE IF NOT EXISTS ban (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                cid bigint(20) NOT NULL UNIQUE,
-                admin_cid bigint(20),
+                user_id bigint(20) NOT NULL UNIQUE,
+                admin_user_id bigint(20),
                 update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 date varchar(255)
             )
@@ -107,7 +107,7 @@ class Database:
             sql = """
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                cid bigint(20) NOT NULL UNIQUE,
+                user_id bigint(20) NOT NULL UNIQUE,
                 update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 date varchar(255),
                 lang varchar(5)
@@ -130,10 +130,10 @@ class Database:
             sql = """
                 CREATE TABLE IF NOT EXISTS channels (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    cid bigint(200),
+                    channel_id bigint(200),
                     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     date varchar(255),
-                    add_cid int(200)
+                    add_user_id int(200)
                 );
             """
             self.cursor.execute(sql)
@@ -153,8 +153,8 @@ class Database:
             sql = """
                 CREATE TABLE IF NOT EXISTS admins (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    cid bigint(20) NOT NULL UNIQUE,
-                    add_cid bigint(20),
+                    user_id bigint(20) NOT NULL UNIQUE,
+                    add_user_id bigint(20),
                     send_message TINYINT(1),
                     statistika TINYINT(1),
                     download_statistika TINYINT(1),
@@ -177,20 +177,20 @@ class Database:
 
     ## ------------------ Insert data ------------------ ##
 
-    def insert_user(self, cid, date, lang):
+    def insert_user(self, user_id, date, lang):
             """
             Add a user to the 'users' table.
 
             Parameters:
-            cid (int): The user's chat ID.
+            user_id (int): The user's chat ID.
             date (str): The date the user was added.
             lang (str): The user's language preference.
             """
             try:
                 sql = """
-                INSERT INTO `users` (`cid`,`date`,`lang`) VALUES (%s,%s,%s)
+                INSERT INTO `users` (`user_id`,`date`,`lang`) VALUES (%s,%s,%s)
                 """
-                values = (cid, date, lang)
+                values = (user_id, date, lang)
                 self.cursor.execute(sql, values)
                 self.connection.commit()
             except mysql.connector.Error as err:
@@ -200,20 +200,20 @@ class Database:
                 logging.error(err)
 
 
-    def insert_channel(self, cid, date, add_cid):
+    def insert_channel(self, user_id, date, add_user_id):
         """
         Add a channel to the 'channels' table.
 
         Parameters:
-        cid (int): The channel's ID.
+        user_id (int): The channel's ID.
         date (str): The date the channel was added.
-        add_cid (int): The chat ID of the admin who added the channel.
+        add_user_id (int): The chat ID of the admin who added the channel.
         """
         try:
             sql = """
-            INSERT INTO `channels` (`cid`,`date`,`add_cid`) VALUES (%s,%s,%s)
+            INSERT INTO `channels` (`user_id`,`date`,`add_user_id`) VALUES (%s,%s,%s)
             """
-            values = (cid, date, add_cid)
+            values = (user_id, date, add_user_id)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -223,20 +223,20 @@ class Database:
             logging.error(err)
 
 
-    def insert_admin(self, cid, date, add):
+    def insert_admin(self, user_id, date, add):
         """
         Add an admin to the 'admins' table.
 
         Parameters:
-        cid (int): The admin's chat ID.
+        user_id (int): The admin's chat ID.
         date (str): The date the admin was added.
         add (int): The chat ID of the admin who added this admin.
         """
         try:
             sql = """
-            INSERT INTO `admins` (`cid`,`add_cid`,`date`) VALUES (%s,%s,%s)
+            INSERT INTO `admins` (`user_id`,`add_user_id`,`date`) VALUES (%s,%s,%s)
             """
-            values = (cid, add, date)
+            values = (user_id, add, date)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -246,20 +246,20 @@ class Database:
             logging.error(err)
 
 
-    def insert_user_ban(self, cid, date, admin_cid):
+    def insert_user_ban(self, user_id, date, admin_user_id):
         """
         Add a user to the 'ban' table.
 
         Parameters:
-        cid (int): The user's chat ID.
+        user_id (int): The user's chat ID.
         date (str): The date the user was banned.
-        admin_cid (int): The admin's chat ID who banned the user.
+        admin_user_id (int): The admin's chat ID who banned the user.
         """
         try:
             sql = """
-            INSERT INTO `ban` (`cid`,`admin_cid`,`date`) VALUES (%s,%s,%s)
+            INSERT INTO `ban` (`user_id`,`admin_user_id`,`date`) VALUES (%s,%s,%s)
             """
-            values = (cid, admin_cid, date)
+            values = (user_id, admin_user_id, date)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -292,18 +292,18 @@ class Database:
     ## ------------------ Update ------------------ ##
 
 
-    def update_admin_data(self, cid, column, value):
+    def update_admin_data(self, user_id, column, value):
         """
         Update an admin's data in the 'admins' table.
 
         Parameters:
-        cid (int): The admin's chat ID.
+        user_id (int): The admin's chat ID.
         column (str): The column to be updated.
         value (str): The new value for the specified column.
         """
         try:
-            sql = f"""UPDATE `admins` SET `{column}` = '{value}' WHERE `cid`=%s"""
-            values = (cid,)
+            sql = f"""UPDATE `admins` SET `{column}` = '{value}' WHERE `user_id`=%s"""
+            values = (user_id,)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -334,18 +334,18 @@ class Database:
             logging.error(err)
 
 
-    def check_user_ban(self, cid):
+    def check_user_ban(self, user_id):
         """
         Check if a user is banned.
 
         Parameters:
-        cid (int): The user's chat ID.
+        user_id (int): The user's chat ID.
 
         Returns:
         tuple: The user's ban information if they are banned, None otherwise.
         """
         try:
-            self.cursor.execute("SELECT * FROM `ban` WHERE `cid`=%s", (cid,))
+            self.cursor.execute("SELECT * FROM `ban` WHERE `user_id`=%s", (user_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
@@ -355,15 +355,15 @@ class Database:
             logging.error(err)
 
 
-    def delete_user_ban(self, cid):
+    def delete_user_ban(self, user_id):
         """
         Delete a user from the 'ban' table.
 
         Parameters:
-        cid (int): The user's chat ID.
+        user_id (int): The user's chat ID.
         """
         try:
-            self.cursor.execute("DELETE FROM `ban` WHERE `cid`=%s", (cid,))
+            self.cursor.execute("DELETE FROM `ban` WHERE `user_id`=%s", (user_id,))
         except mysql.connector.Error as err:
             logging.error(err)
             self.reconnect()
@@ -433,18 +433,18 @@ class Database:
             logging.error(err)
 
 
-    def check_user(self, cid):
+    def check_user(self, user_id):
         """
         Check if a user exists in the 'users' table.
 
         Parameters:
-        cid (int): The user's chat ID.
+        user_id (int): The user's chat ID.
 
         Returns:
         tuple: The user's information if they exist, None otherwise.
         """
         try:
-            self.cursor.execute("SELECT * FROM `users` WHERE `cid`=%s", (cid,))
+            self.cursor.execute("SELECT * FROM `users` WHERE `user_id`=%s", (user_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
@@ -454,19 +454,19 @@ class Database:
             logging.error(err)
 
 
-    def select_admin_column(self, cid, column):
+    def select_admin_column(self, user_id, column):
         """
         Select a specific column for an admin from the 'admins' table.
 
         Parameters:
-        cid (int): The admin's chat ID.
+        user_id (int): The admin's chat ID.
         column (str): The column to be selected.
 
         Returns:
         any: The value of the specified column for the admin.
         """
         try:
-            self.cursor.execute(f"SELECT {column} FROM `admins` WHERE `cid`=%s", (cid,))
+            self.cursor.execute(f"SELECT {column} FROM `admins` WHERE `user_id`=%s", (user_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
@@ -476,18 +476,18 @@ class Database:
             logging.error(err)
 
 
-    def select_admin(self, cid):
+    def select_admin(self, user_id):
         """
         Select an admin from the 'admins' table.
 
         Parameters:
-        cid (int): The admin's chat ID.
+        user_id (int): The admin's chat ID.
 
         Returns:
         tuple: The admin's information if they exist, None otherwise.
         """
         try:
-            self.cursor.execute("SELECT * FROM `admins` WHERE `cid`=%s", (cid,))
+            self.cursor.execute("SELECT * FROM `admins` WHERE `user_id`=%s", (user_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
@@ -497,18 +497,18 @@ class Database:
             logging.error(err)
 
 
-    def select_add_admin(self, cid):
+    def select_add_admin(self, user_id):
         """
         Select all admins added by a specific admin from the 'admins' table.
 
         Parameters:
-        cid (int): The chat ID of the admin who added other admins.
+        user_id (int): The chat ID of the admin who added other admins.
 
         Returns:
         list: A list of tuples containing the added admins' information.
         """
         try:
-            self.cursor.execute("SELECT * FROM `admins` WHERE `add_cid`=%s", (cid,))
+            self.cursor.execute("SELECT * FROM `admins` WHERE `add_user_id`=%s", (user_id,))
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
@@ -558,15 +558,15 @@ class Database:
             logging.error(err)
 
 
-    def delete_admin(self, cid):
+    def delete_admin(self, user_id):
         """
         Delete an admin from the 'admins' table.
 
         Parameters:
-        cid (int): The admin's chat ID.
+        user_id (int): The admin's chat ID.
         """
         try:
-            self.cursor.execute("DELETE FROM `admins` WHERE `cid`=%s", (cid,))
+            self.cursor.execute("DELETE FROM `admins` WHERE `user_id`=%s", (user_id,))
         except mysql.connector.Error as err:
             logging.error(err)
             self.reconnect()
@@ -592,18 +592,18 @@ class Database:
             logging.error(err)
 
 
-    def select_channels_add_cid(self, add_cid):
+    def select_channels_add_user_id(self, add_user_id):
         """
         Select all channels added by a specific admin from the 'channels' table.
 
         Parameters:
-        add_cid (int): The chat ID of the admin who added the channels.
+        add_user_id (int): The chat ID of the admin who added the channels.
 
         Returns:
         list: A list of tuples containing the added channels' information.
         """
         try:
-            self.cursor.execute("SELECT * FROM `channels` WHERE `add_cid`=%s", (add_cid,))
+            self.cursor.execute("SELECT * FROM `channels` WHERE `add_user_id`=%s", (add_user_id,))
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
@@ -613,18 +613,18 @@ class Database:
             logging.error(err)
 
 
-    def check_channel(self, cid):
+    def check_channel(self, user_id):
         """
         Check if a channel exists in the 'channels' table.
 
         Parameters:
-        cid (int): The channel's ID.
+        user_id (int): The channel's ID.
 
         Returns:
         tuple: The channel's information if it exists, None otherwise.
         """
         try:
-            self.cursor.execute("SELECT * FROM `channels` WHERE `cid`=%s", (cid,))
+            self.cursor.execute("SELECT * FROM `channels` WHERE `user_id`=%s", (user_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
@@ -657,15 +657,15 @@ class Database:
 
     ## -------------- Delete -------------- ##
 
-    def delete_channel(self, cid):
+    def delete_channel(self, user_id):
         """
         Delete a channel from the 'channels' table.
 
         Parameters:
-        cid (int): The channel's ID.
+        user_id (int): The channel's ID.
         """
         try:
-            self.cursor.execute("DELETE FROM `channels` WHERE `cid`=%s", (cid,))
+            self.cursor.execute("DELETE FROM `channels` WHERE `channel_id`=%s", (user_id,))
         except mysql.connector.Error as err:
             logging.error(err)
             self.reconnect()
