@@ -85,9 +85,9 @@ class Database:
             CREATE TABLE IF NOT EXISTS ban (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `user_id` bigint(200) NOT NULL UNIQUE,
-                `admin_user_id` bigint(200),
+                `initiator_user_id` bigint(200),
                 `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                `date` DATE
+                `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """
             self.cursor.execute(sql)
@@ -109,7 +109,7 @@ class Database:
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `user_id` bigint(200) NOT NULL UNIQUE,
                 `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                `date` DATE,
+                `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 `language_code` varchar(5)
             )
             """
@@ -132,7 +132,7 @@ class Database:
                     `id` INT AUTO_INCREMENT PRIMARY KEY,
                     `channel_id` bigint(200),
                     `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    `date` DATE,
+                    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     `initiator_user_id` bigint(200)
                 );
             """
@@ -164,7 +164,8 @@ class Database:
                     `set_data` TINYINT(1),
                     `get_data` TINYINT(1),
                     `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    `date` DATE
+                    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
                 );
             """
             self.cursor.execute(sql)
@@ -175,22 +176,44 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+    def create_table_settings(self):
+        """
+        Create the 'settings' table if it does not already exist.
+        """
+        try:
+            sql = """
+            CREATE TABLE IF NOT EXISTS `settings` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `updater_user_id` bigint(200) NOT NULL UNIQUE,
+                `initiator_user_id` bigint(200),
+                `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+            self.cursor.execute(sql)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+
     ## ------------------ Insert data ------------------ ##
 
-    def insert_user(self, user_id, date, language_code):
+    def insert_user(self, user_id, language_code):
             """
             Add a user to the 'users' table.
 
             Parameters:
             user_id (int): The user's chat ID.
-            date (str): The date the user was added.
             language_code (str): The user's language_codeuage preference.
             """
             try:
                 sql = """
-                INSERT INTO `users` (`user_id`,`date`,`language_code`) VALUES (%s,%s,%s)
+                INSERT INTO `users` (`user_id`,`language_code`) VALUES (%s,%s)
                 """
-                values = (user_id, date, language_code)
+                values = (user_id, language_code)
                 self.cursor.execute(sql, values)
                 self.connection.commit()
             except mysql.connector.Error as err:

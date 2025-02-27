@@ -3,7 +3,6 @@ from aiogram import types
 from aiogram.filters import CommandStart
 from function.translator import translator
 from loader import dp, bot, db
-from data.config import yil_oy_kun, soat_minut_sekund
 from keyboards.inline.user import send_url
 
 
@@ -46,7 +45,6 @@ async def start_handler(msg: types.Message):
         # Check and log the user if not already in the database
         if db.check_user(user_id) is None:
             db.insert_user(user_id==user_id,
-                           date=f'{yil_oy_kun} / {soat_minut_sekund}',
                            lang=user_language)
     except Exception as err:
         logging.error(f"Error handling /start command: {err}")
