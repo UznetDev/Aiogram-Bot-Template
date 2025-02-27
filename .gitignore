@@ -8,3 +8,7 @@
 /_build*
 /.vscode*
 *my_test
+__pycache__
+__pycache__/*
+*.so
+*.json

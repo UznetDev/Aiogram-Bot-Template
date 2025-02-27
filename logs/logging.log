@@ -1,0 +1,6 @@
+dispatcher.py - start_polling - 527 - aiogram.dispatcher - INFO - Start polling
+dispatcher.py - _polling - 341 - aiogram.dispatcher - INFO - Run polling for bot @Biloger_uzbot id=1430978281 - 'B'
+dispatcher.py - _signal_stop_polling - 455 - aiogram.dispatcher - WARNING - Received SIGINT signal
+dispatcher.py - _polling - 359 - aiogram.dispatcher - INFO - Polling stopped for bot @Biloger_uzbot id=1430978281 - 'B'
+dispatcher.py - start_polling - 554 - aiogram.dispatcher - INFO - Polling stopped
+main.py - main - 39 - root - INFO - 1

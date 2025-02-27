@@ -20,7 +20,7 @@ yil_oy_kun = datetime.datetime.date(datetime.datetime.now())  # The current date
 soat_minut_sekund = f"{datas.hour}:{datas.minute}:{datas.second}"  # The current time (hour:minute:second)
 
 # Define the log file name and path
-log_file_name = 'db/logging.log'  # The log file path for logging database activities
+log_file_name = 'logs/logging.log'  # The log file path for logging database activities
 
 
 # Date and time
