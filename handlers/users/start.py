@@ -35,7 +35,7 @@ async def start_handler(msg: types.Message):
 
         # Create the share button
         share_button = send_url(url=f'{sharing_message} https://t.me/{bot_username}?start',
-                                lang=user_language)
+                                language_code=user_language)
 
         # Translate and personalize the greeting text
         translated_greeting = translator(text=greeting_text, dest=user_language)
@@ -44,8 +44,8 @@ async def start_handler(msg: types.Message):
         await msg.answer(translated_greeting, reply_markup=share_button)
 
         # Check and log the user if not already in the database
-        if db.check_user(cid=user_id) is None:
-            db.insert_user(cid=user_id,
+        if db.check_user(user_id) is None:
+            db.insert_user(user_id==user_id,
                            date=f'{yil_oy_kun} / {soat_minut_sekund}',
                            lang=user_language)
     except Exception as err:

@@ -1,7 +1,7 @@
 /.idea/
 /__pycache__/
 /env/
-/db/
+/logs/
 /build/
 /.command*
 /.env

@@ -21,14 +21,14 @@ async def ban_handler(msg: types.Message):
     try:
         # Get the user's language code and ID
         lang = msg.from_user.language_code
-        cid = msg.from_user.id
+        user_id = msg.from_user.id
 
         # Check if the user is banned and retrieve ban information
-        info = db.check_user_ban(cid=cid)
+        info = db.check_user_ban(user_id=user_id)
         logging.info(f"User ban info: {info}")
 
         # Retrieve admin information
-        admin_info = await bot.get_chat(chat_id=info[2])
+        admin_info = await bot.get_chat(chat_id=info['admin_user_id'])
         admins = await bot.get_chat(chat_id=ADMIN)
 
         # Create the response message
@@ -41,8 +41,8 @@ async def ban_handler(msg: types.Message):
         await msg.answer(text=f"<b>{text}</b>", reply_markup=close_btn())
 
         # Add the user to the database if they are not already present
-        if db.check_user(cid=cid) is None:
-            db.insert_user(cid=cid,
+        if db.check_user(user_id=user_id) is None:
+            db.insert_user(user_id=user_id,
                            date=f"{yil_oy_kun} / {soat_minut_sekund}")
 
     except Exception as err:

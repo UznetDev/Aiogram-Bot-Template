@@ -34,7 +34,7 @@ async def check_join(call: types.CallbackQuery):
 
         # Iterate through the channels
         for x in channels_list:
-            channel_id = str(-100) + str(x[1])
+            channel_id = str(-100) + str(x['channel_id'])
             channel = await bot.get_chat(channel_id)
 
             try:

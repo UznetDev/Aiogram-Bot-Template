@@ -83,11 +83,11 @@ class Database:
         try:
             sql = """
             CREATE TABLE IF NOT EXISTS ban (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id bigint(20) NOT NULL UNIQUE,
-                admin_user_id bigint(20),
-                update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                date varchar(255)
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `user_id` bigint(200) NOT NULL UNIQUE,
+                `admin_user_id` bigint(200),
+                `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `date` DATE
             )
             """
             self.cursor.execute(sql)
@@ -106,11 +106,11 @@ class Database:
         try:
             sql = """
             CREATE TABLE IF NOT EXISTS users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id bigint(20) NOT NULL UNIQUE,
-                update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                date varchar(255),
-                lang varchar(5)
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `user_id` bigint(200) NOT NULL UNIQUE,
+                `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `date` DATE,
+                `language_code` varchar(5)
             )
             """
             self.cursor.execute(sql)
@@ -128,12 +128,12 @@ class Database:
         """
         try:
             sql = """
-                CREATE TABLE IF NOT EXISTS channels (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    channel_id bigint(200),
-                    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    date varchar(255),
-                    add_user_id int(200)
+                CREATE TABLE IF NOT EXISTS `channels` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `channel_id` bigint(200),
+                    `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    `date` DATE,
+                    `initiator_user_id` bigint(200)
                 );
             """
             self.cursor.execute(sql)
@@ -152,19 +152,19 @@ class Database:
         try:
             sql = """
                 CREATE TABLE IF NOT EXISTS admins (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    user_id bigint(20) NOT NULL UNIQUE,
-                    add_user_id bigint(20),
-                    send_message TINYINT(1),
-                    statistika TINYINT(1),
-                    download_statistika TINYINT(1),
-                    block_user TINYINT(1),
-                    channel_settings TINYINT(1),
-                    add_admin TINYINT(1),
-                    set TINYINT(1),
-                    get TINYINT(1),
-                    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    date varchar(255)
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `user_id` bigint(200) NOT NULL UNIQUE,
+                    `initiator_user_id` bigint(200),
+                    `send_message` TINYINT(1),
+                    `statistika` TINYINT(1),
+                    `download_statistika` TINYINT(1),
+                    `block_user` TINYINT(1),
+                    `channel_settings` TINYINT(1),
+                    `add_admin` TINYINT(1),
+                    `set_data` TINYINT(1),
+                    `get_data` TINYINT(1),
+                    `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    `date` DATE
                 );
             """
             self.cursor.execute(sql)
@@ -177,20 +177,20 @@ class Database:
 
     ## ------------------ Insert data ------------------ ##
 
-    def insert_user(self, user_id, date, lang):
+    def insert_user(self, user_id, date, language_code):
             """
             Add a user to the 'users' table.
 
             Parameters:
             user_id (int): The user's chat ID.
             date (str): The date the user was added.
-            lang (str): The user's language preference.
+            language_code (str): The user's language_codeuage preference.
             """
             try:
                 sql = """
-                INSERT INTO `users` (`user_id`,`date`,`lang`) VALUES (%s,%s,%s)
+                INSERT INTO `users` (`user_id`,`date`,`language_code`) VALUES (%s,%s,%s)
                 """
-                values = (user_id, date, lang)
+                values = (user_id, date, language_code)
                 self.cursor.execute(sql, values)
                 self.connection.commit()
             except mysql.connector.Error as err:
@@ -200,20 +200,20 @@ class Database:
                 logging.error(err)
 
 
-    def insert_channel(self, user_id, date, add_user_id):
+    def insert_channel(self, user_id, date, initiator_user_id):
         """
         Add a channel to the 'channels' table.
 
         Parameters:
         user_id (int): The channel's ID.
         date (str): The date the channel was added.
-        add_user_id (int): The chat ID of the admin who added the channel.
+        initiator_user_id (int): The chat ID of the admin who added the channel.
         """
         try:
             sql = """
-            INSERT INTO `channels` (`user_id`,`date`,`add_user_id`) VALUES (%s,%s,%s)
+            INSERT INTO `channels` (`user_id`,`date`,`initiator_user_id`) VALUES (%s,%s,%s)
             """
-            values = (user_id, date, add_user_id)
+            values = (user_id, date, initiator_user_id)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -234,7 +234,7 @@ class Database:
         """
         try:
             sql = """
-            INSERT INTO `admins` (`user_id`,`add_user_id`,`date`) VALUES (%s,%s,%s)
+            INSERT INTO `admins` (`user_id`,`initiator_user_id`,`date`) VALUES (%s,%s,%s)
             """
             values = (user_id, add, date)
             self.cursor.execute(sql, values)
@@ -508,7 +508,7 @@ class Database:
         list: A list of tuples containing the added admins' information.
         """
         try:
-            self.cursor.execute("SELECT * FROM `admins` WHERE `add_user_id`=%s", (user_id,))
+            self.cursor.execute("SELECT * FROM `admins` WHERE `initiator_user_id`=%s", (user_id,))
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
@@ -592,18 +592,18 @@ class Database:
             logging.error(err)
 
 
-    def select_channels_add_user_id(self, add_user_id):
+    def select_channels_initiator_user_id(self, initiator_user_id):
         """
         Select all channels added by a specific admin from the 'channels' table.
 
         Parameters:
-        add_user_id (int): The chat ID of the admin who added the channels.
+        initiator_user_id (int): The chat ID of the admin who added the channels.
 
         Returns:
         list: A list of tuples containing the added channels' information.
         """
         try:
-            self.cursor.execute("SELECT * FROM `channels` WHERE `add_user_id`=%s", (add_user_id,))
+            self.cursor.execute("SELECT * FROM `channels` WHERE `initiator_user_id`=%s", (initiator_user_id,))
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:

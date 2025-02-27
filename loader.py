@@ -3,7 +3,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.bot import DefaultBotProperties  # Yangi versiyadagi default sozlamalar uchun
 from data.config import *  # Konfiguratsiyalarni import qilamiz
-from utils.db_api.mysql_db import Database
+from db.database import Database
 from cython_code.file_db import BotDb, FileDB
 
 # Botni token va default parametr orqali yaratamiz
