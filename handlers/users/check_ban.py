@@ -42,8 +42,8 @@ async def ban_handler(msg: types.Message):
 
         # Add the user to the database if they are not already present
         if db.check_user(cid=cid) is None:
-            db.add_user(cid=cid,
-                        date=f"{yil_oy_kun} / {soat_minut_sekund}")
+            db.insert_user(cid=cid,
+                           date=f"{yil_oy_kun} / {soat_minut_sekund}")
 
     except Exception as err:
         logging.error(f"Error in start_handler: {err}")

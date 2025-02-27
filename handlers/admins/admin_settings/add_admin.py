@@ -51,9 +51,9 @@ async def add_admin(msg: types.Message, state: FSMContext):
 
                 if check is None:
                     # Add the new admin to the database
-                    db.add_admin(cid=user_id,
-                                 date=f"{yil_oy_kun} / {soat_minut_sekund}",
-                                 add=cid)
+                    db.insert_admin(cid=user_id,
+                                    date=f"{yil_oy_kun} / {soat_minut_sekund}",
+                                    add=cid)
                     text = translator(text="✅ Admin has been successfully added\n\nName: ",
                                       dest=lang)
                     text += f"{user.full_name}\n"

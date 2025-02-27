@@ -48,9 +48,9 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
                 check = db.check_user_ban(cid=user_id)  # Check if the user is already banned
                 user = await bot.get_chat(chat_id=user_id)  # Get user details
                 if check is None:
-                    db.add_user_ban(cid=user_id,
-                                    admin_cid=cid,
-                                    date=f'{yil_oy_kun} / {soat_minut_sekund}')  # Add user to ban list
+                    db.insert_user_ban(cid=user_id,
+                                       admin_cid=cid,
+                                       date=f'{yil_oy_kun} / {soat_minut_sekund}')  # Add user to ban list
                     text = translator(text='⛔ User blocked\n\n Username: @', dest=lang)
                     text += str(user.username)
                     await bot.send_message(chat_id=user_id,

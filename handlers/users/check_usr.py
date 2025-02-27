@@ -60,8 +60,8 @@ async def start_handler(msg: types.Message):
 
         # Add user to the database if not already present
         if db.check_user(cid=user_id) is None:
-            db.add_user(cid=user_id,
-                        date=f"{date_day_month} / {time_hour_minute_second}")
+            db.insert_user(cid=user_id,
+                           date=f"{date_day_month} / {time_hour_minute_second}")
     except Exception as err:
         logging.error(f"Error in start_handler: {err}")
 

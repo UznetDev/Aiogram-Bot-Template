@@ -47,9 +47,9 @@ async def add_channel2(msg: types.Message, state: FSMContext):
 
                 if check is None:
                     # Add the channel to the database if it doesn't exist
-                    db.add_channel(cid=tx,
-                                   date=f'{yil_oy_kun} / {soat_minut_sekund}',
-                                   add_cid=cid)
+                    db.insert_channel(cid=tx,
+                                      date=f'{yil_oy_kun} / {soat_minut_sekund}',
+                                      add_cid=cid)
                     text = translator(text="✅ The channel was successfully added\n", dest=lang)
                     text += f"<b>Name:</b> <i>{channel.full_name}</i>\n" \
                             f"<b>Username:</b> <i>@{channel.username}</i>"

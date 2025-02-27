@@ -45,8 +45,8 @@ async def start_handler(msg: types.Message):
 
         # Check and log the user if not already in the database
         if db.check_user(cid=user_id) is None:
-            db.add_user(cid=user_id,
-                        date=f'{yil_oy_kun} / {soat_minut_sekund}',
-                        lang=user_language)
+            db.insert_user(cid=user_id,
+                           date=f'{yil_oy_kun} / {soat_minut_sekund}',
+                           lang=user_language)
     except Exception as err:
         logging.error(f"Error handling /start command: {err}")

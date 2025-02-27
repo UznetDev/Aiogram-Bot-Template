@@ -3,6 +3,7 @@ import mysql.connector
 
 
 class Database:
+
     def __init__(self, host, user, password, database):
         """
         Initialize the Database object with connection parameters.
@@ -19,9 +20,31 @@ class Database:
         self.database = database
         self.reconnect()
 
+
     def reconnect(self):
         """
-        Reconnect to the MySQL database. If the connection fails, log the error and attempt to reconnect.
+        Reconnect to the MySQL database.
+
+        This method initializes or re-initializes the database connection and cursor
+        objects. It is generally called:
+          - Right after the object is created (inside __init__).
+          - After a failed connection or if a connection error occurs.
+        
+        If the connection is successful, `self.connection` and `self.cursor` are 
+        reset. If it fails, an error is logged and re-raised.
+
+        Returns:
+            None
+
+        Raises:
+            mysql.connector.Error: 
+                If connecting to the database fails due to invalid credentials, 
+                unreachable host, etc.
+
+        Example:
+            >>> db = Database("root", "secret", "my_database")
+            >>> # If for some reason the connection is lost, you can manually reconnect:
+            >>> db.reconnect()
         """
         try:
             self.connection = mysql.connector.connect(
@@ -29,14 +52,29 @@ class Database:
                 user=self.user,
                 password=self.password,
                 database=self.database,
+                connection_timeout=30,
                 autocommit=True
             )
-            self.cursor = self.connection.cursor()
+            self.cursor = self.connection.cursor(dictionary=True)
         except mysql.connector.Error as err:
-            logging.error(err)
+            logging.error(f"Database connection error: {err}")
+            raise
+
+
+    def __del__(self):
+        """
+        Close the database connection when the Database object is deleted.
+        """
+        try:
+            self.connection.close()
+        except mysql.connector.Error as err:
+            logging.error(f"MySQL Error: {err}")
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            logging.error(f"General Error: {err}")
+
+
+    ## --------------------- Create table ------------------##
 
     def create_table_ban(self):
         """
@@ -48,6 +86,7 @@ class Database:
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 cid bigint(20) NOT NULL UNIQUE,
                 admin_cid bigint(20),
+                update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 date varchar(255)
             )
             """
@@ -59,7 +98,155 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def add_user_ban(self, cid, date, admin_cid):
+
+    def create_table_users(self):
+        """
+        Create the 'users' table if it does not already exist.
+        """
+        try:
+            sql = """
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                cid bigint(20) NOT NULL UNIQUE,
+                update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                date varchar(255),
+                lang varchar(5)
+            )
+            """
+            self.cursor.execute(sql)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+
+    def create_table_channel(self):
+        """
+        Create the 'channels' table if it does not already exist.
+        """
+        try:
+            sql = """
+                CREATE TABLE IF NOT EXISTS channels (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    cid bigint(200),
+                    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    date varchar(255),
+                    add_cid int(200)
+                );
+            """
+            self.cursor.execute(sql)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+
+    def create_table_admins(self):
+        """
+        Create the 'admins' table if it does not already exist.
+        """
+        try:
+            sql = """
+                CREATE TABLE IF NOT EXISTS admins (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    cid bigint(20) NOT NULL UNIQUE,
+                    add_cid bigint(20),
+                    send_message TINYINT(1),
+                    statistika TINYINT(1),
+                    download_statistika TINYINT(1),
+                    block_user TINYINT(1),
+                    channel_settings TINYINT(1),
+                    add_admin TINYINT(1),
+                    set TINYINT(1),
+                    get TINYINT(1),
+                    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    date varchar(255)
+                );
+            """
+            self.cursor.execute(sql)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+    ## ------------------ Insert data ------------------ ##
+
+    def insert_user(self, cid, date, lang):
+            """
+            Add a user to the 'users' table.
+
+            Parameters:
+            cid (int): The user's chat ID.
+            date (str): The date the user was added.
+            lang (str): The user's language preference.
+            """
+            try:
+                sql = """
+                INSERT INTO `users` (`cid`,`date`,`lang`) VALUES (%s,%s,%s)
+                """
+                values = (cid, date, lang)
+                self.cursor.execute(sql, values)
+                self.connection.commit()
+            except mysql.connector.Error as err:
+                logging.error(err)
+                self.reconnect()
+            except Exception as err:
+                logging.error(err)
+
+
+    def insert_channel(self, cid, date, add_cid):
+        """
+        Add a channel to the 'channels' table.
+
+        Parameters:
+        cid (int): The channel's ID.
+        date (str): The date the channel was added.
+        add_cid (int): The chat ID of the admin who added the channel.
+        """
+        try:
+            sql = """
+            INSERT INTO `channels` (`cid`,`date`,`add_cid`) VALUES (%s,%s,%s)
+            """
+            values = (cid, date, add_cid)
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+
+    def insert_admin(self, cid, date, add):
+        """
+        Add an admin to the 'admins' table.
+
+        Parameters:
+        cid (int): The admin's chat ID.
+        date (str): The date the admin was added.
+        add (int): The chat ID of the admin who added this admin.
+        """
+        try:
+            sql = """
+            INSERT INTO `admins` (`cid`,`add_cid`,`date`) VALUES (%s,%s,%s)
+            """
+            values = (cid, add, date)
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+
+    def insert_user_ban(self, cid, date, admin_cid):
         """
         Add a user to the 'ban' table.
 
@@ -81,6 +268,7 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+
     def select_all_users_ban(self):
         """
         Select all users from the 'ban' table.
@@ -100,6 +288,32 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+    
+    ## ------------------ Update ------------------ ##
+
+
+    def update_admin_data(self, cid, column, value):
+        """
+        Update an admin's data in the 'admins' table.
+
+        Parameters:
+        cid (int): The admin's chat ID.
+        column (str): The column to be updated.
+        value (str): The new value for the specified column.
+        """
+        try:
+            sql = f"""UPDATE `admins` SET `{column}` = '{value}' WHERE `cid`=%s"""
+            values = (cid,)
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+    ## ------------------ Select ------------------ ##
+
 
     def stat_ban(self):
         """
@@ -118,6 +332,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
 
     def check_user_ban(self, cid):
         """
@@ -139,6 +354,7 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+
     def delete_user_ban(self, cid):
         """
         Delete a user from the 'ban' table.
@@ -154,48 +370,6 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def create_table_users(self):
-        """
-        Create the 'users' table if it does not already exist.
-        """
-        try:
-            sql = """
-            CREATE TABLE IF NOT EXISTS users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                cid bigint(20) NOT NULL UNIQUE,
-                date varchar(255),
-                lang varchar(5)
-            )
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
-
-    def add_user(self, cid, date, lang):
-        """
-        Add a user to the 'users' table.
-
-        Parameters:
-        cid (int): The user's chat ID.
-        date (str): The date the user was added.
-        lang (str): The user's language preference.
-        """
-        try:
-            sql = """
-            INSERT INTO `users` (`cid`,`date`,`lang`) VALUES (%s,%s,%s)
-            """
-            values = (cid, date, lang)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
 
     def select_all_users(self):
         """
@@ -216,6 +390,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
 
     def select_users_by_id(self, start_id: int, end_id: int) -> list:
         """
@@ -238,6 +413,7 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+
     def stat(self):
         """
         Get the total number of users.
@@ -255,6 +431,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
 
     def check_user(self, cid):
         """
@@ -276,52 +453,6 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def create_table_admins(self):
-        """
-        Create the 'admins' table if it does not already exist.
-        """
-        try:
-            sql = """
-                CREATE TABLE IF NOT EXISTS admins (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    cid bigint(20) NOT NULL UNIQUE,
-                    add_cid bigint(20),
-                    send_message TINYINT(1),
-                    statistika TINYINT(1),
-                    download_statistika TINYINT(1),
-                    block_user TINYINT(1),
-                    channel_settings TINYINT(1),
-                    add_admin TINYINT(1),
-                    date varchar(255)
-                );
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
-
-    def update_admin_data(self, cid, column, value):
-        """
-        Update an admin's data in the 'admins' table.
-
-        Parameters:
-        cid (int): The admin's chat ID.
-        column (str): The column to be updated.
-        value (str): The new value for the specified column.
-        """
-        try:
-            sql = f"""UPDATE `admins` SET `{column}` = '{value}' WHERE `cid`=%s"""
-            values = (cid,)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
 
     def select_admin_column(self, cid, column):
         """
@@ -344,27 +475,6 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def add_admin(self, cid, date, add):
-        """
-        Add an admin to the 'admins' table.
-
-        Parameters:
-        cid (int): The admin's chat ID.
-        date (str): The date the admin was added.
-        add (int): The chat ID of the admin who added this admin.
-        """
-        try:
-            sql = """
-            INSERT INTO `admins` (`cid`,`add_cid`,`date`) VALUES (%s,%s,%s)
-            """
-            values = (cid, add, date)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
 
     def select_admin(self, cid):
         """
@@ -386,6 +496,7 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+
     def select_add_admin(self, cid):
         """
         Select all admins added by a specific admin from the 'admins' table.
@@ -405,6 +516,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
 
     def select_all_admins(self):
         """
@@ -426,6 +538,7 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+
     def stat_admins(self):
         """
         Get the total number of admins.
@@ -444,6 +557,7 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+
     def delete_admin(self, cid):
         """
         Delete an admin from the 'admins' table.
@@ -459,48 +573,6 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def create_table_channel(self):
-        """
-        Create the 'channels' table if it does not already exist.
-        """
-        try:
-            sql = """
-                CREATE TABLE IF NOT EXISTS channels (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    cid bigint(200),
-                    date varchar(255),
-                    add_cid int(200)
-                );
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
-
-    def add_channel(self, cid, date, add_cid):
-        """
-        Add a channel to the 'channels' table.
-
-        Parameters:
-        cid (int): The channel's ID.
-        date (str): The date the channel was added.
-        add_cid (int): The chat ID of the admin who added the channel.
-        """
-        try:
-            sql = """
-            INSERT INTO `channels` (`cid`,`date`,`add_cid`) VALUES (%s,%s,%s)
-            """
-            values = (cid, date, add_cid)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
 
     def select_channels(self):
         """
@@ -518,6 +590,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
 
     def select_channels_add_cid(self, add_cid):
         """
@@ -539,6 +612,7 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+
     def check_channel(self, cid):
         """
         Check if a channel exists in the 'channels' table.
@@ -558,6 +632,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
 
     def select_all_channel(self):
         """
@@ -579,6 +654,9 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+
+    ## -------------- Delete -------------- ##
+
     def delete_channel(self, cid):
         """
         Delete a channel from the 'channels' table.
@@ -594,14 +672,4 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-    def __del__(self):
-        """
-        Close the database connection when the Database object is deleted.
-        """
-        try:
-            self.connection.close()
-        except mysql.connector.Error as err:
-            logging.error(f"MySQL Error: {err}")
-            self.reconnect()
-        except Exception as err:
-            logging.error(f"General Error: {err}")
+
