@@ -86,6 +86,7 @@ class Database:
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `user_id` bigint(200) NOT NULL UNIQUE,
                 `initiator_user_id` bigint(200),
+                `updater_user_id` bigint(200),
                 `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -105,7 +106,7 @@ class Database:
         """
         try:
             sql = """
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS `users` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `user_id` bigint(200) NOT NULL UNIQUE,
                 `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -131,9 +132,11 @@ class Database:
                 CREATE TABLE IF NOT EXISTS `channels` (
                     `id` INT AUTO_INCREMENT PRIMARY KEY,
                     `channel_id` bigint(200),
+                    `initiator_user_id` bigint(200),
+                    `updater_user_id` bigint(200)
                     `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    `initiator_user_id` bigint(200)
+                    `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
                 );
             """
             self.cursor.execute(sql)
@@ -151,10 +154,11 @@ class Database:
         """
         try:
             sql = """
-                CREATE TABLE IF NOT EXISTS admins (
+                CREATE TABLE IF NOT EXISTS `admins` (
                     `id` INT AUTO_INCREMENT PRIMARY KEY,
                     `user_id` bigint(200) NOT NULL UNIQUE,
                     `initiator_user_id` bigint(200),
+                    `updater_user_id` bigint(200),
                     `send_message` TINYINT(1),
                     `statistika` TINYINT(1),
                     `download_statistika` TINYINT(1),
@@ -165,7 +169,6 @@ class Database:
                     `get_data` TINYINT(1),
                     `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-
                 );
             """
             self.cursor.execute(sql)
@@ -175,6 +178,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
 
     def create_table_settings(self):
         """
