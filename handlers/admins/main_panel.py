@@ -28,7 +28,7 @@ async def main_panel(msg: types.Message, state: FSMContext):
     """
     try:
         user_ud = msg.from_user.id
-        mid = msg.message_id
+        message_id = msg.message_id
         lang = msg.from_user.language_code
 
         # Translate and send the welcome message with admin panel buttons
@@ -51,7 +51,7 @@ async def main_panel(msg: types.Message, state: FSMContext):
         })
 
         # Delete the original command message
-        await bot.delete_message(chat_id=user_ud, message_id=mid)
+        await bot.delete_message(chat_id=user_ud, message_id=message_id)
 
     except Exception as err:
         logging.error(f"Unhandled error: {err}")
