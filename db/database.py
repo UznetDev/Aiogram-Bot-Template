@@ -223,20 +223,19 @@ class Database:
                 logging.error(err)
 
 
-    def insert_channel(self, user_id, date, initiator_user_id):
+    def insert_channel(self, user_id, initiator_user_id):
         """
         Add a channel to the 'channels' table.
 
         Parameters:
         user_id (int): The channel's ID.
-        date (str): The date the channel was added.
         initiator_user_id (int): The chat ID of the admin who added the channel.
         """
         try:
             sql = """
-            INSERT INTO `channels` (`user_id`,`date`,`initiator_user_id`) VALUES (%s,%s,%s)
+            INSERT INTO `channels` (`user_id`, `initiator_user_id`) VALUES (%s,%s)
             """
-            values = (user_id, date, initiator_user_id)
+            values = (user_id, initiator_user_id)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -246,20 +245,19 @@ class Database:
             logging.error(err)
 
 
-    def insert_admin(self, user_id, date, add):
+    def insert_admin(self, user_id, add):
         """
         Add an admin to the 'admins' table.
 
         Parameters:
         user_id (int): The admin's chat ID.
-        date (str): The date the admin was added.
         add (int): The chat ID of the admin who added this admin.
         """
         try:
             sql = """
-            INSERT INTO `admins` (`user_id`,`initiator_user_id`,`date`) VALUES (%s,%s,%s)
+            INSERT INTO `admins` (`user_id`,`admin_user_idinitiator_user_id`) VALUES (%s,%s)
             """
-            values = (user_id, add, date)
+            values = (user_id, add)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -269,20 +267,19 @@ class Database:
             logging.error(err)
 
 
-    def insert_user_ban(self, user_id, date, admin_user_id):
+    def insert_user_ban(self, user_id, admin_user_id):
         """
         Add a user to the 'ban' table.
 
         Parameters:
         user_id (int): The user's chat ID.
-        date (str): The date the user was banned.
         admin_user_id (int): The admin's chat ID who banned the user.
         """
         try:
             sql = """
-            INSERT INTO `ban` (`user_id`,`admin_user_id`,`date`) VALUES (%s,%s,%s)
+            INSERT INTO `ban` (`user_id`,`admin_user_id`) VALUES (%s,%s)
             """
-            values = (user_id, admin_user_id, date)
+            values = (user_id, admin_user_id)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -292,26 +289,6 @@ class Database:
             logging.error(err)
 
 
-    def select_all_users_ban(self):
-        """
-        Select all users from the 'ban' table.
-
-        Returns:
-        list: A list of tuples containing all banned users.
-        """
-        try:
-            sql = """
-            SELECT * FROM `ban`
-            """
-            self.cursor.execute(sql)
-            result = self.cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
-    
     ## ------------------ Update ------------------ ##
 
 
@@ -337,6 +314,27 @@ class Database:
 
     ## ------------------ Select ------------------ ##
 
+
+    def select_all_users_ban(self):
+        """
+        Select all users from the 'ban' table.
+
+        Returns:
+        list: A list of tuples containing all banned users.
+        """
+        try:
+            sql = """
+            SELECT * FROM `ban`
+            """
+            self.cursor.execute(sql)
+            result = self.cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+    
 
     def stat_ban(self):
         """
