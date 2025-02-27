@@ -76,29 +76,6 @@ class Database:
 
     ## --------------------- Create table ------------------##
 
-    def create_table_ban(self):
-        """
-        Create the 'ban' table if it does not already exist.
-        """
-        try:
-            sql = """
-            CREATE TABLE IF NOT EXISTS `ban` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `user_id` bigint(200) NOT NULL UNIQUE,
-                `initiator_user_id` bigint(200),
-                `updater_user_id` bigint(200),
-                `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
-
 
     def create_table_users(self):
         """
@@ -109,6 +86,9 @@ class Database:
             CREATE TABLE IF NOT EXISTS `users` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `user_id` bigint(200) NOT NULL UNIQUE,
+                `status` VARCHAR(255) IN ('remove', 'active', 'blocked', 'ban', 'unban', 'sleep', 'active') DEFAULT 'active',
+                `initiator_user_id` bigint(200),
+                `updater_user_id` bigint(200),
                 `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 `language_code` varchar(5)
@@ -247,17 +227,39 @@ class Database:
                 logging.error(err)
 
 
-    def insert_channel(self, user_id, initiator_user_id):
+    def insert_channel(self, channel_id, initiator_user_id):
         """
         Add a channel to the 'channels' table.
 
         Parameters:
-        user_id (int): The channel's ID.
+        channel_id (int): The channel's ID.
         initiator_user_id (int): The chat ID of the admin who added the channel.
         """
         try:
             sql = """
-            INSERT INTO `channels` (`user_id`, `initiator_user_id`) VALUES (%s,%s)
+            INSERT INTO `channels` (`channel_id`, `initiator_user_id`) VALUES (%s,%s)
+            """
+            values = (channel_id, initiator_user_id)
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+
+    def insert_admin(self, user_id, initiator_user_id):
+        """
+        Add an admin to the 'admins' table.
+
+        Parameters:
+        user_id (int): The admin's chat ID.
+        initiator_user_id (int): The chat ID of the admin who added this admin.
+        """
+        try:
+            sql = """
+            INSERT INTO `admins` (`user_id`,`initiator_user_id`) VALUES (%s,%s)
             """
             values = (user_id, initiator_user_id)
             self.cursor.execute(sql, values)
@@ -268,49 +270,6 @@ class Database:
         except Exception as err:
             logging.error(err)
 
-
-    def insert_admin(self, user_id, add):
-        """
-        Add an admin to the 'admins' table.
-
-        Parameters:
-        user_id (int): The admin's chat ID.
-        add (int): The chat ID of the admin who added this admin.
-        """
-        try:
-            sql = """
-            INSERT INTO `admins` (`user_id`,`admin_user_idinitiator_user_id`) VALUES (%s,%s)
-            """
-            values = (user_id, add)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
-
-
-    def insert_user_ban(self, user_id, admin_user_id):
-        """
-        Add a user to the 'ban' table.
-
-        Parameters:
-        user_id (int): The user's chat ID.
-        admin_user_id (int): The admin's chat ID who banned the user.
-        """
-        try:
-            sql = """
-            INSERT INTO `ban` (`user_id`,`admin_user_id`) VALUES (%s,%s)
-            """
-            values = (user_id, admin_user_id)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            logging.error(err)
-            self.reconnect()
-        except Exception as err:
-            logging.error(err)
 
 
     ## ------------------ Update ------------------ ##
@@ -338,7 +297,7 @@ class Database:
             logging.error(err)
 
 
-    def update_admin_data(self, user_id, column, value):
+    def update_admin_data(self, user_id, column, value, updater_user_id):
         """
         Update an admin's data in the 'admins' table.
 
@@ -346,9 +305,13 @@ class Database:
         user_id (int): The admin's chat ID.
         column (str): The column to be updated.
         value (str): The new value for the specified column.
+        updater_user_id (int): The chat ID of the admin who updated the data.
+        Returns:
+            None
+        
         """
         try:
-            sql = f"""UPDATE `admins` SET `{column}` = '{value}' WHERE `user_id`=%s"""
+            sql = f"""UPDATE `admins` SET `{column}` = '{value}', `updater_user_id` = '{updater_user_id}' WHERE `user_id`=%s"""
             values = (user_id,)
             self.cursor.execute(sql, values)
             self.connection.commit()
@@ -357,6 +320,8 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
+
 
     ## ------------------ Select ------------------ ##
 
