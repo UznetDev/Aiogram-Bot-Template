@@ -53,9 +53,9 @@ class IsAdmin(BaseFilter):
         Returns:
             bool: True if the user is an admin or the super admin, False otherwise.
         """
-        self.user_ud = message.from_user.id
-        self.dada = db.select_admin(user_ud=self.user_ud)
-        if self.user_ud == ADMIN:
+        self.user_id = message.from_user.id
+        self.dada = db.select_admin(user_id=self.user_id)
+        if self.user_id == ADMIN:
             return True
         elif self.dada is not None:
             return True
@@ -68,15 +68,15 @@ class SelectAdmin:
     Class to handle various admin-related actions.
 
     Attributes:
-        user_ud (int): The user ID.
+        user_id (int): The user ID.
         super_admin (int): The ID of the super admin.
         dada (list): The admin details from the database.
     """
 
-    def __init__(self, user_ud):
-        self.user_ud = user_ud
+    def __init__(self, user_id):
+        self.user_id = user_id
         self.super_admin = ADMIN
-        self.dada = db.select_admin(user_ud=self.user_ud)
+        self.dada = db.select_admin(user_id=self.user_id)
 
     def send_message(self) -> bool:
         """
@@ -85,9 +85,9 @@ class SelectAdmin:
         Returns:
             bool: True if the user can send messages, False otherwise.
         """
-        if self.user_ud == self.super_admin:
+        if self.user_id == self.super_admin:
             return True
-        elif self.dada[3] == 1:
+        elif self.dada['send_message'] == 1:
             return True
         else:
             return False
@@ -99,9 +99,9 @@ class SelectAdmin:
         Returns:
             bool: True if the user can view statistics, False otherwise.
         """
-        if self.user_ud == self.super_admin:
+        if self.user_id == self.super_admin:
             return True
-        elif self.dada[4] == 1:
+        elif self.dada['statistika'] == 1:
             return True
         else:
             return False
@@ -113,9 +113,9 @@ class SelectAdmin:
         Returns:
             bool: True if the user can download statistics, False otherwise.
         """
-        if self.user_ud == self.super_admin:
+        if self.user_id == self.super_admin:
             return True
-        elif self.dada[5] == 1:
+        elif self.dada['download_statistika'] == 1:
             return True
         else:
             return False
@@ -127,9 +127,9 @@ class SelectAdmin:
         Returns:
             bool: True if the user can block users, False otherwise.
         """
-        if self.user_ud == self.super_admin:
+        if self.user_id == self.super_admin:
             return True
-        elif self.dada[6] == 1:
+        elif self.dada['block_user'] == 1:
             return True
         else:
             return False
@@ -141,9 +141,9 @@ class SelectAdmin:
         Returns:
             bool: True if the user can change channel settings, False otherwise.
         """
-        if self.user_ud == self.super_admin:
+        if self.user_id == self.super_admin:
             return True
-        elif self.dada[7] == 1:
+        elif self.dada['channel_settings'] == 1:
             return True
         else:
             return False
@@ -155,10 +155,37 @@ class SelectAdmin:
         Returns:
             bool: True if the user can add new admins, False otherwise.
         """
-        if self.user_ud == self.super_admin:
+        if self.user_id == self.super_admin:
             return True
-        elif self.dada[8] == 1:
+        elif self.dada['add_admin'] == 1:
             return True
         else:
             return False
 
+
+    def set_data(self) -> bool:
+        """
+        Checks if the user has permission to set data.
+        Returns:
+           bool: True if the user can set data, False otherwise.
+           """
+        if self.user_id == self.super_admin:
+            return True
+        elif self.dada['set_data'] == 1:
+            return True
+        else:
+            return False
+        
+        
+    def get_data(self) -> bool:
+        """
+        Checks if the user has permission to get data.
+        Returns:
+           bool: True if the user can get data, False otherwise.
+           """
+        if self.user_id == self.super_admin:
+            return True
+        elif self.dada['get_data'] == 1:
+            return True
+        else:
+            return False

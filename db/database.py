@@ -487,7 +487,7 @@ class Database:
         tuple: The admin's information if they exist, None otherwise.
         """
         try:
-            self.cursor.execute("SELECT * FROM `admins` WHERE `user_id`=%s", (user_id,))
+            self.cursor.execute("SELECT * FROM `admins` WHERE `user_id`=%s LIMIT 1", (user_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
