@@ -186,6 +186,8 @@ class Database:
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `updater_user_id` bigint(200) NOT NULL UNIQUE,
                 `initiator_user_id` bigint(200),
+                `key` VARCHAR(255) NOT NULL,
+                `value` VARCHAR(255) NOT NULL,
                 `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -200,6 +202,24 @@ class Database:
 
 
     ## ------------------ Insert data ------------------ ##
+
+    def insert_settings(self, initiator_user_id, key, value):
+        """
+        Add a setting to the 'settings' table.
+        """
+        try:
+            sql = """
+            INSERT INTO `settings` (`updater_user_id`, `initiator_user_id`, `key`, `value`) VALUES (%s, %s, %s, %s)
+            """
+            values = (initiator_user_id, initiator_user_id, key, value)
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
 
     def insert_user(self, user_id, language_code):
             """
@@ -291,6 +311,28 @@ class Database:
 
     ## ------------------ Update ------------------ ##
 
+    def update_settings_key(self, updater_user_id, key, value):
+        """
+        Update a setting in the 'settings' table.
+        Parameters:
+        updater_user_id (int): The chat ID of the admin who updated the setting.
+        initiator_user_id (int): The chat ID of the admin who initiated the update.
+        key (str): The key of the setting to be updated.
+        value (str): The new value for the setting.
+        """
+        try:
+            sql = """
+            UPDATE `settings` SET `value`=%s, `updater_user_id`=%s,  WHERE `key`=%s
+            """
+            values = (value, updater_user_id, key)
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
 
     def update_admin_data(self, user_id, column, value):
         """
@@ -313,6 +355,26 @@ class Database:
             logging.error(err)
 
     ## ------------------ Select ------------------ ##
+
+    def select_setting(self, key: str):
+        """
+        Select a setting from the 'settings' table.
+        Parameters:
+        key (str): The key of the setting to retrieve.
+        Returns:
+        str: The value of the setting.
+        """
+        try:
+            sql = "SELECT `value` FROM `settings` WHERE `key`=%s"
+            values = (key,)
+            self.cursor.execute(sql, values)
+            result = self.cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
 
 
     def select_all_users_ban(self):
