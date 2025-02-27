@@ -82,7 +82,7 @@ class Database:
         """
         try:
             sql = """
-            CREATE TABLE IF NOT EXISTS ban (
+            CREATE TABLE IF NOT EXISTS `ban` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `user_id` bigint(200) NOT NULL UNIQUE,
                 `initiator_user_id` bigint(200),
@@ -133,7 +133,7 @@ class Database:
                     `id` INT AUTO_INCREMENT PRIMARY KEY,
                     `channel_id` bigint(200),
                     `initiator_user_id` bigint(200),
-                    `updater_user_id` bigint(200)
+                    `updater_user_id` bigint(200),
                     `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
