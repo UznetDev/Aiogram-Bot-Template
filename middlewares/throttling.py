@@ -3,7 +3,10 @@ import time
 from data.config import ADMIN
 from keyboards.inline.close_btn import close_btn
 from aiogram import BaseMiddleware, types
-from aiogram.dispatcher.event.handler import HandlerObject
+from aiogram.filters import BaseFilter
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import Message, CallbackQuery
+from keyboards.inline.button import MainCallback
 from loader import bot, db
 from function.translator import translator
 
@@ -38,71 +41,244 @@ class ThrottlingMiddleware(BaseMiddleware):
         # Determine user id and language code.
         if event.message:
             user_id = event.message.from_user.id
-            lang = event.message.from_user.language_code
+            language_code = event.message.from_user.language_code
         elif event.callback_query:
             user_id = event.callback_query.from_user.id
-            lang = event.callback_query.from_user.language_code
+            language_code = event.callback_query.from_user.language_code
         else:
-            lang = 'en'
+            language_code = 'en'
             return await handler(event, data)
+
 
         if user_id == ADMIN:
             return await handler(event, data)
 
-        if real_handler.flags.get("skip_pass") is not None:
-            skip_pass = real_handler.flags.get("skip_pass")
+        user_data = db.check_user(user_id=user_id)
+        if user_data:
+            is_ban = await self.check_ban(user_data)
+            if is_ban:
+                return 
 
-        now = time.time()
-        # For each user we track:
-        # "last": timestamp of the last request,
-        # "count": number of throttled events in the current window,
-        # "first": start timestamp of the current 1-minute window.
-        user_data = self.limiters.get(user_id, {"last": now, "count": 0, "first": now})
+            if real_handler.flags.get("skip_pass") is not None:
+                skip_pass = real_handler.flags.get("skip_pass")
 
-        if skip_pass:
-            # If enough time has passed since the last request, reset the throttling counter.
-            if now - user_data["last"] >= self.default_rate:
-                user_data["last"] = now
-                user_data["count"] = 0  # Reset counter.
-                user_data["first"] = now
-                self.limiters[user_id] = user_data
-                return await handler(event, data)
-            else:
-                # Update the throttling counter. If the current window is over 60 seconds, reset it.
-                if now - user_data["first"] > 60:
-                    user_data["count"] = 0
+            now = time.time()
+            # For each user we track:
+            # "last": timestamp of the last request,
+            # "count": number of throttled events in the current window,
+            # "first": start timestamp of the current 1-minute window.
+            user_data = self.limiters.get(user_id, {"last": now, "count": 0, "first": now})
+
+            if skip_pass:
+                # If enough time has passed since the last request, reset the throttling counter.
+                if now - user_data["last"] >= self.default_rate:
+                    user_data["last"] = now
+                    user_data["count"] = 0  # Reset counter.
                     user_data["first"] = now
-                user_data["count"] += 1
-
-                # Agar throttling hisobi 3 yoki undan ko'p bo'lsa, foydalanuvchini ban qilamiz.
-                if user_data["count"] >= 3:
-                    try:
-                        db.ban_user_for_one_hour(user_id, comment="Too many requests")
-                        tx = translator(
-                            text='You have been banned for 1 hour due to too many requests.',
-                            dest=lang
-                        )
-                        await bot.send_message(chat_id=user_id, text=tx)
-                    except Exception as err:
-                        logging.error(f"Error banning user {user_id}: {err}")
-                    # Reset the counter to oldindan qayta-ban qilishdan saqlanish uchun.
-                    user_data["count"] = 0
+                    self.limiters[user_id] = user_data
+                    return await handler(event, data)
                 else:
-                    try:
-                        tx = translator(text='Many requests have been made', dest=lang)
-                        try:
-                            await event.callback_query.answer(tx)
-                        except Exception:
-                            await bot.send_message(
-                                chat_id=user_id,
-                                text=tx,
-                                reply_markup=close_btn()
-                            )
-                    except Exception as err:
-                        logging.error(err)
+                    # Update the throttling counter. If the current window is over 60 seconds, reset it.
+                    if now - user_data["first"] > 60:
+                        user_data["count"] = 0
+                        user_data["first"] = now
+                    user_data["count"] += 1
 
-                user_data["last"] = now
-                self.limiters[user_id] = user_data
-                return
+                    # Agar throttling hisobi 3 yoki undan ko'p bo'lsa, foydalanuvchini ban qilamiz.
+                    if user_data["count"] >= 3:
+                        try:
+                            db.ban_user_for_one_hour(user_id, comment="1 hour due to too many requests.")
+                            tx = translator(
+                                text='You have been banned for 1 hour due to too many requests.',
+                                dest=language_code
+                            )
+                            await bot.send_message(chat_id=user_id, text=tx)
+                        except Exception as err:
+                            logging.error(f"Error banning user {user_id}: {err}")
+                        # Reset the counter to oldindan qayta-ban qilishdan saqlanish uchun.
+                        user_data["count"] = 0
+                    else:
+                        try:
+                            tx = translator(text='Many requests have been made', dest=language_code)
+                            try:
+                                await event.callback_query.answer(tx)
+                            except Exception:
+                                await bot.send_message(
+                                    chat_id=user_id,
+                                    text=tx,
+                                    reply_markup=close_btn()
+                                )
+                        except Exception as err:
+                            logging.error(err)
+
+                    user_data["last"] = now
+                    self.limiters[user_id] = user_data
+                    return
+            else:
+                return await handler(event, data)
         else:
+            db.insert_user(user_id=user_id, 
+                           language_code=language_code)
             return await handler(event, data)
+
+
+
+
+
+
+    async def check_ban(self, user_data):
+        try:
+
+            if user_data['status'] == 'ban':
+                text = translator(text="🛑 You are banned!:\n"
+                        "⚠ If you think this is a mistake, contact the admin.",
+                    dest=user_data['language_code'])
+                if user_data['initiator_user_id'] == 1 or user_data['initiator_user_id'] == 0:
+                    text += f"\n\n<b>👮‍♂️ Admin: Bot</b>\n "
+                elif user_data['initiator_user_id'] is not None:
+                    admin_info = await bot.get_chat(chat_id=user_data['updater_user_id'])
+                    text += f"\n\n<b>👮‍♂️ Admin @{admin_info.username}</b>\n "
+                if user_data['comment'] is not None:
+                    text += f"\n<b>📝 Comment: {user_data['comment']}</b>\n"
+
+                if user_data['ban_time'] is not None:
+                    text += f"\n<b>📅 Ban time: {user_data['ban_time']}</b>\n"
+
+                admins = await bot.get_chat(chat_id=ADMIN)
+
+                text += f'<b>👩‍💻 Super admin @{admins.username}</b>\n'
+
+                await bot.send_message(chat_id=user_data['user_id'], 
+                                       text=f"<b>{text}</b>", 
+                                       reply_markup=close_btn())
+                return True
+            else:
+                return False
+        except Exception as err:
+            logging.error(err)
+            return False
+        
+    async def check_member(self, user_id):
+        try:
+            is_mandatory = await db.select_setting('mandatory_membership')
+            if is_mandatory is None:
+                db.update_settings_key(updater_user_id=1, key='mandatory_membership', value=False)
+                return False
+            elif is_mandatory == 'False':
+                return False
+            elif is_mandatory == 'True':
+                try:
+                    channels = db.select_channels()
+                except Exception as err:
+                    logging.error(f"Error selecting channels: {err}")
+                    return False
+
+                for channel in channels:
+                    try:
+                        chat_id = int("-100" + str(channel.get('channel_id')))
+                        res = await bot.get_chat_member(chat_id=chat_id, user_id=user_id)
+                        
+                        if res.status not in ('member', 'administrator', 'creator'):
+                            count = 0
+
+                            keyboard = InlineKeyboardBuilder()
+                            message_text = translator(text="🛑 You have not joined the channel(s)!:\n\n", dest=language_code)
+
+                            for x in channels:
+                                channel_id = str(-100) + str(x['channel_id'])
+                                channel = await bot.get_chat(channel_id)
+
+                                try:
+                                    chat_member_status = await bot.get_chat_member(chat_id=channel_id, user_id=user_id)
+                                except Exception as e:
+                                    logging.error(f"Error getting chat member status: {e}")
+                                    continue
+
+                                # Check if the user is a member of the channel
+                                if chat_member_status.status not in ('member', 'administrator', 'creator'):
+                                    count += 1
+                                    message_text += f"\n{count}. ⭕ <b>{channel.full_name}</b> <i>@{channel.username} ❓</i>\n"
+                                    keyboard.button(text='➕ ' + channel.title,
+                                                    url=f"{await channel.export_invite_link()}")
+
+                            # Add a button to check again
+                            keyboard.button(text=translator(text='♻ Check!', dest=language_code),
+                                            callback_data=MainCallback(action="check_join", q='').pack())
+                            keyboard.adjust(1)
+
+                            # Send the message to the user
+                            await msg.answer(text=f"<b>{message_text}</b>", reply_markup=keyboard.as_markup())
+                            return True
+                    except Exception as err:
+                        logging.error(f"Error checking membership for channel {channel.get('channel_id')}: {err}")
+                        continue
+
+                # If all channels checked and no problems found, return False.
+                return False
+
+
+        except Exception as err:
+            logging.error(err)
+            return False
+    
+
+
+
+
+
+
+class UserCheck(BaseFilter, BaseMiddleware):
+    """
+    Middleware and filter class to check if a user is a member of required channels.
+    Ensures that users are members of specified channels before they can access certain bot features.
+    """
+
+    def __init__(self):
+        self.ADMIN = ADMIN
+
+    async def __call__(self, message: Message = None, call: CallbackQuery = None) -> bool:
+        # Check if channel joining is required
+        try:
+            data = DB.reading_db()
+        except Exception as err:
+            logging.error(f"Error reading DB: {err}")
+            return False
+
+        if not data.get('join_channel'):
+            return False
+
+        # Extract user_id and language from message or callback query.
+        if message is not None:
+            user_id = message.from_user.id
+            lang = message.from_user.language_code
+        elif call is not None:
+            user_id = call.from_user.id
+            lang = call.from_user.language_code
+        else:
+            return False
+
+        # Bypass the check for the admin user.
+        if user_id == self.ADMIN:
+            return False
+
+        # Check each channel's membership.
+        try:
+            channels = db.select_channels()
+        except Exception as err:
+            logging.error(f"Error selecting channels: {err}")
+            return False
+
+        # For each required channel, check if the user is a member.
+        for channel in channels:
+            try:
+                chat_id = int("-100" + str(channel.get('channel_id')))
+                res = await bot.get_chat_member(chat_id=chat_id, user_id=user_id)
+                if res.status not in ('member', 'administrator', 'creator'):
+                    # If the user is not a member in any one channel, force is True.
+                    return True
+            except Exception as err:
+                logging.error(f"Error checking membership for channel {channel.get('channel_id')}: {err}")
+                continue
+
+        # If all channels checked and no problems found, return False.
+        return False

@@ -42,9 +42,5 @@ async def start_handler(msg: types.Message):
         # Send the greeting and share button
         await msg.answer(translated_greeting, reply_markup=share_button)
 
-        # Check and log the user if not already in the database
-        if db.check_user(user_id) is None:
-            db.insert_user(user_id=user_id,
-                           language_code=user_language)
     except Exception as err:
         logging.error(f"Error handling /start command: {err}")

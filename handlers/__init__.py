@@ -1,5 +1,4 @@
 from .errors import error_handler
-from .users import check_ban
 
 from .users import check_usr
 
