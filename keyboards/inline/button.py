@@ -44,7 +44,7 @@ class AdminSetting(CallbackData, prefix="admin_setting"):
         user_ud (int): The ID of the admin or user related to the setting.
     """
     action: str
-    user_ud: int
+    user_id: int
 
 class BlockUser(CallbackData, prefix="block_user"):
     """

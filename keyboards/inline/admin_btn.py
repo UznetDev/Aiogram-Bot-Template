@@ -103,7 +103,7 @@ async def admin_setting(user_ud, lang):
             data = db.select_add_admin(user_ud=user_ud)
         if data is not None:
             for x in data:
-                info = await bot.get_chat(chat_id=x[1])
+                info = await bot.get_chat(chat_id=x['user_ud'])
                 btn.button(text=f"👮‍♂️ @{info.username}: {info.full_name}!",
                            callback_data=AdminSetting(action="attach_admin", user_ud=x[1]).pack())
         btn.button(text=translator(text=f"👮‍♂️ ADD Admin!",
@@ -304,7 +304,7 @@ def block_user(user_ud, lang, user_id):
                                            dest=lang),
                            callback_data=BlockUser(action="block", user_ud=user_id).pack())
             else:
-                if data[2] == user_ud or user_ud == ADMIN:
+                if (data['initiator_user_id'] == user_ud or data['updater_user_id'] == user_ud) or user_ud == ADMIN:
                     btn.button(text=translator(text=f"✅Unblock user!",
                                                dest=lang),
                                callback_data=BlockUser(action="block", user_ud=user_id).pack())
