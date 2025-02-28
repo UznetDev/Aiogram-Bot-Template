@@ -51,11 +51,11 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
 
             # Populate lists with user data
             for user in data:
-                id_list.append(user[0])
-                user_ud_list.append(user[1])
-                date_list.append(user[2])
-                langs.append(user[3])
-                user_info = await bot.get_chat(chat_id=user[1])
+                id_list.append(user['id'])
+                user_ud_list.append(user['user_id'])
+                date_list.append(user['created_time'])
+                langs.append(user['language_code'])
+                user_info = await bot.get_chat(chat_id=user['user_id'])
                 usernames.append(f'@{user_info.username}')
 
             # Create a DataFrame and save it to an Excel file

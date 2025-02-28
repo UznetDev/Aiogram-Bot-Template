@@ -23,7 +23,6 @@ async def main():
         try:
             file_db.add_data(False, key='ads')
             db.create_table_admins()  # Create the admins table
-            db.create_table_ban()  # Create the ban table
             db.create_table_users()  # Create the users table
             db.create_table_channel()  # Create the channel table
         except Exception as err:

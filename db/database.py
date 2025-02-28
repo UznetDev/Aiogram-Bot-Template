@@ -322,6 +322,26 @@ class Database:
             logging.error(err)
 
 
+    def update_user_status(self, user_id, status, updater_user_id):
+        """
+        Update a user's status in the 'users' table.
+        Parameters:
+        user_id (int): The user's chat ID.
+        status (str): The new status for the user.
+        Returns:
+           None
+        """
+        try: 
+            sql = f"""UPDATE `users` SET `status` = '{status}', `updater_user_id` = '{updater_user_id}' WHERE `user_id`=%s"""
+            values = (user_id,)
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
 
     ## ------------------ Select ------------------ ##
 
@@ -350,14 +370,14 @@ class Database:
     # Select all users from the 'ban' table.
     def select_all_users_ban(self):
         """
-        Select all users from the 'ban' table.
+        Select all users from the 'users' table.
 
         Returns:
         list: A list of tuples containing all banned users.
         """
         try:
             sql = """
-            SELECT * FROM `ban`
+            SELECT * FROM `users` WHERE `status`='ban'`
             """
             self.cursor.execute(sql)
             result = self.cursor.fetchall()
@@ -377,7 +397,7 @@ class Database:
         int: The total number of banned users.
         """
         try:
-            sql = "SELECT COUNT(*) FROM `ban`;"
+            sql = "SELECT COUNT(*) FROM `users` WHERE `status`='ban'`;"
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             return result[0]
@@ -399,7 +419,7 @@ class Database:
         tuple: The user's ban information if they are banned, None otherwise.
         """
         try:
-            self.cursor.execute("SELECT * FROM `ban` WHERE `user_id`=%s", (user_id,))
+            self.cursor.execute("SELECT * FROM `users` WHERE `status`='ban' AND `user_id`=%s", (user_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
