@@ -43,13 +43,12 @@ async def add_channel2(msg: types.Message, state: FSMContext):
                 tx = msg.text  # The text message containing the channel ID
                 k_id = int(str(-100) + str(tx))  # Format the channel ID for API
                 channel = await bot.get_chat(chat_id=k_id)  # Get channel details using the Telegram API
-                check = db.check_channel(user_ud=tx)  # Check if the channel is already in the database
+                check = db.check_channel(channel_id=tx)  # Check if the channel is already in the database
 
                 if check is None:
                     # Add the channel to the database if it doesn't exist
-                    db.insert_channel(user_ud=tx,
-                                      date=f'{yil_oy_kun} / {soat_minut_sekund}',
-                                      add_user_ud=user_ud)
+                    db.insert_channel(channel_id=tx,
+                                      initiator_user_id=user_ud)
                     text = translator(text="✅ The channel was successfully added\n", dest=lang)
                     text += f"<b>Name:</b> <i>{channel.full_name}</i>\n" \
                             f"<b>Username:</b> <i>@{channel.username}</i>"

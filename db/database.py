@@ -145,8 +145,6 @@ class Database:
                     `block_user` TINYINT(1) DEFAULT 0,
                     `channel_settings` TINYINT(1) DEFAULT 0,
                     `add_admin` TINYINT(1) DEFAULT 0,
-                    `set_data` TINYINT(1) DEFAULT 0,
-                    `get_data` TINYINT(1) DEFAULT 0,
                     `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
@@ -690,7 +688,7 @@ class Database:
             logging.error(err)
 
 
-    def check_channel(self, user_id):
+    def check_channel(self, channel_id):
         """
         Check if a channel exists in the 'channels' table.
 
@@ -701,7 +699,7 @@ class Database:
         tuple: The channel's information if it exists, None otherwise.
         """
         try:
-            self.cursor.execute("SELECT * FROM `channels` WHERE `user_id`=%s", (user_id,))
+            self.cursor.execute("SELECT * FROM `channels` WHERE `channel_id`=%s", (channel_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
@@ -734,7 +732,7 @@ class Database:
 
     ## -------------- Delete -------------- ##
 
-    def delete_channel(self, user_id):
+    def delete_channel(self, channel_id):
         """
         Delete a channel from the 'channels' table.
 
@@ -742,7 +740,7 @@ class Database:
         user_id (int): The channel's ID.
         """
         try:
-            self.cursor.execute("DELETE FROM `channels` WHERE `channel_id`=%s", (user_id,))
+            self.cursor.execute("DELETE FROM `channels` WHERE `channel_id`=%s", (channel_id,))
         except mysql.connector.Error as err:
             logging.error(err)
             self.reconnect()

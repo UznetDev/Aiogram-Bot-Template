@@ -44,7 +44,7 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
                 data = db.select_channels()
             else:
                 # Retrieve channels added by the current admin
-                data = db.select_channels_add_user_ud(add_user_ud=user_ud)
+                data = db.select_channels_initiator_user_id(initiator_user_id=user_ud)
 
             if not data:
                 # If no channels are found, indicate that the list is empty

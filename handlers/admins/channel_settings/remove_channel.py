@@ -45,7 +45,7 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
             if user_ud == ADMIN:
                 data = db.select_channels()
             else:
-                data = db.select_channels_add_user_ud(add_user_ud=user_ud)
+                data = db.select_channels_initiator_user_id(initiator_user_id=user_ud)
 
             if not data:
                 # Inform the admin if no channels are available
@@ -58,10 +58,10 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
                 for x in data:
                     try:
                         count += 1
-                        channel = await bot.get_chat(chat_id=str(-100) + str(x[1]))
+                        channel = await bot.get_chat(chat_id=str(-100) + str(x['channel_id']))
                         # Add a button for each channel to the keyboard
                         btn.button(text=f"{channel.full_name}: @{channel.username}",
-                                   callback_data=AdminCallback(action="delete_channel", data=str(x[1])).pack())
+                                   callback_data=AdminCallback(action="delete_channel", data=str(x['channel_id'])).pack())
                         text += (f"<b><i>{count}</i>. Name:</b> <i>{channel.full_name}</i>\n"
                                  f"<b>Username:</b> <i>@{channel.username}</i>\n"
                                  f"<b>Added date:</b> <i>{x[2]}</i>\n\n")

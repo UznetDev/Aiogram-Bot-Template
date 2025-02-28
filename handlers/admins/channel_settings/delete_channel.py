@@ -53,7 +53,7 @@ async def delete_channel(call: types.CallbackQuery, callback_data: AdminCallback
 
                 if check[3] == user_ud or user_ud == ADMIN:
                     # Delete the channel if the user is authorized
-                    db.delete_channel(user_ud=ch_user_ud)
+                    db.delete_channel(channel_id=ch_user_ud)
                     tx = translator(text='<b><i>🚫 Channel removed...</i></b>\n', dest=lang)
                     text = (f"{tx}\n"
                             f"<b>Name:</b> <i>{channel.full_name}</i>\n"
