@@ -23,7 +23,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
     - state (FSMContext): The FSM context for managing the bot's conversation state.
 
     Functionality:
-    - Extracts the current admin's ID (`user_ud`), message ID (`mid`), language code (`lang`), target admin ID (`admin_user_ud`), and the key to be edited (`edit_key`).
+    - Extracts the current admin's ID (`user_id`), message ID (`mid`), language code (`lang`), target admin ID (`admin_user_id`), and the key to be edited (`edit_key`).
     - Checks if the current admin has the right to modify admin settings.
     - If permitted, fetches the target admin's data.
     - Depending on the edit key, either deletes the target admin or updates a specific admin permission.
@@ -38,35 +38,35 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
     - Catches and logs any exceptions that occur during the execution of the function.
     """
     try:
-        user_ud = call.from_user.id  # Current admin's ID
+        user_id = call.from_user.id  # Current admin's ID
         mid = call.message.message_id  # Message ID to be updated
         lang = call.from_user.language_code  # Admin's language preference
-        admin_user_ud = callback_data.user_ud  # ID of the target admin to be modified
+        admin_user_id = callback_data.user_id  # ID of the target admin to be modified
         edit_key = callback_data.data  # The key indicating what action to perform
-        data = SelectAdmin(user_ud=user_ud)  # Fetches the current admin's data
+        data = SelectAdmin(user_id=user_id)  # Fetches the current admin's data
         add_admin = data.add_admin()  # Checks if the current admin can add admins
         btn = close_btn()  # Default button to close the operation
 
         # Check if the admin has rights to add another admin
         if add_admin:
-            admin_data = db.select_admin(user_ud=admin_user_ud)  # Fetch data for the target admin
+            admin_data = db.select_admin(user_id=admin_user_id)  # Fetch data for the target admin
             if admin_data is None:
-                text = f'⛔{admin_user_ud} {translator(text="😪 Not available in admin list!", dest=lang)}'
+                text = f'⛔{admin_user_id} {translator(text="😪 Not available in admin list!", dest=lang)}'
             else:
-                if admin_data[2] == user_ud or user_ud == ADMIN:
+                if admin_data[2] == user_id or user_id == ADMIN:
                     if edit_key == "delete_admin":
                         # If the edit action is to delete the admin
-                        db.delete_admin(user_ud=admin_user_ud)
-                        admin_info = await bot.get_chat(chat_id=admin_user_ud)
+                        db.delete_admin(user_id=admin_user_id)
+                        admin_info = await bot.get_chat(chat_id=admin_user_id)
                         text = f'🔪 @{admin_info.username} {translator(text="✅ Removed from admin!", dest=lang)}'
-                        await bot.send_message(chat_id=admin_user_ud, text='😪 Your admin rights have been revoked!')
+                        await bot.send_message(chat_id=admin_user_id, text='😪 Your admin rights have been revoked!')
                     else:
                         # Update the specific admin permission
-                        select_column = db.select_admin_column(user_ud=admin_user_ud, column=edit_key)
+                        select_column = db.select_admin_column(user_id=admin_user_id, column=edit_key)
                         new_value = 0 if select_column[0] == 1 else 1
-                        db.update_admin_data(user_ud=admin_user_ud, column=edit_key, value=new_value)
-                        btn = attach_admin_btn(user_ud=admin_user_ud, lang=lang)
-                        is_admin = SelectAdmin(user_ud=admin_user_ud)
+                        db.update_admin_data(user_id=admin_user_id, column=edit_key, value=new_value)
+                        btn = attach_admin_btn(user_id=admin_user_id, lang=lang)
+                        is_admin = SelectAdmin(user_id=admin_user_id)
                         send_message_tx = x_or_y(is_admin.send_message())
                         view_statistika_tx = x_or_y(is_admin.view_statistika())
                         download_statistika_tx = x_or_y(is_admin.download_statistika())
@@ -88,7 +88,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
 
         # Update the message with the admin rights information or error message
-        await bot.edit_message_text(chat_id=user_ud, message_id=mid, text=f"<b>{text}</b>", reply_markup=btn)
+        await bot.edit_message_text(chat_id=user_id, message_id=mid, text=f"<b>{text}</b>", reply_markup=btn)
         await state.set_state(AdminState.add_admin)  # Set the state to add admin
         await state.update_data({"message_id": call.message.message_id})  # Update the state data with the message ID
     except Exception as err:

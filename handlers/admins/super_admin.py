@@ -42,17 +42,17 @@ async def super_admin(msg: types.Message):
         data = db.select_all_users_ban()
 
         id_list = []
-        user_ud_list = []
+        user_id_list = []
         date_list = []
         username_list = []
-        admin_user_ud = []
+        admin_user_id = []
 
         try:
             # Collecting data for the DataFrame
             for x in data:
                 id_list.append(x['id'])
-                user_ud_list.append(x['user_id'])
-                admin_user_ud.append(x['admin_user_id'])
+                user_id_list.append(x['user_id'])
+                admin_user_id.append(x['admin_user_id'])
                 date_list.append(x['date'])
 
                 # Fetching username from chat ID
@@ -62,8 +62,8 @@ async def super_admin(msg: types.Message):
             # Creating and saving DataFrame to Excel
             x_data = {
                 "id": id_list,
-                "user_ud": user_ud_list,
-                "admin_user_ud": admin_user_ud,
+                "user_id": user_id_list,
+                "admin_user_id": admin_user_id,
                 "date_add": date_list,
                 "username": username_list
             }

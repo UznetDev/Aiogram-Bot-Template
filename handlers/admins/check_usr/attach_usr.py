@@ -49,7 +49,7 @@ async def attach_user(msg: types.Message, state: FSMContext):
                 if check1 is not None:
                     btn = block_user(attention_user_id=attention_user_id, user_id=user_id, lang=lang)  # Button for blocking/unblocking user
                     if check is None:
-                        check2 = db.select_admin(user_ud=attention_user_id)  # Check if the user is an admin
+                        check2 = db.select_admin(user_id=attention_user_id)  # Check if the user is an admin
                         select_user = db.check_user(user_id)  # Get information about the user
 
                         if check2 is None:
