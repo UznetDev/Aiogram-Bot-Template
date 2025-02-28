@@ -6,6 +6,7 @@ from aiogram.filters import Command
 from data.config import log_file_name
 from filters.admin import IsSuperAdmin
 from loader import dp, bot, db
+from aiogram.types import FSInputFile
 
 
 @dp.message(IsSuperAdmin(), Command(commands='stat'))
@@ -70,11 +71,13 @@ async def super_admin(msg: types.Message):
             excel_path = 'data/ban.xlsx'
             df.to_excel(excel_path, index=False)
 
-            # Sending the generated Excel file
-            document = types.InputFile(excel_path)
-            await bot.send_document(chat_id=user_ud,
-                                    document=document,
-                                    caption='<b>Ban list</b>')
+            # Sending the generated Excel file using FSInputFile
+            document = FSInputFile(excel_path)
+            await bot.send_document(
+                chat_id=user_ud,
+                document=document,
+                caption='<b>Ban list</b>'
+            )
             os.remove(excel_path)
 
         except Exception as err:
@@ -83,10 +86,12 @@ async def super_admin(msg: types.Message):
         try:
             # Sending the log file if it exists
             if os.path.exists(log_file_name) and os.path.getsize(log_file_name) > 0:
-                document2 = types.InputFile(log_file_name)
-                await bot.send_document(chat_id=user_ud,
-                                        document=document2,
-                                        caption='<b>Update log</b>')
+                document2 = FSInputFile(log_file_name)
+                await bot.send_document(
+                    chat_id=user_ud,
+                    document=document2,
+                    caption='<b>Update log</b>'
+                )
         except Exception as err:
             logging.error(f"Error sending log file: {err}")
 
@@ -95,4 +100,3 @@ async def super_admin(msg: types.Message):
 
     except Exception as err:
         logging.error(f"Unhandled error: {err}")
-

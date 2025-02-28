@@ -30,7 +30,7 @@ def main_btn():
         return False
 
 
-def main_admin_panel_btn(user_ud, lang):
+def main_admin_panel_btn(user_id, lang):
     """
     Creates the inline keyboard for the main admin panel.
 
@@ -50,7 +50,7 @@ def main_admin_panel_btn(user_ud, lang):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = SelectAdmin(user_ud=user_ud)
+        is_admin = SelectAdmin(user_id=user_id)
         if is_admin.add_admin():
             btn.button(text=translator(text=f"👮‍♂️ Admins settings!",
                                        dest=lang),
