@@ -425,10 +425,10 @@ class Database:
         int: The total number of banned users.
         """
         try:
-            sql = "SELECT COUNT(*) FROM `users` WHERE `status`='ban'`;"
+            sql = "SELECT COUNT(*) AS user_count FROM `users` WHERE `status`='ban';"
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
-            return result[0]
+            return result['user_count']
         except mysql.connector.Error as err:
             logging.error(err)
             self.reconnect()
@@ -525,10 +525,10 @@ class Database:
         int: The total number of users.
         """
         try:
-            sql = "SELECT COUNT(*) FROM `users`;"
+            sql = "SELECT COUNT(*) AS total_users FROM `users`;"
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
-            return result[0]
+            return result['total_users']
         except mysql.connector.Error as err:
             logging.error(err)
             self.reconnect()
@@ -570,7 +570,7 @@ class Database:
         any: The value of the specified column for the admin.
         """
         try:
-            self.cursor.execute(f"SELECT {column} FROM `admins` WHERE `user_id`=%s", (user_id,))
+            self.cursor.execute(f"SELECT {column} AS result FROM `admins` WHERE `user_id`=%s", (user_id,))
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:

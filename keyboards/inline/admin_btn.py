@@ -105,7 +105,7 @@ async def admin_setting(user_id, lang):
             for x in data:
                 info = await bot.get_chat(chat_id=x['user_id'])
                 btn.button(text=f"👮‍♂️ @{info.username}: {info.full_name}!",
-                           callback_data=AdminSetting(action="attach_admin", user_id=x[1]).pack())
+                           callback_data=AdminSetting(action="attach_admin", user_id=x['user_id']).pack())
         btn.button(text=translator(text=f"👮‍♂️ ADD Admin!",
                                    dest=lang),
                    callback_data=AdminCallback(action="add_admin", data="").pack())
@@ -175,7 +175,7 @@ def attach_admin(user_id, lang):
         return False
 
 
-def attach_admin_btn(user_id, lang):
+def attach_admin_btn(user_id, language_code):
     """
     Creates the inline keyboard for managing admin settings.
 
@@ -203,28 +203,28 @@ def attach_admin_btn(user_id, lang):
         channel_settings_tx = x_or_y(is_admin.channel_settings())
         add_admin_tx = x_or_y(is_admin.add_admin())
         btn.button(text=translator(text=f"{send_message_tx} Send a message!",
-                                   dest=lang),
+                                   dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='send_message').pack())
 
         btn.button(text=translator(text=f"{wiew_statistika_tx} Wiew statistics!",
-                                   dest=lang),
+                                   dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='statistika').pack())
 
         btn.button(text=translator(text=f"{download_statistika_tx} Download statistics!",
-                                   dest=lang),
+                                   dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='download_statistika').pack())
 
         btn.button(text=translator(text=f"{block_user_tx} Block user!",
-                                   dest=lang),
+                                   dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='block_user').pack())
         btn.button(text=translator(text=f"{channel_settings_tx} Channel settings!",
-                                   dest=lang),
+                                   dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='channel_settings').pack())
         btn.button(text=translator(text=f"{add_admin_tx} Add a admin!",
-                                   dest=lang),
+                                   dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='add_admin').pack())
         btn.button(text=translator(text=f"🔪Delete admin!",
-                                   dest=lang),
+                                   dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='delete_admin').pack())
         btn.adjust(1)
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))

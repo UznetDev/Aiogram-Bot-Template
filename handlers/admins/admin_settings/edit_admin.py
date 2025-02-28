@@ -40,7 +40,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
     try:
         user_id = call.from_user.id  # Current admin's ID
         mid = call.message.message_id  # Message ID to be updated
-        lang = call.from_user.language_code  # Admin's language preference
+        language_code = call.from_user.language_code  # Admin's language preference
         admin_user_id = callback_data.user_id  # ID of the target admin to be modified
         edit_key = callback_data.data  # The key indicating what action to perform
         data = SelectAdmin(user_id=user_id)  # Fetches the current admin's data
@@ -51,21 +51,21 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
         if add_admin:
             admin_data = db.select_admin(user_id=admin_user_id)  # Fetch data for the target admin
             if admin_data is None:
-                text = f'⛔{admin_user_id} {translator(text="😪 Not available in admin list!", dest=lang)}'
+                text = f'⛔{admin_user_id} {translator(text="😪 Not available in admin list!", dest=language_code)}'
             else:
-                if admin_data[2] == user_id or user_id == ADMIN:
+                if admin_data['initiator_user_id'] == user_id or user_id == ADMIN:
                     if edit_key == "delete_admin":
                         # If the edit action is to delete the admin
                         db.delete_admin(user_id=admin_user_id)
                         admin_info = await bot.get_chat(chat_id=admin_user_id)
-                        text = f'🔪 @{admin_info.username} {translator(text="✅ Removed from admin!", dest=lang)}'
+                        text = f'🔪 @{admin_info.username} {translator(text="✅ Removed from admin!", dest=language_code)}'
                         await bot.send_message(chat_id=admin_user_id, text='😪 Your admin rights have been revoked!')
                     else:
                         # Update the specific admin permission
                         select_column = db.select_admin_column(user_id=admin_user_id, column=edit_key)
-                        new_value = 0 if select_column[0] == 1 else 1
-                        db.update_admin_data(user_id=admin_user_id, column=edit_key, value=new_value)
-                        btn = attach_admin_btn(user_id=admin_user_id, lang=lang)
+                        new_value = 0 if select_column['result'] == 1 else 1
+                        db.update_admin_data(user_id=admin_user_id, column=edit_key, value=new_value, updater_user_id=user_id)
+                        btn = attach_admin_btn(user_id=admin_user_id, language_code=language_code)
                         is_admin = SelectAdmin(user_id=admin_user_id)
                         send_message_tx = x_or_y(is_admin.send_message())
                         view_statistika_tx = x_or_y(is_admin.view_statistika())
@@ -81,11 +81,14 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
                                f'<b>Channel settings: {channel_settings_tx}</b>\n' \
                                f'<b>Add admin: {add_admin_tx}</b>\n' \
                                f'<b>Date added: </b>'
-                        text += str(admin_data[9])
+                        text += str(admin_data['created_time'])
+                        text += f'\n<b>Updated added: </b>'
+                        text += str(admin_data['updated_time']) 
+
                 else:
-                    text = translator(text='🛑 You can only change the admin rights you assigned!', dest=lang)
+                    text = translator(text='🛑 You can only change the admin rights you assigned!', dest=language_code)
         else:
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
 
         # Update the message with the admin rights information or error message
         await bot.edit_message_text(chat_id=user_id, message_id=mid, text=f"<b>{text}</b>", reply_markup=btn)
