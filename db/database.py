@@ -85,13 +85,14 @@ class Database:
             sql = """
             CREATE TABLE IF NOT EXISTS `users` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `user_id` bigint(200) NOT NULL UNIQUE,
-                `status` VARCHAR(255) IN ('remove', 'active', 'blocked', 'ban', 'unban', 'sleep', 'active') DEFAULT 'active',
-                `initiator_user_id` bigint(200),
-                `updater_user_id` bigint(200),
+                `user_id` BIGINT NOT NULL UNIQUE,
+                `status` ENUM('remove', 'active', 'blocked', 'ban', 'unban', 'sleep') DEFAULT 'active',
+                `initiator_user_id` BIGINT,
+                `updater_user_id` BIGINT,
+                `ban_time` TIMESTAMP NULL DEFAULT NULL,
                 `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                `language_code` varchar(5)
+                `language_code` VARCHAR(5)
             )
             """
             self.cursor.execute(sql)
@@ -181,6 +182,35 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
+
+    ## ---------------- Scheduler ---------------------
+    def ban_user_for_one_hour(self, user_id):
+        try:
+            sql_update = """
+                UPDATE users 
+                SET status = 'ban', ban_time = NOW() 
+                WHERE user_id = %s
+            """
+            self.cursor.execute(sql_update, (user_id,))
+            self.connection.commit()
+            event_name = f"unban_user_{user_id}"
+            sql_event = f"""
+                CREATE EVENT IF NOT EXISTS {event_name}
+                ON SCHEDULE AT DATE_ADD(NOW(), INTERVAL 1 HOUR)
+                DO
+                    UPDATE users 
+                    SET status = 'active', ban_time = NULL 
+                    WHERE user_id = {user_id};
+            """
+            self.cursor.execute(sql_event)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(f"MySQL error: {err}")
+            self.reconnect()
+        except Exception as err:
+            logging.error(f"General error: {err}")
+
 
 
     ## ------------------ Insert data ------------------ ##
