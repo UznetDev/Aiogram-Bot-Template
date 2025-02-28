@@ -275,7 +275,7 @@ def channel_settings(lang):
         return False
 
 
-def block_user(user_ud, lang, user_id):
+def block_user(attention_user_id, lang, user_id):
     """
     Creates the inline keyboard for blocking or unblocking a user.
 
@@ -296,18 +296,18 @@ def block_user(user_ud, lang, user_id):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = SelectAdmin(user_ud=user_ud)
+        is_admin = SelectAdmin(user_id=user_id)
         if is_admin.block_user():
-            data = db.check_user_ban(user_ud=user_id)
+            data = db.check_user_ban(user_id=attention_user_id)
             if data is None:
                 btn.button(text=translator(text=f"🚫Userni bloklash!",
                                            dest=lang),
-                           callback_data=BlockUser(action="block", user_ud=user_id).pack())
+                           callback_data=BlockUser(action="block", user_id=attention_user_id).pack())
             else:
-                if (data['initiator_user_id'] == user_ud or data['updater_user_id'] == user_ud) or user_ud == ADMIN:
+                if (data['initiator_user_id'] == user_id or data['updater_user_id'] == user_id) or user_id == ADMIN:
                     btn.button(text=translator(text=f"✅Unblock user!",
                                                dest=lang),
-                               callback_data=BlockUser(action="block", user_ud=user_id).pack())
+                               callback_data=BlockUser(action="block", user_id=user_id).pack())
         btn.adjust(1, 2)
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()

@@ -32,7 +32,7 @@ class EditAdminSetting(CallbackData, prefix="edit_setting"):
         data (str): The specific setting to be edited.
     """
     action: str
-    user_ud: int
+    user_id: int
     data: str
 
 class AdminSetting(CallbackData, prefix="admin_setting"):
@@ -55,4 +55,4 @@ class BlockUser(CallbackData, prefix="block_user"):
         user_ud (int): The ID of the user to be blocked or unblocked.
     """
     action: str
-    user_ud: int
+    user_id: int
