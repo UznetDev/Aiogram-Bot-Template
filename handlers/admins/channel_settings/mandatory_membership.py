@@ -18,7 +18,7 @@ async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`user_ud`), the message ID (`mid`), and the language code (`lang`) from the callback query.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the callback query.
     - Checks if the user has the required permissions to modify channel settings using the `SelectAdmin` filter.
     - If authorized, reads the current mandatory membership status from the database.
     - Toggles the membership requirement status:
@@ -32,10 +32,10 @@ async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
     - This function is asynchronous and does not return a value. It interacts with the Telegram API to update messages and with the database to modify settings.
     """
     try:
-        user_ud = call.from_user.id  # The ID of the admin who initiated the action
+        user_id = call.from_user.id  # The ID of the admin who initiated the action
         mid = call.message.message_id  # The ID of the message to be updated
         lang = call.from_user.language_code  # The language code for translation
-        data = SelectAdmin(user_ud=user_ud)  # Check if the user has admin permissions
+        data = SelectAdmin(user_id=user_id)  # Check if the user has admin permissions
         btn = close_btn()  # Create a button for closing the message
 
         if data.channel_settings():
@@ -57,7 +57,7 @@ async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
 
         # Edit the message with the new status and close button
-        await bot.edit_message_text(chat_id=user_ud,
+        await bot.edit_message_text(chat_id=user_id,
                                     message_id=mid,
                                     text=f'<b><i>{text}</i></b>',
                                     reply_markup=btn)
