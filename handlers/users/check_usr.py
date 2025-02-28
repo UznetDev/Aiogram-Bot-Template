@@ -5,7 +5,6 @@ from cython_code.user_check import User_Check
 from function.translator import translator
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from keyboards.inline.button import MainCallback
-from data.config import date_day_month, time_hour_minute_second
 
 
 @dp.message(User_Check())

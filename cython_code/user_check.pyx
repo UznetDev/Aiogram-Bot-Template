@@ -6,6 +6,7 @@ from aiogram.filters import BaseFilter
 from aiogram.types import Message, CallbackQuery
 from aiogram import BaseMiddleware
 
+
 class User_Check(BaseFilter, BaseMiddleware):
     """
     Middleware and filter class to check if a user is a member of required channels.
@@ -47,24 +48,24 @@ class User_Check(BaseFilter, BaseMiddleware):
             if data['join_channel']:
                 try:
                     # Try to get the user ID from the message object
-                    user_ud = message.from_user.id
+                    user_id = message.from_user.id
                 except Exception as err:
                     # If message object is not available, use callback query object
-                    user_ud = call.from_user.id
+                    user_id = call.from_user.id
                     logging.error(err)
 
                 # If the user is not the admin, perform the channel check
-                if user_ud != self.ADMIN:
+                if user_id != self.ADMIN:
                     force = False
                     result = db.select_channels()
                     for x in result:
                         try:
                             # Construct the chat ID for the channel
-                            ids = str(-100) + str(x[1])
+                            ids = str(-100) + str(x['channel_id'])
                             await bot.get_chat(ids)
                             try:
                                 # Check the user's membership status in the channel
-                                res = await bot.get_chat_member(chat_id=ids, user_id=user_ud)
+                                res = await bot.get_chat_member(chat_id=ids, user_id=user_id)
                             except:
                                 # Continue if unable to retrieve chat member information
                                 continue
