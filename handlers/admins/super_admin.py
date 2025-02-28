@@ -37,7 +37,7 @@ async def super_admin(msg: types.Message):
     """
     try:
         logging.info('Generating stats report')
-        user_ud = msg.from_user.id
+        user_id = msg.from_user.id
         mid = msg.message_id
         data = db.select_all_users_ban()
 
@@ -74,7 +74,7 @@ async def super_admin(msg: types.Message):
             # Sending the generated Excel file using FSInputFile
             document = FSInputFile(excel_path)
             await bot.send_document(
-                chat_id=user_ud,
+                chat_id=user_id,
                 document=document,
                 caption='<b>Ban list</b>'
             )
@@ -88,7 +88,7 @@ async def super_admin(msg: types.Message):
             if os.path.exists(log_file_name) and os.path.getsize(log_file_name) > 0:
                 document2 = FSInputFile(log_file_name)
                 await bot.send_document(
-                    chat_id=user_ud,
+                    chat_id=user_id,
                     document=document2,
                     caption='<b>Update log</b>'
                 )
@@ -96,7 +96,7 @@ async def super_admin(msg: types.Message):
             logging.error(f"Error sending log file: {err}")
 
         # Deleting the original message
-        await bot.delete_message(chat_id=user_ud, message_id=mid)
+        await bot.delete_message(chat_id=user_id, message_id=mid)
 
     except Exception as err:
         logging.error(f"Unhandled error: {err}")
