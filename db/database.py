@@ -89,6 +89,7 @@ class Database:
                 `status` ENUM('remove', 'active', 'blocked', 'ban', 'unban', 'sleep') DEFAULT 'active',
                 `initiator_user_id` BIGINT,
                 `updater_user_id` BIGINT,
+                `comment` TEXT,
                 `ban_time` TIMESTAMP NULL DEFAULT NULL,
                 `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -185,14 +186,14 @@ class Database:
 
 
     ## ---------------- Scheduler ---------------------
-    def ban_user_for_one_hour(self, user_id):
+    def ban_user_for_one_hour(self, user_id, comment=None):
         try:
             sql_update = """
                 UPDATE users 
-                SET status = 'ban', ban_time = NOW() 
+                SET status = 'ban', ban_time = NOW(), initiator_user_id = 1, updater_user_id = 1, `comment` = %s
                 WHERE user_id = %s
             """
-            self.cursor.execute(sql_update, (user_id,))
+            self.cursor.execute(sql_update, (comment, user_id,))
             self.connection.commit()
             event_name = f"unban_user_{user_id}"
             sql_event = f"""
@@ -200,7 +201,7 @@ class Database:
                 ON SCHEDULE AT DATE_ADD(NOW(), INTERVAL 1 HOUR)
                 DO
                     UPDATE users 
-                    SET status = 'active', ban_time = NULL 
+                    SET status = 'active', ban_time = NULL, updater_user_id = 1
                     WHERE user_id = {user_id};
             """
             self.cursor.execute(sql_event)

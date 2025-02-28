@@ -7,7 +7,8 @@ from filters.admin import IsAdmin, SelectAdmin
 from aiogram.fsm.context import FSMContext
 from function.translator import translator
 from states.admin_state import AdminState
-from data.config import yil_oy_kun, soat_minut_sekund, ADMIN
+from data.config import ADMIN
+
 
 @dp.callback_query(BlockUser.filter(F.action == "block"), IsAdmin())
 async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state: FSMContext):
@@ -44,7 +45,7 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
 
         if data.block_user():
             check1 = db.select_admin(user_id=attention_user_id)  # Check if the user is an admin
-            if check1 is None:
+            if check1 is None or user_id == ADMIN:
                 check = db.check_user_ban(user_id=attention_user_id)  # Check if the user is already banned
                 user = await bot.get_chat(chat_id=attention_user_id)  # Get user details
                 if check is None:

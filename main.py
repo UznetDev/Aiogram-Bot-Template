@@ -6,7 +6,8 @@ from utils.notify_admins import on_startup_notify  # Import the function to noti
 import logging
 from utils.set_bot_commands import set_default_commands  # Import the function to set default bot commands
 from loader import *  # Import all from loader module
-from middlewares import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
+# from middlewares import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
+from middlewares.throttling import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
 from data.config import log_file_name  # Import the log file name from config
 
 

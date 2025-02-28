@@ -16,6 +16,7 @@ class IsBan(BaseFilter):
     def __init__(self):
         self.super_admin = ADMIN
 
+
     async def __call__(self, message: Message) -> bool:
         """
         Checks if the message sender is banned.
@@ -28,15 +29,15 @@ class IsBan(BaseFilter):
         """
         try:
             self.user_id = message.from_user.id
-            self.dada = db.select_admin(user_id=self.user_id)
+            # self.dada = db.select_admin(user_id=self.user_id)
             check_ban = db.check_user_ban(user_id=self.user_id)
 
             # If the user is the super admin, they are not banned
             if self.user_id == self.super_admin:
                 return False
             # If the user is an admin, they are not banned
-            elif self.dada is not None:
-                return False
+            # elif self.dada is not None:
+            #     return False
             # If there is no ban record for the user, they are not banned
             elif check_ban is None:
                 return False
