@@ -405,7 +405,7 @@ class Database:
         """
         try:
             sql = """
-            SELECT * FROM `users` WHERE `status`='ban'`
+            SELECT * FROM `users` WHERE `status`='ban'
             """
             self.cursor.execute(sql)
             result = self.cursor.fetchall()

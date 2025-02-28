@@ -3,7 +3,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from function.translator import translator
 
 
-def send_url(url, lang):
+def send_url(language_code, url):
     """
     Creates an inline keyboard with a button to share a URL.
 
@@ -18,7 +18,7 @@ def send_url(url, lang):
     try:
         btn = InlineKeyboardBuilder()
         btn.button(
-            text=translator(text='➕Share to friend', dest=lang),
+            text=translator(text='➕Share to friend', dest=language_code),
             url=f'https://t.me/share/url?url={url}'
         )
         btn.adjust(1)
