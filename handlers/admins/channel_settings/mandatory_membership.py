@@ -41,18 +41,18 @@ async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
 
         if data.channel_settings():
             # Read the current setting for mandatory membership from the database
-            join_channel = db.select_setting('join_channel')
-            if join_channel:
+            mandatory_membership = db.select_setting('mandatory_membership')
+            if mandatory_membership == 'True':
                 # If mandatory membership is enabled, disable it
                 text = translator(text='☑️ Forced membership disabled!', dest=language_code)
-                nex_join_channel = False
+                nex_mandatory_membership = 'False'
             else:
                 # If mandatory membership is disabled, enable it
                 text = translator(text='✅ Mandatory membership enabled!', dest=language_code)
-                nex_join_channel = True
+                nex_mandatory_membership = 'True'
 
             # Update the database with the new membership status
-            db.update_settings_key('join_channel', nex_join_channel)
+            db.update_settings_key(updater_user_id=user_id, key='mandatory_membership', value=nex_mandatory_membership)
             btn = channel_settings(language_code=language_code)  # Update the button to reflect the new settings
         else:
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)

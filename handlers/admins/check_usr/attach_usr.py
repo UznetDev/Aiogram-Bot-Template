@@ -43,29 +43,28 @@ async def attach_user(msg: types.Message, state: FSMContext):
             data_state = await state.get_data()  # Get the current state data
             try:
                 user = await bot.get_chat(chat_id=attention_user_id)  # Get user information
-                check = db.check_user_ban(user_id=attention_user_id)  # Check if the user is banned
-                check1 = db.check_user(user_id=attention_user_id)  # Check if the user exists in the bot's list
+                user_data = db.check_user(user_id=attention_user_id)  # Check if the user is banned
+                if user_data:
+                    btn = block_user(attention_user_id=attention_user_id, 
+                                     user_id=user_id, 
+                                     language_code=language_code)  # Button for blocking/unblocking user
+                    if user_data['status'] != 'ban':
+                        check_admin = db.select_admin(user_id=attention_user_id)  # Check if the user is an admin
 
-                if check1 is not None:
-                    btn = block_user(attention_user_id=attention_user_id, user_id=user_id, language_code=language_code)  # Button for blocking/unblocking user
-                    if check is None:
-                        check2 = db.select_admin(user_id=attention_user_id)  # Check if the user is an admin
-                        select_user = db.check_user(user_id)  # Get information about the user
-
-                        if check2 is None:
+                        if check_admin is None:
                             # User is successfully unblocked
                             text = "✅ User unblocked!"
                             text += translator(text=f'\n\nUsername: @', dest=language_code) + user.username
-                            text += translator(text='\nLanguage code: ', dest=language_code) + f'{select_user[3]}'
+                            text += translator(text='\nLanguage code: ', dest=language_code) + f'{user_data['language_code']}'
                         else:
                             # User is blocked but is an admin
                             tx = "✅ User blocked!\n👮‍♂️ User is in the list of admins!</b>"
                             text = translator(text=f'{tx}\n\nUsername: @', dest=language_code) + user.username
-                            text += translator(text='<b>\nLanguage code:</b> ', dest=language_code) + f'<i>{select_user[3]}</i>'
+                            text += translator(text='<b>\nLanguage code:</b> ', dest=language_code) + f'<i>{user_data['language_code']}</i>'
                     else:
                         # User is already blocked
                         tx = "✅ User blocked!\n Date:"
-                        text = translator(text=f'{tx} {check[3]}\n\nUsername: @', dest=language_code) + user.username
+                        text = translator(text=f'{tx} {user_data['created_at']}\n\nUsername: @', dest=language_code) + user.username
                 else:
                     # User not found in the bot's list
                     text = translator(text="🔴 User not found!\nThe user may not be in the bot's list..", dest=language_code)

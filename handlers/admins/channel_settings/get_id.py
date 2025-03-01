@@ -57,7 +57,7 @@ async def add_channel2(msg: types.Message, state: FSMContext):
                     text = translator(text="✅ The channel was previously added\n", dest=language_code)
                     text += f"<b>Name:</b> <i>{channel.full_name}</i>\n" \
                             f"<b>Username:</b> <i>@{channel.username}</i>\n" \
-                            f"<b>Added date:</b> <i>{check[3]}</i>"
+                            f"<b>Added date:</b> <i>{check['created_at']}</i>"
 
                 btn = channel_settings(language_code=language_code)  # Update the button for channel settings
             except Exception as err:

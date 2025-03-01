@@ -81,9 +81,9 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
                                f'<b>Channel settings: {channel_settings_tx}</b>\n' \
                                f'<b>Add admin: {add_admin_tx}</b>\n' \
                                f'<b>Date added: </b>'
-                        text += str(admin_data['created_time'])
+                        text += str(admin_data['created_at'])
                         text += f'\n<b>Updated added: </b>'
-                        text += str(admin_data['updated_time']) 
+                        text += str(admin_data['updated_at']) 
 
                 else:
                     text = translator(text='🛑 You can only change the admin rights you assigned!', dest=language_code)

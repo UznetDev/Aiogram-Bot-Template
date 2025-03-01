@@ -53,7 +53,7 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
             for user in data:
                 id_list.append(user['id'])
                 user_id_list.append(user['user_id'])
-                date_list.append(user['created_time'])
+                date_list.append(user['created_at'])
                 langs.append(user['language_code'])
                 user_info = await bot.get_chat(chat_id=user['user_id'])
                 usernames.append(f'@{user_info.username}')

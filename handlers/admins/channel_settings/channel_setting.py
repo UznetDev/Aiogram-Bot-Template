@@ -56,12 +56,12 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
                 for x in data:
                     try:
                         count += 1
-                        chat_id = str(-100) + str(x[1])  # Telegram channel ID
+                        chat_id = str(-100) + str(x['channel_id'])  # Telegram channel ID
                         channel = await bot.get_chat(chat_id=chat_id)  # Get channel details
                         text += (f"<b><i>{count}</i>. Name:</b> <i>{channel.full_name}</i>\n"
                                  f"<b>Username:</b> <i>@{channel.username}\n</i>"
-                                 f"<b>Added date:</b> <i>{x[2]}\n</i>"
-                                 f"<b>Added by user_id:</b> <i>{x[3]}\n\n</i>")
+                                 f"<b>Added date:</b> <i>{x['created_at']}\n</i>"
+                                 f"<b>Added by user_id:</b> <i>{x['initiator_user_id']}\n\n</i>")
                     except Exception as err:
                         logging.error(err)  # Log any errors in retrieving channel details
             btn = channel_settings(language_code=language_code)  # Button for channel settings

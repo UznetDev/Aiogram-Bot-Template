@@ -26,9 +26,9 @@ async def main():
             db.create_table_users()  # Create the users table
             db.create_table_channel()  # Create the channel table
             db.create_table_settings()  # Create the settings table
-            join_channel = db.select_setting('join_channel')
-            if join_channel is None:
-                db.insert_settings(initiator_user_id=1, key='join_channel', value='False')
+            mandatory_membership = db.select_setting('mandatory_membership')
+            if mandatory_membership is None:
+                db.insert_settings(initiator_user_id=1, key='mandatory_membership', value='False')
 
         except Exception as err:
             logging.error(err)  # Log any errors that occur during table creation
@@ -36,7 +36,6 @@ async def main():
         # Delete any existing webhook and start polling
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
-
     finally:
         # Log the database statistics and close the bot session
         res = db.stat()  # Get database statistics
@@ -52,13 +51,7 @@ if __name__ == "__main__":
     if not os.path.exists(log_file_name):
         with open(log_file_name, 'w') as f:
             pass
-
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
-
-    log_format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
-    formatter = logging.Formatter(log_format)
-
+        
     file_handler = logging.FileHandler(log_file_name)
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)

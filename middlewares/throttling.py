@@ -58,7 +58,7 @@ class ThrottlingMiddleware(BaseMiddleware):
             is_ban = await self.check_ban(user_data)
             if is_ban:
                 return 
-            is_member = await self.check_member(user_data)
+            is_member = await self.check_member(user_id=user_id, language_code=language_code)
             if is_member:
                 return
 
@@ -160,7 +160,7 @@ class ThrottlingMiddleware(BaseMiddleware):
 
     async def check_member(self, user_id, language_code):
         try:
-            is_mandatory = await db.select_setting('mandatory_membership')
+            is_mandatory = db.select_setting('mandatory_membership')
             if is_mandatory is None:
                 db.update_settings_key(updater_user_id=1, key='mandatory_membership', value=False)
                 return False

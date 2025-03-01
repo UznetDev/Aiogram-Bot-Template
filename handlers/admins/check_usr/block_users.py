@@ -50,7 +50,7 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
                 user = await bot.get_chat(chat_id=attention_user_id)  # Get user details
                 if check is None:
                     db.update_user_status(user_id=attention_user_id, 
-                                          status='blocked',
+                                          status='ban',
                                           updater_user_id=user_id)  # Update user status to blocked
                     text = translator(text='⛔ User blocked\n\n Username: @', dest=language_code)
                     text += str(user.username)

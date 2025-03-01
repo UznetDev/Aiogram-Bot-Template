@@ -48,37 +48,38 @@ async def super_admin(msg: types.Message):
         admin_user_id = []
 
         try:
-            # Collecting data for the DataFrame
-            for x in data:
-                id_list.append(x['id'])
-                user_id_list.append(x['user_id'])
-                admin_user_id.append(x['initiator_user_id'])
-                date_list.append(x['ban_time'])
+            if data:
+                # Collecting data for the DataFrame
+                for x in data:
+                    id_list.append(x['id'])
+                    user_id_list.append(x['user_id'])
+                    admin_user_id.append(x['initiator_user_id'])
+                    date_list.append(x['ban_time'])
 
-                # Fetching username from chat ID
-                chat = await bot.get_chat(chat_id=x['user_id'])
-                username_list.append(f'@{chat.username}')
+                    # Fetching username from chat ID
+                    chat = await bot.get_chat(chat_id=x['user_id'])
+                    username_list.append(f'@{chat.username}')
 
-            # Creating and saving DataFrame to Excel
-            x_data = {
-                "id": id_list,
-                "user_id": user_id_list,
-                "admin_user_id": admin_user_id,
-                "date_add": date_list,
-                "username": username_list
-            }
-            df = pd.DataFrame(x_data)
-            excel_path = 'data/ban.xlsx'
-            df.to_excel(excel_path, index=False)
+                # Creating and saving DataFrame to Excel
+                x_data = {
+                    "id": id_list,
+                    "user_id": user_id_list,
+                    "admin_user_id": admin_user_id,
+                    "date_add": date_list,
+                    "username": username_list
+                }
+                df = pd.DataFrame(x_data)
+                excel_path = 'data/ban.xlsx'
+                df.to_excel(excel_path, index=False)
 
-            # Sending the generated Excel file using FSInputFile
-            document = FSInputFile(excel_path)
-            await bot.send_document(
-                chat_id=user_id,
-                document=document,
-                caption='<b>Ban list</b>'
-            )
-            os.remove(excel_path)
+                # Sending the generated Excel file using FSInputFile
+                document = FSInputFile(excel_path)
+                await bot.send_document(
+                    chat_id=user_id,
+                    document=document,
+                    caption='<b>Ban list</b>'
+                )
+                os.remove(excel_path)
 
         except Exception as err:
             logging.error(f"Error processing ban data: {err}")

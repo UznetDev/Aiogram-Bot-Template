@@ -251,8 +251,8 @@ def channel_settings(language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        join_channel = db.select_setting('join_channel')
-        if join_channel:
+        mandatory_membership = db.select_setting('mandatory_membership')
+        if mandatory_membership == 'True':
             text = translator(text=f'✅ Mandatory membership of',
                               dest=language_code)
         else:
@@ -300,14 +300,14 @@ def block_user(attention_user_id, language_code, user_id):
         if is_admin.block_user():
             data = db.check_user_ban(user_id=attention_user_id)
             if data is None:
-                btn.button(text=translator(text=f"🚫Userni bloklash!",
+                btn.button(text=translator(text=f"🚫Block user!",
                                            dest=language_code),
                            callback_data=BlockUser(action="block", user_id=attention_user_id).pack())
             else:
                 if (data['initiator_user_id'] == user_id or data['updater_user_id'] == user_id) or user_id == ADMIN:
                     btn.button(text=translator(text=f"✅Unblock user!",
                                                dest=language_code),
-                               callback_data=BlockUser(action="block", user_id=user_id).pack())
+                               callback_data=BlockUser(action="block", user_id=attention_user_id).pack())
         btn.adjust(1, 2)
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
