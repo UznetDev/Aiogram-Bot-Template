@@ -26,7 +26,7 @@ class Database:
                 connection_timeout=30,
                 autocommit=True
             )
-            self.cursor = self.connection.cursor(dictionary=True)
+            self.cursor = self.connection.cursor(dictionary=True, buffered=True)
         except mysql.connector.Error as err:
             logging.error(f"Database connection error: {err}")
             raise
@@ -173,6 +173,7 @@ class Database:
                     WHERE user_id = %s;
             """
             self.cursor.execute(sql_event, (user_id,))
+            _ = self.cursor.fetchall()  # Natijani o‘qish orqali tozalaymiz
             self.connection.commit()
         except mysql.connector.Error as err:
             logging.error(f"MySQL error: {err}")
@@ -400,7 +401,22 @@ class Database:
         Select users from the 'users' table within a specific ID range.
         """
         try:
-            sql = "SELECT * FROM users WHERE id >= %s AND id < %s;"
+            sql = "SELECT * FROM `users` WHERE `id` >= %s AND `id` < %s;"
+            values = (start_id, end_id)
+            self.cursor.execute(sql, values)
+            result = self.cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+    def select_admins_by_id(self, start_id: int, end_id: int) -> list:
+        """
+        Select admins from the 'admins' table within a specific ID range.
+        """
+        try:
+            sql = "SELECT * FROM `admins` WHERE `id` >= %s AND `id` < %s;"
             values = (start_id, end_id)
             self.cursor.execute(sql, values)
             result = self.cursor.fetchall()

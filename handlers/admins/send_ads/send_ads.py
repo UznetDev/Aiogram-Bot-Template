@@ -1,16 +1,19 @@
 import logging
 import time
-from loader import dp, file_db
+from loader import dp, db
 from aiogram import types
 from keyboards.inline.button import AdminCallback
 from keyboards.inline.close_btn import close_btn
 from keyboards.inline.admin_btn import stop_advertisement, main_admin_panel_btn
 from aiogram import F
+from function.function import format_seconds
+from function.send_ads import init_broadcast_settings, send_ads_to_all
 from aiogram.fsm.context import FSMContext
 from states.admin_state import AdminState
 from filters.admin import SelectAdmin, IsAdmin
 from function.translator import translator
 from data.config import ADMIN
+
 
 
 @dp.callback_query(AdminCallback.filter(F.action == "send_advertisement"), IsAdmin())
@@ -47,27 +50,37 @@ async def send_ads(call: types.CallbackQuery, state: FSMContext):
         button_markup = close_btn()
 
         if is_admin.send_message():
-            ads_data = file_db.reading_db().get('ads')
+            # users_data = db.select_all_users()
+            # users_count = len(users_data)
+            # init_broadcast_settings(total=users_count, admin_id=user_id, broadcast_type="users")
+            broadcast_status = db.select_setting("broadcast_status")
+            if broadcast_status == 'active':
+                broadcast_total = int(db.select_setting("broadcast_total"))
+                broadcast_sent = int(db.select_setting("broadcast_sent"))
+                broadcast_fail = int(db.select_setting("broadcast_fail"))
+                broadcast_start_time = float(db.select_setting("broadcast_start_time"))
+                broadcast_status = db.select_setting("broadcast_status")
+                broadcast_admin_id = int(db.select_setting("broadcast_admin_id"))
+                broadcast_start_time = float(db.select_setting("broadcast_start_time"))
 
-            if ads_data:
+                current_time = time.time()
+                elapsed = current_time - broadcast_start_time
+                processed = broadcast_sent + broadcast_fail
+                remaining = broadcast_total - processed
+                avg_time = elapsed / processed if processed > 0 else 0
+                estimated_remaining = avg_time * remaining
 
-                # Calculate remaining users
-                remaining_users = ads_data['total_users'] - ads_data['done_count'] - ads_data['fail_count']
-                estimated_minutes = (remaining_users / 100)  # 1 minute per 100 users
-
-                # Calculate the estimated end time
-                estimated_end_time = time.localtime(time.time() + estimated_minutes * 60)
 
                 message_text = (
-                    f"📢 <b>Advertisement Status:</b>\n\n"
-                    f"👥 <b>Total users:</b> {ads_data['total_users']}\n"
-                    f"✅ <b>Messages sent:</b> {ads_data['done_count']}\n"
-                    f"❌ <b>Failed messages:</b> {ads_data['fail_count']}\n"
-                    f"⏰ <b>Start Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ads_data['start-time']))}\n"
-                    f"🕒 <b>Estimated End Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', estimated_end_time)}"
+                    f"📢 <b>Advertisement Status: {broadcast_status}</b>\n\n"
+                    f"👥 <b>Total users:</b> {broadcast_total}\n"
+                    f"✅ <b>Messages sent:</b> {broadcast_sent}\n"
+                    f"❌ <b>Failed messages:</b> {broadcast_fail}\n"
+                    f"⏰ <b>Start Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(broadcast_start_time))} \n"
+                    f"🕒 <b>Estimated End Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S', format_seconds(estimated_remaining))}\n"
                 )
 
-                if ads_data['from_chat_id'] == user_id or user_id == ADMIN:
+                if broadcast_admin_id == user_id or user_id == ADMIN:
                     button_markup = stop_advertisement()
                 else:
                     button_markup = main_admin_panel_btn(user_id, language_code)
