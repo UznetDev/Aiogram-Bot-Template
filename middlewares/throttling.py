@@ -58,6 +58,9 @@ class ThrottlingMiddleware(BaseMiddleware):
             is_ban = await self.check_ban(user_data)
             if is_ban:
                 return 
+            is_member = await self.check_member(user_data)
+            if is_member:
+                return
 
             if real_handler.flags.get("skip_pass") is not None:
                 skip_pass = real_handler.flags.get("skip_pass")
@@ -122,10 +125,6 @@ class ThrottlingMiddleware(BaseMiddleware):
             return await handler(event, data)
 
 
-
-
-
-
     async def check_ban(self, user_data):
         try:
 
@@ -158,7 +157,8 @@ class ThrottlingMiddleware(BaseMiddleware):
             logging.error(err)
             return False
         
-    async def check_member(self, user_id):
+
+    async def check_member(self, user_id, language_code):
         try:
             is_mandatory = await db.select_setting('mandatory_membership')
             if is_mandatory is None:
@@ -201,13 +201,15 @@ class ThrottlingMiddleware(BaseMiddleware):
                                     keyboard.button(text='➕ ' + channel.title,
                                                     url=f"{await channel.export_invite_link()}")
 
-                            # Add a button to check again
-                            keyboard.button(text=translator(text='♻ Check!', dest=language_code),
-                                            callback_data=MainCallback(action="check_join", q='').pack())
-                            keyboard.adjust(1)
+                                    # Add a button to check again
+                                    keyboard.button(text=translator(text='♻ Check!', dest=language_code),
+                                                    callback_data=MainCallback(action="check_join", q='').pack())
+                                    keyboard.adjust(1)
 
-                            # Send the message to the user
-                            await msg.answer(text=f"<b>{message_text}</b>", reply_markup=keyboard.as_markup())
+                                    # Send the message to the user
+                                    await bot.send_message(chat_id=user_id, 
+                                                            text=f"<b>{message_text}</b>", 
+                                                            reply_markup=keyboard.as_markup())
                             return True
                     except Exception as err:
                         logging.error(f"Error checking membership for channel {channel.get('channel_id')}: {err}")
@@ -220,65 +222,3 @@ class ThrottlingMiddleware(BaseMiddleware):
         except Exception as err:
             logging.error(err)
             return False
-    
-
-
-
-
-
-
-class UserCheck(BaseFilter, BaseMiddleware):
-    """
-    Middleware and filter class to check if a user is a member of required channels.
-    Ensures that users are members of specified channels before they can access certain bot features.
-    """
-
-    def __init__(self):
-        self.ADMIN = ADMIN
-
-    async def __call__(self, message: Message = None, call: CallbackQuery = None) -> bool:
-        # Check if channel joining is required
-        try:
-            data = DB.reading_db()
-        except Exception as err:
-            logging.error(f"Error reading DB: {err}")
-            return False
-
-        if not data.get('join_channel'):
-            return False
-
-        # Extract user_id and language from message or callback query.
-        if message is not None:
-            user_id = message.from_user.id
-            lang = message.from_user.language_code
-        elif call is not None:
-            user_id = call.from_user.id
-            lang = call.from_user.language_code
-        else:
-            return False
-
-        # Bypass the check for the admin user.
-        if user_id == self.ADMIN:
-            return False
-
-        # Check each channel's membership.
-        try:
-            channels = db.select_channels()
-        except Exception as err:
-            logging.error(f"Error selecting channels: {err}")
-            return False
-
-        # For each required channel, check if the user is a member.
-        for channel in channels:
-            try:
-                chat_id = int("-100" + str(channel.get('channel_id')))
-                res = await bot.get_chat_member(chat_id=chat_id, user_id=user_id)
-                if res.status not in ('member', 'administrator', 'creator'):
-                    # If the user is not a member in any one channel, force is True.
-                    return True
-            except Exception as err:
-                logging.error(f"Error checking membership for channel {channel.get('channel_id')}: {err}")
-                continue
-
-        # If all channels checked and no problems found, return False.
-        return False
