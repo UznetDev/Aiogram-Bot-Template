@@ -9,7 +9,7 @@ def send_url(language_code, url):
 
     Args:
         url (str): The URL to be shared.
-        lang (str): The language code for translation.
+        language_code (str): The language code for translation.
 
     Returns:
         aiogram.types.InlineKeyboardMarkup: The markup for the inline keyboard with the share button,
@@ -28,13 +28,13 @@ def send_url(language_code, url):
         return False
 
 
-def share_audio(text: str, lang):
+def share_audio(text: str, language_code):
     """
     Creates an inline keyboard with a button to share audio content via an inline query.
 
     Args:
         text (str): The text to be shared in the inline query.
-        lang (str): The language code for translation.
+        language_code (str): The language code for translation.
 
     Returns:
         aiogram.types.InlineKeyboardMarkup: The markup for the inline keyboard with the share button,
@@ -44,7 +44,7 @@ def share_audio(text: str, lang):
         btn = InlineKeyboardBuilder()
         text = text.strip()
         btn.button(
-            text=translator(text='➕Share to friend', dest=lang),
+            text=translator(text='➕Share to friend', dest=language_code),
             switch_inline_query=text
         )
         btn.adjust(1)

@@ -33,7 +33,7 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
     try:
         user_id = call.from_user.id  # The ID of the admin who initiated the action
         mid = call.message.message_id  # The ID of the message to be updated
-        lang = call.from_user.language_code  # The language code for translation
+        language_code = call.from_user.language_code  # The language code for translation
         data = SelectAdmin(user_id=user_id)  # Check if the user has admin permissions
         btn = InlineKeyboardBuilder()  # Create an instance of InlineKeyboardBuilder for the keyboard
 
@@ -49,10 +49,10 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
 
             if not data:
                 # Inform the admin if no channels are available
-                text = translator(text="❔ The channel list is empty!\n\n", dest=lang)
+                text = translator(text="❔ The channel list is empty!\n\n", dest=language_code)
             else:
                 # Display the list of channels with options to delete them
-                text = translator(text="🔰 Choose a channel:\n\n", dest=lang)
+                text = translator(text="🔰 Choose a channel:\n\n", dest=language_code)
                 count = 0
 
                 for x in data:
@@ -74,7 +74,7 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
             btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         else:
             # Inform the admin if they do not have the right to access channel settings
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
 
         # Edit the message with the updated text and keyboard
         await bot.edit_message_text(chat_id=call.from_user.id,

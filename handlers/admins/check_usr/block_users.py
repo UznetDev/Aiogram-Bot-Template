@@ -39,7 +39,7 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
         attention_user_id = callback_data.user_id  # The ID of the user to be blocked/unblocked
         user_id = call.from_user.id  # The ID of the admin issuing the block/unblock command
         mid = call.message.message_id  # The ID of the message triggering the callback
-        lang = call.from_user.language_code  # The language code of the admin for message translation
+        language_code = call.from_user.language_code  # The language code of the admin for message translation
         data = SelectAdmin(user_id=user_id)  # Check if the admin is authorized to perform the action
         btn = close_btn()  # Inline button to close the message
 
@@ -52,7 +52,7 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
                     db.update_user_status(user_id=attention_user_id, 
                                           status='blocked',
                                           updater_user_id=user_id)  # Update user status to blocked
-                    text = translator(text='⛔ User blocked\n\n Username: @', dest=lang)
+                    text = translator(text='⛔ User blocked\n\n Username: @', dest=language_code)
                     text += str(user.username)
                     await bot.send_message(chat_id=attention_user_id,
                                            text='🚫 You are blocked! If you think this is a mistake, contact the admin.',
@@ -62,16 +62,16 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
                         db.update_user_status(user_id=attention_user_id,
                                               status='active',
                                               updater_user_id=user_id)  # Update user status to active
-                        text = translator(text='✅ User unblocked!\n\n Username: @', dest=lang)
+                        text = translator(text='✅ User unblocked!\n\n Username: @', dest=language_code)
                         text += str(user.username)
                         await bot.send_message(chat_id=attention_user_id,
                                                text='😊 You are unblocked! Contact the admin.',
                                                reply_markup=close_btn())  # Notify the user of the unblock
                     else:
-                        text = translator(text='⭕ Only the person who blocked the user can unblock them!\n\n Username: @', dest=lang)
+                        text = translator(text='⭕ Only the person who blocked the user can unblock them!\n\n Username: @', dest=language_code)
                         text += str(user.username)  # Inform that only the original admin can unblock
             else:
-                text = translator(text='🚫 I cannot block an admin.', dest=lang)
+                text = translator(text='🚫 I cannot block an admin.', dest=language_code)
                 try:
                     db.update_user_status(user_id=attention_user_id,
                                         status='active',
@@ -80,7 +80,7 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
                     logging.error(err)  # Log any errors encountered
             await state.set_state(AdminState.check_user)  # Update the FSM state
         else:
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
         await bot.edit_message_text(chat_id=user_id,
                                     message_id=mid,
                                     text=f'<b><i>{text}</i></b>',

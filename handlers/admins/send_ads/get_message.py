@@ -46,7 +46,7 @@ async def get_message(msg: types.Message, state: FSMContext):
 
         if is_admin.send_message():
             # Prepare the admin panel button and fetch ads data
-            button_markup = main_admin_panel_btn(user_id=user_id, lang=language_code)
+            button_markup = main_admin_panel_btn(user_id=user_id, language_code=language_code)
             ads_data = file_db.reading_db().get('ads')
 
             if ads_data:

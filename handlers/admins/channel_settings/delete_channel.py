@@ -33,7 +33,7 @@ async def delete_channel(call: types.CallbackQuery, callback_data: AdminCallback
     try:
         user_id = call.from_user.id  # The ID of the admin making the request
         mid = call.message.message_id  # The ID of the message associated with the callback
-        lang = call.from_user.language_code  # The language code for translating responses
+        language_code = call.from_user.language_code  # The language code for translating responses
         data = SelectAdmin(user_id=user_id)  # Check if the user has admin permissions
         btn = close_btn()  # A button for closing the message
 
@@ -46,7 +46,7 @@ async def delete_channel(call: types.CallbackQuery, callback_data: AdminCallback
                 # Inform the user if the channel does not exist
                 text = translator(
                     text='⭕ Channel not found!\nThe channel seems to have been deleted previously!',
-                    dest=lang)
+                    dest=language_code)
             else:
                 # Get channel details using the Telegram API
                 channel = await bot.get_chat(chat_id=ch_user_id100)
@@ -54,17 +54,17 @@ async def delete_channel(call: types.CallbackQuery, callback_data: AdminCallback
                 if check[3] == user_id or user_id == ADMIN:
                     # Delete the channel if the user is authorized
                     db.delete_channel(channel_id=ch_user_id)
-                    tx = translator(text='<b><i>🚫 Channel removed...</i></b>\n', dest=lang)
+                    tx = translator(text='<b><i>🚫 Channel removed...</i></b>\n', dest=language_code)
                     text = (f"{tx}\n"
                             f"<b>Name:</b> <i>{channel.full_name}</i>\n"
                             f"<b>Username:</b> <i>@{channel.username}</i>\n"
                             f"<b>ID:</b> <i><code>{ch_user_id}</code></i>\n\n")
                 else:
                     # Inform the user if they do not have permission to delete the channel
-                    text = translator(text='⭕ Only an admin can delete this channel.', dest=lang)
+                    text = translator(text='⭕ Only an admin can delete this channel.', dest=language_code)
         else:
             # Inform the user if they lack the necessary permissions
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
 
         await bot.edit_message_text(chat_id=user_id,
                                     message_id=mid,

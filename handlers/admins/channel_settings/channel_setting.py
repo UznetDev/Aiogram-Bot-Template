@@ -34,7 +34,7 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
     try:
         user_id = call.from_user.id  # The ID of the admin initiating the action
         mid = call.message.message_id  # The ID of the message triggering the callback
-        lang = call.from_user.language_code  # The language code of the admin for message translation
+        language_code = call.from_user.language_code  # The language code of the admin for message translation
         data = SelectAdmin(user_id=user_id)  # Check if the admin has permission to manage channel settings
         btn = close_btn()  # Inline button to close the message
 
@@ -48,10 +48,10 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
 
             if not data:
                 # If no channels are found, indicate that the list is empty
-                text = translator(text="❔ The channel list is empty!\n\n", dest=lang)
+                text = translator(text="❔ The channel list is empty!\n\n", dest=language_code)
             else:
                 # Construct a message listing the channels
-                text = translator(text="🔰 List of channels:\n\n", dest=lang)
+                text = translator(text="🔰 List of channels:\n\n", dest=language_code)
                 count = 0
                 for x in data:
                     try:
@@ -64,10 +64,10 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
                                  f"<b>Added by user_id:</b> <i>{x[3]}\n\n</i>")
                     except Exception as err:
                         logging.error(err)  # Log any errors in retrieving channel details
-            btn = channel_settings(lang=lang)  # Button for channel settings
+            btn = channel_settings(language_code=language_code)  # Button for channel settings
         else:
             # Inform the admin that they do not have the necessary permissions
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
 
         await bot.edit_message_text(
             chat_id=user_id,

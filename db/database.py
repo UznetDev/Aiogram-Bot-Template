@@ -113,9 +113,9 @@ class Database:
             sql = """
                 CREATE TABLE IF NOT EXISTS `channels` (
                     `id` INT AUTO_INCREMENT PRIMARY KEY,
-                    `channel_id` bigint(200),
-                    `initiator_user_id` bigint(200),
-                    `updater_user_id` bigint(200),
+                    `channel_id` BIGINT,
+                    `initiator_user_id` BIGINT,
+                    `updater_user_id` BIGINT,
                     `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     `created_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
@@ -138,9 +138,9 @@ class Database:
             sql = """
                 CREATE TABLE IF NOT EXISTS `admins` (
                     `id` INT AUTO_INCREMENT PRIMARY KEY,
-                    `user_id` bigint(200) NOT NULL UNIQUE,
-                    `initiator_user_id` bigint(200),
-                    `updater_user_id` bigint(200),
+                    `user_id` BIGINT NOT NULL UNIQUE,
+                    `initiator_user_id` BIGINT,
+                    `updater_user_id` BIGINT,
                     `send_message` TINYINT(1) DEFAULT 0,
                     `statistika` TINYINT(1) DEFAULT 0,
                     `download_statistika` TINYINT(1) DEFAULT 0,
@@ -168,8 +168,8 @@ class Database:
             sql = """
             CREATE TABLE IF NOT EXISTS `settings` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `updater_user_id` bigint(200) NOT NULL UNIQUE,
-                `initiator_user_id` bigint(200),
+                `updater_user_id` BIGINT,
+                `initiator_user_id` BIGINT,
                 `key` VARCHAR(255) NOT NULL,
                 `value` VARCHAR(255) NOT NULL,
                 `updated_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -388,7 +388,10 @@ class Database:
             values = (key,)
             self.cursor.execute(sql, values)
             result = self.cursor.fetchone()
-            return result[0]
+            if result is None:
+                return None
+            else:
+                return result['value']
         except mysql.connector.Error as err:
             logging.error(err)
             self.reconnect()

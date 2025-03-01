@@ -52,8 +52,8 @@ async def super_admin(msg: types.Message):
             for x in data:
                 id_list.append(x['id'])
                 user_id_list.append(x['user_id'])
-                admin_user_id.append(x['admin_user_id'])
-                date_list.append(x['date'])
+                admin_user_id.append(x['initiator_user_id'])
+                date_list.append(x['ban_time'])
 
                 # Fetching username from chat ID
                 chat = await bot.get_chat(chat_id=x['user_id'])

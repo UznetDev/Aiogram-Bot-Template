@@ -33,7 +33,7 @@ async def add_channel2(msg: types.Message, state: FSMContext):
     try:
         user_id = msg.from_user.id  # The ID of the admin making the request
         mid = msg.message_id  # The ID of the message associated with the request
-        lang = msg.from_user.language_code  # The language code for translating responses
+        language_code = msg.from_user.language_code  # The language code for translating responses
         data = SelectAdmin(user_id=user_id)  # Check if the user has admin permissions
         btn = close_btn()  # A button for closing the message
         data_state = await state.get_data()  # Get data stored in the FSM state
@@ -49,25 +49,25 @@ async def add_channel2(msg: types.Message, state: FSMContext):
                     # Add the channel to the database if it doesn't exist
                     db.insert_channel(channel_id=tx,
                                       initiator_user_id=user_id)
-                    text = translator(text="✅ The channel was successfully added\n", dest=lang)
+                    text = translator(text="✅ The channel was successfully added\n", dest=language_code)
                     text += f"<b>Name:</b> <i>{channel.full_name}</i>\n" \
                             f"<b>Username:</b> <i>@{channel.username}</i>"
                 else:
                     # Inform the user if the channel is already in the database
-                    text = translator(text="✅ The channel was previously added\n", dest=lang)
+                    text = translator(text="✅ The channel was previously added\n", dest=language_code)
                     text += f"<b>Name:</b> <i>{channel.full_name}</i>\n" \
                             f"<b>Username:</b> <i>@{channel.username}</i>\n" \
                             f"<b>Added date:</b> <i>{check[3]}</i>"
 
-                btn = channel_settings(lang=lang)  # Update the button for channel settings
+                btn = channel_settings(language_code=language_code)  # Update the button for channel settings
             except Exception as err:
                 # Handle exceptions such as the bot not being an admin in the channel
                 text = translator(text="🔴 The channel could not be added because the channel was not found!\n"
-                                       "The bot is not an admin on the channel.", dest=lang)
+                                       "The bot is not an admin on the channel.", dest=language_code)
                 logging.error(err)
             await state.clear()  # Clear the FSM state
         else:
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
 
         # Update the message with the result and close button
         await bot.edit_message_text(chat_id=user_id,

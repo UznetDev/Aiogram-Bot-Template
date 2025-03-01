@@ -33,17 +33,17 @@ async def admin_settings(call: types.CallbackQuery, state: FSMContext):
     try:
         user_id = call.from_user.id  # ID of the admin initiating the request
         mid = call.message.message_id  # ID of the message to be updated
-        lang = call.from_user.language_code  # Language code for translation
+        language_code = call.from_user.language_code  # Language code for translation
         data = SelectAdmin(user_id=user_id)  # Retrieves admin settings for the current user
         add_admin = data.add_admin()  # Checks if the user has the right to access admin settings
 
         if add_admin:
             # The admin has the right to access settings
-            text = translator(text="❗ You are in the Admin settings section!", dest=lang)
-            btn = await admin_setting(user_id=user_id, lang=lang)  # Prepare admin settings buttons
+            text = translator(text="❗ You are in the Admin settings section!", dest=language_code)
+            btn = await admin_setting(user_id=user_id, language_code=language_code)  # Prepare admin settings buttons
         else:
             # The admin does not have the necessary rights
-            text = translator(text="❌ Unfortunately, you do not have this right!", dest=lang)
+            text = translator(text="❌ Unfortunately, you do not have this right!", dest=language_code)
             btn = close_btn()  # Prepare close button
 
         # Update the message with the appropriate response and buttons

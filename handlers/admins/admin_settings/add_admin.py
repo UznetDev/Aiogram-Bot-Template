@@ -36,14 +36,14 @@ async def add_admin(msg: types.Message, state: FSMContext):
     try:
         user_id = msg.from_user.id  # The ID of the admin who is performing the action
         mid = msg.message_id  # The ID of the message to be updated
-        lang = msg.from_user.language_code  # The language code for translation
+        language_code = msg.from_user.language_code  # The language code for translation
         data = SelectAdmin(user_id=user_id)  # Retrieves admin settings for the current user
         add_admin_db = data.add_admin()  # Check if the user has the right to add an admin
         target_user_id = int(msg.text)  # The ID of the user to be added as an admin
 
         if add_admin_db:
             data_state = await state.get_data()  # Get current state data
-            btn = await admin_setting(user_id=user_id, lang=lang)  # Prepare admin settings buttons
+            btn = await admin_setting(user_id=user_id, language_code=language_code)  # Prepare admin settings buttons
             text = "🔴 Admin failed because admin was not found!\n"
 
             try:
@@ -55,39 +55,39 @@ async def add_admin(msg: types.Message, state: FSMContext):
                     db.insert_admin(user_id=target_user_id,
                                     initiator_user_id=user_id)
                     text = translator(text="✅ Admin has been successfully added\n\nName: ",
-                                      dest=lang)
+                                      dest=language_code)
                     text += f"{user.full_name}\n"
                     text += f'Username:  @{user.username}\n'
                     await bot.send_message(chat_id=target_user_id,
                                            text=f'😊Hi @{user.username}, you have been made an admin\n'
                                                 f'To open the panel, use /admin ',
                                            reply_markup=close_btn())
-                    btn = await admin_setting(user_id=user_id, lang=lang)  # Prepare admin settings buttons
+                    btn = await admin_setting(user_id=user_id, language_code=language_code)  # Prepare admin settings buttons
                 else:
                     text = translator(text="✅ Admin was added before\n\nName: ",
-                                      dest=lang)
+                                      dest=language_code)
                     text += f"{user.full_name}\n"
                     text += f'Username:  @{user.username}\n'
                     text += translator(text="Add date: ",
-                                       dest=lang)
+                                       dest=language_code)
                     text += f'{check[9]}\n<code>{check[2]}</code>'
                     text += translator(text="Added by",
-                                       dest=lang)
+                                       dest=language_code)
             except Exception as err:
                 logging.error(err)  # Log any errors that occur
                 text = translator(text="🔴 Admin failed because admin was not found!\n"
                                        "The bot may not have found the admin..",
-                                  dest=lang)
+                                  dest=language_code)
             finally:
                 text = translator(text=text,
-                                  dest=lang)
+                                  dest=language_code)
                 await bot.edit_message_text(chat_id=user_id,
                                             message_id=data_state['message_id'],
                                             text=text,
                                             reply_markup=btn)
         else:
             text = translator(text='❌ Unfortunately, you do not have this right!',
-                              dest=lang)
+                              dest=language_code)
             btn = close_btn()
         await bot.edit_message_text(chat_id=user_id,
                                     message_id=mid,

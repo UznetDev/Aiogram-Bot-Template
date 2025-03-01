@@ -29,13 +29,13 @@ async def main_panel(msg: types.Message, state: FSMContext):
     try:
         user_id = msg.from_user.id
         message_id = msg.message_id
-        lang = msg.from_user.language_code
+        language_code = msg.from_user.language_code
 
         # Translate and send the welcome message with admin panel buttons
         welcome_text = translator(text=f'👩‍💻Hello, dear admin, welcome to the main panel!',
-                                  dest=lang)
+                                  dest=language_code)
         response_msg = await msg.answer(text=f'<b>{welcome_text}</b>',
-                                        reply_markup=main_admin_panel_btn(user_id=user_id, lang=lang))
+                                        reply_markup=main_admin_panel_btn(user_id=user_id, language_code=language_code))
 
         # Manage previous message
         state_data = await state.get_data()

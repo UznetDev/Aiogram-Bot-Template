@@ -218,7 +218,6 @@ class ThrottlingMiddleware(BaseMiddleware):
                 # If all channels checked and no problems found, return False.
                 return False
 
-
         except Exception as err:
             logging.error(err)
             return False

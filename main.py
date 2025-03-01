@@ -22,10 +22,14 @@ async def main():
     try:
         # Try to create necessary database tables
         try:
-            file_db.add_data(False, key='ads')
             db.create_table_admins()  # Create the admins table
             db.create_table_users()  # Create the users table
             db.create_table_channel()  # Create the channel table
+            db.create_table_settings()  # Create the settings table
+            join_channel = db.select_setting('join_channel')
+            if join_channel is None:
+                db.insert_settings(initiator_user_id=1, key='join_channel', value='False')
+
         except Exception as err:
             logging.error(err)  # Log any errors that occur during table creation
 
