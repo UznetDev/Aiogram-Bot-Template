@@ -12,7 +12,5 @@ __pycache__
 __pycache__/*
 *.so
 *.json
-/logs/*
-/logs/
 *.log
 *.xls
