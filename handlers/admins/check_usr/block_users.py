@@ -7,7 +7,8 @@ from filters.admin import IsAdmin, SelectAdmin
 from aiogram.fsm.context import FSMContext
 from function.translator import translator
 from states.admin_state import AdminState
-from data.config import yil_oy_kun, soat_minut_sekund, ADMIN
+from data.config import ADMIN
+
 
 @dp.callback_query(BlockUser.filter(F.action == "block"), IsAdmin())
 async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state: FSMContext):
@@ -35,48 +36,52 @@ async def block_users(call: types.CallbackQuery, callback_data: BlockUser, state
     - This function is asynchronous and does not return a value but performs actions such as sending messages and updating states.
     """
     try:
-        user_id = callback_data.cid  # The ID of the user to be blocked/unblocked
-        cid = call.from_user.id  # The ID of the admin issuing the block/unblock command
+        attention_user_id = callback_data.user_id  # The ID of the user to be blocked/unblocked
+        user_id = call.from_user.id  # The ID of the admin issuing the block/unblock command
         mid = call.message.message_id  # The ID of the message triggering the callback
-        lang = call.from_user.language_code  # The language code of the admin for message translation
-        data = SelectAdmin(cid=cid)  # Check if the admin is authorized to perform the action
+        language_code = call.from_user.language_code  # The language code of the admin for message translation
+        data = SelectAdmin(user_id=user_id)  # Check if the admin is authorized to perform the action
         btn = close_btn()  # Inline button to close the message
 
         if data.block_user():
-            check1 = db.select_admin(cid=user_id)  # Check if the user is an admin
-            if check1 is None:
-                check = db.check_user_ban(cid=user_id)  # Check if the user is already banned
-                user = await bot.get_chat(chat_id=user_id)  # Get user details
+            check1 = db.select_admin(user_id=attention_user_id)  # Check if the user is an admin
+            if check1 is None or user_id == ADMIN:
+                check = db.check_user_ban(user_id=attention_user_id)  # Check if the user is already banned
+                user = await bot.get_chat(chat_id=attention_user_id)  # Get user details
                 if check is None:
-                    db.add_user_ban(cid=user_id,
-                                    admin_cid=cid,
-                                    date=f'{yil_oy_kun} / {soat_minut_sekund}')  # Add user to ban list
-                    text = translator(text='⛔ User blocked\n\n Username: @', dest=lang)
+                    db.update_user_status(user_id=attention_user_id, 
+                                          status='ban',
+                                          updater_user_id=user_id)  # Update user status to blocked
+                    text = translator(text='⛔ User blocked\n\n Username: @', dest=language_code)
                     text += str(user.username)
-                    await bot.send_message(chat_id=user_id,
+                    await bot.send_message(chat_id=attention_user_id,
                                            text='🚫 You are blocked! If you think this is a mistake, contact the admin.',
                                            reply_markup=close_btn())  # Notify the user of the block
                 else:
-                    if check[2] == cid or cid == ADMIN:  # Check if the unblocking is authorized
-                        db.delete_user_ban(cid=user_id)  # Remove user from ban list
-                        text = translator(text='✅ User unblocked!\n\n Username: @', dest=lang)
+                    if check['initiator_user_id'] == user_id or check['updater_user_id'] == user_id or user_id == ADMIN:  # Check if the unblocking is authorized
+                        db.update_user_status(user_id=attention_user_id,
+                                              status='active',
+                                              updater_user_id=user_id)  # Update user status to active
+                        text = translator(text='✅ User unblocked!\n\n Username: @', dest=language_code)
                         text += str(user.username)
-                        await bot.send_message(chat_id=user_id,
+                        await bot.send_message(chat_id=attention_user_id,
                                                text='😊 You are unblocked! Contact the admin.',
                                                reply_markup=close_btn())  # Notify the user of the unblock
                     else:
-                        text = translator(text='⭕ Only the person who blocked the user can unblock them!\n\n Username: @', dest=lang)
+                        text = translator(text='⭕ Only the person who blocked the user can unblock them!\n\n Username: @', dest=language_code)
                         text += str(user.username)  # Inform that only the original admin can unblock
             else:
-                text = translator(text='🚫 I cannot block an admin.', dest=lang)
+                text = translator(text='🚫 I cannot block an admin.', dest=language_code)
                 try:
-                    db.delete_user_ban(cid=user_id)  # Ensure user is not mistakenly banned
+                    db.update_user_status(user_id=attention_user_id,
+                                        status='active',
+                                        updater_user_id=user_id)  # Ensure user is not mistakenly blocked
                 except Exception as err:
                     logging.error(err)  # Log any errors encountered
             await state.set_state(AdminState.check_user)  # Update the FSM state
         else:
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
-        await bot.edit_message_text(chat_id=cid,
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
+        await bot.edit_message_text(chat_id=user_id,
                                     message_id=mid,
                                     text=f'<b><i>{text}</i></b>',
                                     reply_markup=btn)  # Edit the original message with the result

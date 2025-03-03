@@ -1,5 +1,5 @@
 import logging
-from loader import dp, bot, DB
+from loader import dp, bot, db
 from aiogram import types, F
 from keyboards.inline.button import AdminCallback
 from keyboards.inline.admin_btn import channel_settings
@@ -7,6 +7,7 @@ from keyboards.inline.close_btn import close_btn
 from filters.admin import IsAdmin, SelectAdmin
 from aiogram.fsm.context import FSMContext
 from function.translator import translator
+
 
 @dp.callback_query(AdminCallback.filter(F.action == "mandatory_membership"), IsAdmin())
 async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
@@ -18,7 +19,7 @@ async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the callback query.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language_codeuage code (`language_code`) from the callback query.
     - Checks if the user has the required permissions to modify channel settings using the `SelectAdmin` filter.
     - If authorized, reads the current mandatory membership status from the database.
     - Toggles the membership requirement status:
@@ -32,32 +33,32 @@ async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
     - This function is asynchronous and does not return a value. It interacts with the Telegram API to update messages and with the database to modify settings.
     """
     try:
-        cid = call.from_user.id  # The ID of the admin who initiated the action
+        user_id = call.from_user.id  # The ID of the admin who initiated the action
         mid = call.message.message_id  # The ID of the message to be updated
-        lang = call.from_user.language_code  # The language code for translation
-        data = SelectAdmin(cid=cid)  # Check if the user has admin permissions
+        language_code = call.from_user.language_code  # The language_codeuage code for translation
+        data = SelectAdmin(user_id=user_id)  # Check if the user has admin permissions
         btn = close_btn()  # Create a button for closing the message
 
         if data.channel_settings():
             # Read the current setting for mandatory membership from the database
-            data = DB.reading_db()
-            if data['join_channel']:
+            mandatory_membership = db.select_setting('mandatory_membership')
+            if mandatory_membership == 'True':
                 # If mandatory membership is enabled, disable it
-                text = translator(text='☑️ Forced membership disabled!', dest=lang)
-                join_channel = False
+                text = translator(text='☑️ Forced membership disabled!', dest=language_code)
+                nex_mandatory_membership = 'False'
             else:
                 # If mandatory membership is disabled, enable it
-                text = translator(text='✅ Mandatory membership enabled!', dest=lang)
-                join_channel = True
+                text = translator(text='✅ Mandatory membership enabled!', dest=language_code)
+                nex_mandatory_membership = 'True'
 
             # Update the database with the new membership status
-            DB.change_data(join_channel=join_channel)
-            btn = channel_settings(lang=lang)  # Update the button to reflect the new settings
+            db.update_settings_key(updater_user_id=user_id, key='mandatory_membership', value=nex_mandatory_membership)
+            btn = channel_settings(language_code=language_code)  # Update the button to reflect the new settings
         else:
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
 
         # Edit the message with the new status and close button
-        await bot.edit_message_text(chat_id=cid,
+        await bot.edit_message_text(chat_id=user_id,
                                     message_id=mid,
                                     text=f'<b><i>{text}</i></b>',
                                     reply_markup=btn)

@@ -1,10 +1,16 @@
 /.idea/
 /__pycache__/
 /env/
-/db/
+/logs/
 /build/
 /.command*
 /.env
 /_build*
 /.vscode*
 *my_test
+__pycache__
+__pycache__/*
+*.so
+*.json
+*.log
+*.xls

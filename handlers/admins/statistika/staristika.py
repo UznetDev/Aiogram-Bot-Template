@@ -36,7 +36,7 @@ async def statistika(call: types.CallbackQuery, state: FSMContext):
         user_id = call.from_user.id
         message_id = call.message.message_id
         language = call.from_user.language_code
-        is_admin = SelectAdmin(cid=user_id)
+        is_admin = SelectAdmin(user_id=user_id)
 
         if is_admin.view_statistika():
             user_count = db.stat()
@@ -46,7 +46,7 @@ async def statistika(call: types.CallbackQuery, state: FSMContext):
                     f" {soat_minut_sekund}\n" + translator(text="📆 Date:", dest=language) +
                     f' {yil_oy_kun}\n ' + translator(text="Number of bans: ", dest=language) + str(
                         ban_count))
-            button = download_statistika(cid=user_id, lang=language)
+            button = download_statistika(user_id=user_id, language_code=language)
             await state.update_data({"message_id": call.message.message_id})
         else:
             text = translator(text="❌ Unfortunately, you do not have this permission!", dest=language)

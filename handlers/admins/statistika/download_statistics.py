@@ -38,30 +38,30 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
         user_id = call.from_user.id
         message_id = call.message.message_id
         language = call.from_user.language_code
-        is_admin = SelectAdmin(cid=user_id)
+        is_admin = SelectAdmin(user_id=user_id)
 
         if is_admin.download_statistika():
             # Retrieve user data from the database
             data = db.select_all_users()
             id_list = []
-            cid_list = []
+            user_id_list = []
             date_list = []
             usernames = []
             langs = []
 
             # Populate lists with user data
             for user in data:
-                id_list.append(user[0])
-                cid_list.append(user[1])
-                date_list.append(user[2])
-                langs.append(user[3])
-                user_info = await bot.get_chat(chat_id=user[1])
+                id_list.append(user['id'])
+                user_id_list.append(user['user_id'])
+                date_list.append(user['created_at'])
+                langs.append(user['language_code'])
+                user_info = await bot.get_chat(chat_id=user['user_id'])
                 usernames.append(f'@{user_info.username}')
 
             # Create a DataFrame and save it to an Excel file
             statistics_data = {
                 "id": id_list,
-                "cid": cid_list,
+                "user_id": user_id_list,
                 "date_add": date_list,
                 "username": usernames,
                 "lang": langs

@@ -62,10 +62,13 @@ async def on_startup_notify():
 
                     # Delete the log file if it exceeds 40 MB
                     if (os.path.getsize(log_file_name)) * (1024 * 124) > 40:
-                        os.remove(log_file_name)
+                        with open(log_file_name, 'w') as file:
+                            file.truncate(0)
                 except Exception as err:
                     # Log any errors that occur while sending the log file
                     logging.error(err)
+            if not os.path.exists(log_file_name):
+                os.mkdir(log_file_name)
         except Exception as Err:
             # Log any errors that occur while checking the log file
             logging.exception(Err)

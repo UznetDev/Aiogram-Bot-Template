@@ -32,45 +32,45 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
     - This function is asynchronous and does not return a value but performs actions such as sending messages and updating states.
     """
     try:
-        cid = call.from_user.id  # The ID of the admin initiating the action
+        user_id = call.from_user.id  # The ID of the admin initiating the action
         mid = call.message.message_id  # The ID of the message triggering the callback
-        lang = call.from_user.language_code  # The language code of the admin for message translation
-        data = SelectAdmin(cid=cid)  # Check if the admin has permission to manage channel settings
+        language_code = call.from_user.language_code  # The language code of the admin for message translation
+        data = SelectAdmin(user_id=user_id)  # Check if the admin has permission to manage channel settings
         btn = close_btn()  # Inline button to close the message
 
         if data.channel_settings():
-            if cid == ADMIN:
+            if user_id == ADMIN:
                 # Retrieve all channels if the admin is the main ADMIN
                 data = db.select_channels()
             else:
                 # Retrieve channels added by the current admin
-                data = db.select_channels_add_cid(add_cid=cid)
+                data = db.select_channels_initiator_user_id(initiator_user_id=user_id)
 
             if not data:
                 # If no channels are found, indicate that the list is empty
-                text = translator(text="❔ The channel list is empty!\n\n", dest=lang)
+                text = translator(text="❔ The channel list is empty!\n\n", dest=language_code)
             else:
                 # Construct a message listing the channels
-                text = translator(text="🔰 List of channels:\n\n", dest=lang)
+                text = translator(text="🔰 List of channels:\n\n", dest=language_code)
                 count = 0
                 for x in data:
                     try:
                         count += 1
-                        chat_id = str(-100) + str(x[1])  # Telegram channel ID
+                        chat_id = str(-100) + str(x['channel_id'])  # Telegram channel ID
                         channel = await bot.get_chat(chat_id=chat_id)  # Get channel details
                         text += (f"<b><i>{count}</i>. Name:</b> <i>{channel.full_name}</i>\n"
                                  f"<b>Username:</b> <i>@{channel.username}\n</i>"
-                                 f"<b>Added date:</b> <i>{x[2]}\n</i>"
-                                 f"<b>Added by CID:</b> <i>{x[3]}\n\n</i>")
+                                 f"<b>Added date:</b> <i>{x['created_at']}\n</i>"
+                                 f"<b>Added by user_id:</b> <i>{x['initiator_user_id']}\n\n</i>")
                     except Exception as err:
                         logging.error(err)  # Log any errors in retrieving channel details
-            btn = channel_settings(lang=lang)  # Button for channel settings
+            btn = channel_settings(language_code=language_code)  # Button for channel settings
         else:
             # Inform the admin that they do not have the necessary permissions
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
 
         await bot.edit_message_text(
-            chat_id=cid,
+            chat_id=user_id,
             message_id=mid,
             text=f'<b><i>{text}</i></b>',
             reply_markup=btn  # Update the message with a translated response and appropriate buttons

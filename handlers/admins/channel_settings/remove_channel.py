@@ -20,7 +20,7 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the callback query.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the callback query.
     - Checks if the user has the necessary permissions to access channel settings using the `SelectAdmin` filter.
     - If authorized, retrieves the list of channels either for all admins (if the user is the main admin) or for channels added by the specific admin.
     - If the channel list is empty, informs the admin. If not, displays a list of channels with options to delete them.
@@ -31,10 +31,10 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
     - This function is asynchronous and does not return a value. It interacts with the Telegram API to update messages and with the database to retrieve channel information.
     """
     try:
-        cid = call.from_user.id  # The ID of the admin who initiated the action
+        user_id = call.from_user.id  # The ID of the admin who initiated the action
         mid = call.message.message_id  # The ID of the message to be updated
-        lang = call.from_user.language_code  # The language code for translation
-        data = SelectAdmin(cid=cid)  # Check if the user has admin permissions
+        language_code = call.from_user.language_code  # The language code for translation
+        data = SelectAdmin(user_id=user_id)  # Check if the user has admin permissions
         btn = InlineKeyboardBuilder()  # Create an instance of InlineKeyboardBuilder for the keyboard
 
         # Attach the main button to the keyboard
@@ -42,26 +42,26 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
 
         if data.channel_settings():
             # Retrieve the list of channels based on admin permissions
-            if cid == ADMIN:
+            if user_id == ADMIN:
                 data = db.select_channels()
             else:
-                data = db.select_channels_add_cid(add_cid=cid)
+                data = db.select_channels_initiator_user_id(initiator_user_id=user_id)
 
             if not data:
                 # Inform the admin if no channels are available
-                text = translator(text="❔ The channel list is empty!\n\n", dest=lang)
+                text = translator(text="❔ The channel list is empty!\n\n", dest=language_code)
             else:
                 # Display the list of channels with options to delete them
-                text = translator(text="🔰 Choose a channel:\n\n", dest=lang)
+                text = translator(text="🔰 Choose a channel:\n\n", dest=language_code)
                 count = 0
 
                 for x in data:
                     try:
                         count += 1
-                        channel = await bot.get_chat(chat_id=str(-100) + str(x[1]))
+                        channel = await bot.get_chat(chat_id=str(-100) + str(x['channel_id']))
                         # Add a button for each channel to the keyboard
                         btn.button(text=f"{channel.full_name}: @{channel.username}",
-                                   callback_data=AdminCallback(action="delete_channel", data=str(x[1])).pack())
+                                   callback_data=AdminCallback(action="delete_channel", data=str(x['channel_id'])).pack())
                         text += (f"<b><i>{count}</i>. Name:</b> <i>{channel.full_name}</i>\n"
                                  f"<b>Username:</b> <i>@{channel.username}</i>\n"
                                  f"<b>Added date:</b> <i>{x[2]}</i>\n\n")
@@ -74,7 +74,7 @@ async def remove_channel(call: types.CallbackQuery, state: FSMContext):
             btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         else:
             # Inform the admin if they do not have the right to access channel settings
-            text = translator(text='❌ Unfortunately, you do not have this right!', dest=lang)
+            text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
 
         # Edit the message with the updated text and keyboard
         await bot.edit_message_text(chat_id=call.from_user.id,

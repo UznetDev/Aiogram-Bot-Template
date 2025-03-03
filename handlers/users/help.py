@@ -35,7 +35,7 @@ async def help_handler(msg: types.Message):
 
         # Create a URL button for sharing the bot
         share_button = send_url(url=f'{sharing_message} https://t.me/{bot_info.username}?start',
-                                lang=user_language)
+                                language_code=user_language)
 
         # Translate the help text
         translated_help_text = translator(text=help_text, dest=user_language)

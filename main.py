@@ -1,11 +1,13 @@
 import middlewares, handlers  # Import middlewares and handlers modules
 import asyncio
 import sys
+import os
 from utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup
 import logging
 from utils.set_bot_commands import set_default_commands  # Import the function to set default bot commands
 from loader import *  # Import all from loader module
-from middlewares import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
+# from middlewares import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
+from middlewares.throttling import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
 from data.config import log_file_name  # Import the log file name from config
 
 
@@ -13,25 +15,27 @@ async def main():
     """
     The main asynchronous function to start the bot and perform initial setup.
     """
-    await on_startup_notify()  # Notify admins about the bot startup
+    await on_startup_notify()
     await set_default_commands()  # Set the default commands for the bot
     dp.update.middleware.register(ThrottlingMiddleware())  # Register the ThrottlingMiddleware
 
     try:
         # Try to create necessary database tables
         try:
-            file_db.add_data(False, key='ads')
             db.create_table_admins()  # Create the admins table
-            db.create_table_ban()  # Create the ban table
             db.create_table_users()  # Create the users table
             db.create_table_channel()  # Create the channel table
+            db.create_table_settings()  # Create the settings table
+            mandatory_membership = db.select_setting('mandatory_membership')
+            if mandatory_membership is None:
+                db.insert_settings(initiator_user_id=1, key='mandatory_membership', value='False')
+
         except Exception as err:
             logging.error(err)  # Log any errors that occur during table creation
 
         # Delete any existing webhook and start polling
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
-
     finally:
         # Log the database statistics and close the bot session
         res = db.stat()  # Get database statistics
@@ -40,14 +44,25 @@ async def main():
 
 
 if __name__ == "__main__":
-    # Configure logging
-    format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(
-        filename=log_file_name,  # Save error log on file
-        level=logging.ERROR,  # Set the logging level to INFO
-        format=format,  # Set the logging format
-        # stream=sys.stdout  # Log to stdout
-    )
-    # Run the main function asynchronously
+
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+
+    if not os.path.exists(log_file_name):
+        with open(log_file_name, 'w') as f:
+            pass
+        
+    file_handler = logging.FileHandler(log_file_name)
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    root_logger.addHandler(file_handler)
+
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging.INFO)
+    stream_handler.setFormatter(formatter)
+    root_logger.addHandler(stream_handler)
+
     asyncio.run(main())
+
+    
 

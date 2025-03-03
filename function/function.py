@@ -29,3 +29,10 @@ def x_or_y(data):
     except Exception as err:
         logging.error(err)  # Log the error
         return ''  # Return an empty string if an error occurs
+
+
+def format_seconds(seconds):
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds = int(seconds % 60)
+    return f"{hours} soat {minutes} daqiqa {seconds} soniya"

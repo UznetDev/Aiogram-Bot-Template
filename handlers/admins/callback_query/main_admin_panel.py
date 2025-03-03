@@ -18,7 +18,7 @@ async def main_panel(call: types.CallbackQuery, state: FSMContext):
     - state (FSMContext): The FSM context to manage the bot's state during the conversation.
 
     Functionality:
-    - Retrieves the admin's user ID (`cid`), the message ID (`mid`), and the language code (`lang`) from the callback query.
+    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the callback query.
     - Translates a greeting message to the admin in their preferred language.
     - Edits the original message in the chat to display the translated greeting and the main admin panel buttons.
     - Updates the FSM state with the current message ID.
@@ -30,18 +30,18 @@ async def main_panel(call: types.CallbackQuery, state: FSMContext):
     - Catches and logs any exceptions that occur during the execution, ensuring that errors are recorded for debugging.
     """
     try:
-        cid = call.from_user.id  # The ID of the admin who initiated the action
+        user_id = call.from_user.id  # The ID of the admin who initiated the action
         mid = call.message.message_id  # The ID of the message to be updated
-        lang = call.from_user.language_code  # The language code for translation
+        language_code = call.from_user.language_code  # The language code for translation
 
         # Translate the greeting message
-        text = translator(text="👩‍💻Hello, dear admin, welcome to the main panel!", dest=lang)
+        text = translator(text="👩‍💻Hello, dear admin, welcome to the main panel!", dest=language_code)
 
         # Edit the message with the translated text and update it with the main admin panel buttons
-        await bot.edit_message_text(chat_id=cid,
+        await bot.edit_message_text(chat_id=user_id,
                                     message_id=mid,
                                     text=f'{text}',
-                                    reply_markup=main_admin_panel_btn(cid=cid, lang=lang))
+                                    reply_markup=main_admin_panel_btn(user_id=user_id, language_code=language_code))
 
         # Update FSM state with the current message ID
         await state.update_data({"message_id": call.message.message_id})

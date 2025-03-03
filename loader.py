@@ -1,22 +1,29 @@
-from aiogram import Bot, Dispatcher
+import logging
+from aiogram import Bot, Dispatcher, Router
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from data.config import *  # Import all configurations from the config module
-from utils.db_api.mysql_db import Database
-from cython_code.file_db import BotDb, FileDB
+from aiogram.client.bot import DefaultBotProperties  # Yangi versiyadagi default sozlamalar uchun
+from data.config import *  # Konfiguratsiyalarni import qilamiz
+from db.database import Database
 
-# Initialize the Telegram bot with the given token and parse mode set to HTML
-bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
+# Botni token va default parametr orqali yaratamiz
+bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-# Initialize memory storage for the dispatcher
+# Xotira asosidagi storage ni yaratamiz
 storage = MemoryStorage()
 
-# Initialize the dispatcher with the memory storage
-dp = Dispatcher(storage=storage)
+# Dispatcher obyektini yaratishda bot va storage ni uzatamiz
+dp = Dispatcher(bot=bot, storage=storage)
 
-# Initialize the MySQL database connection
+# Router obyektini yaratamiz
+router = Router()
+
+# MySQL ma'lumotlar bazasi ulanishini yaratamiz
 db = Database(host=HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, database=MYSQL_DATABASE)
 
-# Initialize the BotDb with the specified JSON file
-DB = BotDb(file='data/db.json')
-file_db = FileDB(file='data/file_db.json')
+
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+
+log_format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
+formatter = logging.Formatter(log_format)
