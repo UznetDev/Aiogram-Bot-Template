@@ -1,5 +1,5 @@
 # Aiogram Bot Template
-
+ 
 
 This repository provides a comprehensive template for creating Telegram bots using the Aiogram framework. It includes a powerful admin panel accessible via the `/admin` command, making it ideal for managing bot functionalities and user interactions.
 
