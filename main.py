@@ -1,14 +1,12 @@
-import middlewares, handlers  # Import middlewares and handlers modules
-import asyncio
-import sys
 import os
+import sys
+import asyncio
+import middlewares, handlers  # Import middlewares and handlers modules
 from utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup
 import logging
 from utils.set_bot_commands import set_default_commands  # Import the function to set default bot commands
 from loader import *  # Import all from loader module
-# from middlewares import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
-from middlewares.throttling import ThrottlingMiddleware  # Import the ThrottlingMiddleware class
-from data.config import log_file_name  # Import the log file name from config
+from data.config import log_file_name, FEATURES  # Import the log file name from config
 
 
 async def main():
@@ -17,15 +15,10 @@ async def main():
     """
     await on_startup_notify()
     await set_default_commands()  # Set the default commands for the bot
-    dp.update.middleware.register(ThrottlingMiddleware())  # Register the ThrottlingMiddleware
 
     try:
         # Try to create necessary database tables
         try:
-            db.create_table_admins()  # Create the admins table
-            db.create_table_users()  # Create the users table
-            db.create_table_channel()  # Create the channel table
-            db.create_table_settings()  # Create the settings table
             mandatory_membership = db.select_setting('mandatory_membership')
             if mandatory_membership is None:
                 db.insert_settings(initiator_user_id=1, key='mandatory_membership', value='False')

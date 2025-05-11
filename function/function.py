@@ -1,4 +1,5 @@
 import logging
+import hashlib
 
 def x_or_y(data):
     """
@@ -28,7 +29,7 @@ def x_or_y(data):
             return '❌'  # Return cross mark if data is False
     except Exception as err:
         logging.error(err)  # Log the error
-        return ''  # Return an empty string if an error occurs
+        return ''
 
 
 def format_seconds(seconds):
@@ -36,3 +37,8 @@ def format_seconds(seconds):
     minutes = int((seconds % 3600) // 60)
     seconds = int(seconds % 60)
     return f"{hours} soat {minutes} daqiqa {seconds} soniya"
+
+
+def to_hash(text: str) -> int:
+    hex16 = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    return int(hex16, 16) 

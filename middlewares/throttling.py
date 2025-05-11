@@ -1,13 +1,10 @@
-import logging
 import time
+import logging
 from data.config import ADMIN
 from keyboards.inline.close_btn import close_btn
 from aiogram import BaseMiddleware, types
-from aiogram.filters import BaseFilter
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import Message, CallbackQuery
 from keyboards.inline.button import MainCallback
-from loader import bot, db
 from function.translator import translator
 
 
@@ -19,7 +16,7 @@ class ThrottlingMiddleware(BaseMiddleware):
     If a user receives the throttling warning 3 times within 1 minute, they are banned for 1 hour.
     """
 
-    def __init__(self, default_rate: float = 0.5) -> None:
+    def __init__(self, bot, db, default_rate: float = 0.5) -> None:
         """
         Initializes the ThrottlingMiddleware instance.
 
@@ -28,6 +25,8 @@ class ThrottlingMiddleware(BaseMiddleware):
         """
         self.limiters = {}  # Dictionary to store per-user throttling data.
         self.default_rate = default_rate
+        self.bot = bot
+        self.db = db
 
 
     async def __call__(self, handler, event: types.Message, data):
@@ -53,7 +52,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         if user_id == ADMIN:
             return await handler(event, data)
 
-        user_data = db.check_user(user_id=user_id)
+        user_data = self.db.check_user(user_id=user_id)
         if user_data:
             is_ban = await self.check_ban(user_data)
             if is_ban:
@@ -90,12 +89,12 @@ class ThrottlingMiddleware(BaseMiddleware):
                     # Agar throttling hisobi 3 yoki undan ko'p bo'lsa, foydalanuvchini ban qilamiz.
                     if user_data["count"] >= 3:
                         try:
-                            db.ban_user_for_one_hour(user_id, comment="1 hour due to too many requests.")
+                            self.db.ban_user_for_one_hour(user_id, comment="1 hour due to too many requests.")
                             tx = translator(
                                 text='You have been banned for 1 hour due to too many requests.',
                                 dest=language_code
                             )
-                            await bot.send_message(chat_id=user_id, text=tx)
+                            await self.bot.send_message(chat_id=user_id, text=tx)
                         except Exception as err:
                             logging.error(f"Error banning user {user_id}: {err}")
                         # Reset the counter to oldindan qayta-ban qilishdan saqlanish uchun.
@@ -106,7 +105,7 @@ class ThrottlingMiddleware(BaseMiddleware):
                             try:
                                 await event.callback_query.answer(tx)
                             except Exception:
-                                await bot.send_message(
+                                await self.bot.send_message(
                                     chat_id=user_id,
                                     text=tx,
                                     reply_markup=close_btn()
@@ -120,7 +119,7 @@ class ThrottlingMiddleware(BaseMiddleware):
             else:
                 return await handler(event, data)
         else:
-            db.insert_user(user_id=user_id, 
+            self.db.insert_user(user_id=user_id, 
                            language_code=language_code)
             return await handler(event, data)
 
@@ -133,9 +132,9 @@ class ThrottlingMiddleware(BaseMiddleware):
                         "⚠ If you think this is a mistake, contact the admin.",
                     dest=user_data['language_code'])
                 if user_data['initiator_user_id'] == 1 or user_data['initiator_user_id'] == 0:
-                    text += f"\n\n<b>👮‍♂️ Admin: Bot</b>\n "
+                    text += f"\n\n<b>👮‍♂️ Admin: self.bot</b>\n "
                 elif user_data['initiator_user_id'] is not None:
-                    admin_info = await bot.get_chat(chat_id=user_data['updater_user_id'])
+                    admin_info = await self.bot.get_chat(chat_id=user_data['updater_user_id'])
                     text += f"\n\n<b>👮‍♂️ Admin @{admin_info.username}</b>\n "
                 if user_data['comment'] is not None:
                     text += f"\n<b>📝 Comment: {user_data['comment']}</b>\n"
@@ -143,11 +142,11 @@ class ThrottlingMiddleware(BaseMiddleware):
                 if user_data['ban_time'] is not None:
                     text += f"\n<b>📅 Ban time: {user_data['ban_time']}</b>\n"
 
-                admins = await bot.get_chat(chat_id=ADMIN)
+                admins = await self.bot.get_chat(chat_id=ADMIN)
 
                 text += f'<b>👩‍💻 Super admin @{admins.username}</b>\n'
 
-                await bot.send_message(chat_id=user_data['user_id'], 
+                await self.bot.send_message(chat_id=user_data['user_id'], 
                                        text=f"<b>{text}</b>", 
                                        reply_markup=close_btn())
                 return True
@@ -160,15 +159,15 @@ class ThrottlingMiddleware(BaseMiddleware):
 
     async def check_member(self, user_id, language_code):
         try:
-            is_mandatory = db.select_setting('mandatory_membership')
+            is_mandatory = self.db.select_setting('mandatory_membership')
             if is_mandatory is None:
-                db.update_settings_key(updater_user_id=1, key='mandatory_membership', value=False)
+                self.db.update_settings_key(updater_user_id=1, key='mandatory_membership', value=False)
                 return False
             elif is_mandatory == 'False':
                 return False
             elif is_mandatory == 'True':
                 try:
-                    channels = db.select_channels()
+                    channels = self.db.select_channels()
                 except Exception as err:
                     logging.error(f"Error selecting channels: {err}")
                     return False
@@ -176,20 +175,20 @@ class ThrottlingMiddleware(BaseMiddleware):
                 for channel in channels:
                     try:
                         chat_id = int("-100" + str(channel.get('channel_id')))
-                        res = await bot.get_chat_member(chat_id=chat_id, user_id=user_id)
+                        res = await self.bot.get_chat_member(chat_id=chat_id, user_id=user_id)
                         
                         if res.status not in ('member', 'administrator', 'creator'):
                             count = 0
 
-                            keyboard = InlineKeyboardBuilder()
+                            keyboard = InlineKeyboardBuilder.dbuilder()
                             message_text = translator(text="🛑 You have not joined the channel(s)!:\n\n", dest=language_code)
 
                             for x in channels:
                                 channel_id = str(-100) + str(x['channel_id'])
-                                channel = await bot.get_chat(channel_id)
+                                channel = await self.bot.get_chat(channel_id)
 
                                 try:
-                                    chat_member_status = await bot.get_chat_member(chat_id=channel_id, user_id=user_id)
+                                    chat_member_status = await self.bot.get_chat_member(chat_id=channel_id, user_id=user_id)
                                 except Exception as e:
                                     logging.error(f"Error getting chat member status: {e}")
                                     continue
@@ -207,7 +206,7 @@ class ThrottlingMiddleware(BaseMiddleware):
                                     keyboard.adjust(1)
 
                                     # Send the message to the user
-                                    await bot.send_message(chat_id=user_id, 
+                                    await self.bot.send_message(chat_id=user_id, 
                                                             text=f"<b>{message_text}</b>", 
                                                             reply_markup=keyboard.as_markup())
                             return True

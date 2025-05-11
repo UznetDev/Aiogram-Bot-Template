@@ -27,3 +27,5 @@ log_file_name = 'logs/logging.log'  # The log file path for logging database act
 datas = datetime.datetime.now()
 date_day_month = (datetime.datetime.date(datetime.datetime.now()))
 time_hour_minute_second = f"{datas.hour}:{datas.minute}:{datas.second}"
+
+FEATURES = ['translator', 'middlewares', 'save_log']

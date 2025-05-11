@@ -55,16 +55,16 @@ async def attach_user(msg: types.Message, state: FSMContext):
                             # User is successfully unblocked
                             text = "✅ User unblocked!"
                             text += translator(text=f'\n\nUsername: @', dest=language_code) + user.username
-                            text += translator(text='\nLanguage code: ', dest=language_code) + f'{user_data['language_code']}'
+                            text += translator(text="\nLanguage code: ", dest=language_code) + user_data['language_code']
                         else:
                             # User is blocked but is an admin
                             tx = "✅ User blocked!\n👮‍♂️ User is in the list of admins!</b>"
                             text = translator(text=f'{tx}\n\nUsername: @', dest=language_code) + user.username
-                            text += translator(text='<b>\nLanguage code:</b> ', dest=language_code) + f'<i>{user_data['language_code']}</i>'
+                            text += translator(text='<b>\nLanguage code:</b> ', dest=language_code) + f"<i>{user_data['language_code']}</i>"
                     else:
                         # User is already blocked
                         tx = "✅ User blocked!\n Date:"
-                        text = translator(text=f'{tx} {user_data['created_at']}\n\nUsername: @', dest=language_code) + user.username
+                        text = translator(text=f"{tx} {user_data['created_at']}\n\nUsername: @", dest=language_code) + user.username
                 else:
                     # User not found in the bot's list
                     text = translator(text="🔴 User not found!\nThe user may not be in the bot's list..", dest=language_code)

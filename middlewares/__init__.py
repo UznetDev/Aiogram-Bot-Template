@@ -1,2 +1,2 @@
 # from .throttling import ThrottlingMiddleware
-from cython_code.throttling_middleware import ThrottlingMiddleware
+# from cython_code.throttling_middleware import ThrottlingMiddleware

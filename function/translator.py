@@ -1,18 +1,50 @@
-import logging
-from cython_code.my_translator import MyTranslator
+from typing import Optional
+from deep_translator import GoogleTranslator
+from db.database import Database
+from function.function import to_hash
+from core.feature_manager import FeatureManager
 
 
-def translator(text, dest, file_path='db/translate.json', real=False):
-    try:
-        if dest == 'en' or not dest or not text:
-            return text
+
+def translator(text: str, *args, **kwargs) -> str:
+    return text
+
+
+class Translator:
+    def __init__(self, db: Database,
+                 FM: FeatureManager = None,
+                 default_dest: str = "en",
+                 default_src: str = "en"):
+        self.db = db
+        self.default_dest = default_dest
+        self.default_src = default_src
+        self.FM = FM
+
+    def translate(self,
+                 text: str,
+                 dest: Optional[str] = 'en',
+                 src: Optional[str] = 'en') -> str:
+        if self.FM.feature('translator'):
+            if dest == src or not text:
+                return text
+            dest = dest or self.default_dest
+            src  = src or self.default_src
+
+
+            hash_value = to_hash(text)
+            hash_index = self.db.select_texts(hash_value)
+            if hash_index:
+                check = self.db.select_translations(hash_index, dest)
+                if check:
+                    return check
+                else:
+                    translated = GoogleTranslator(source=src, target=dest).translate(text)
+                    self.db.insert_translations(text_id=hash_index, dest_lang=dest, translated_content=translated)
+                    return translated
+            else:
+                hash_index = self.db.insert_texts(hash_value=hash_value, text=text)
+                translated = GoogleTranslator(source=src, target=dest).translate(text)
+                self.db.insert_translations(text_id=hash_index, dest_lang=dest, translated_content=translated)
+                return translated
         else:
-            data = MyTranslator(file_path=file_path,
-                                text=text,
-                                lang=dest,
-                                real=real)
-        result = data.translator()
-        return result
-    except Exception as err:
-        logging.error(err)
-        return text
+            return text

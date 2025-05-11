@@ -1,5 +1,8 @@
 import logging
 import mysql.connector
+from aiogram import Bot
+from function.function import to_hash
+
 
 class Database:
 
@@ -12,6 +15,13 @@ class Database:
         self.password = password
         self.database = database
         self.reconnect()
+        self.create_table_admins()  # Create the admins table
+        self.create_table_users()  # Create the users table
+        self.create_table_channel()  # Create the channel table
+        self.create_table_settings()  # Create the settings table
+        self.create_table_texts()  # Create the texts table
+        self.create_table_translations()  # Create the translations table
+        self.create_table_features()  # Create the features table
 
     def reconnect(self):
         """
@@ -147,6 +157,69 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+    
+    def create_table_texts(self):
+        try:
+            sql = """
+            CREATE TABLE IF NOT EXISTS texts (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                hash_value BIGINT UNSIGNED,
+                raw_text TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP NULL DEFAULT NULL,
+                INDEX(hash_value)
+            )
+            """
+            self.cursor.execute(sql)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+    def create_table_translations(self):
+        try:
+            sql = """
+                CREATE TABLE IF NOT EXISTS `translations` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `text_id` INT NOT NULL,
+                    `dest_lang` CHAR(5) NOT NULL,
+                    `translated_content` TEXT NOT NULL,
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                    deleted_at TIMESTAMP NULL DEFAULT NULL,
+                    FOREIGN KEY (text_id) REFERENCES texts(id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            """
+            self.cursor.execute(sql)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+    def create_table_features(self):
+        try:
+            sql = """
+                CREATE TABLE IF NOT EXISTS `features` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `name` VARCHAR(255) NOT NULL UNIQUE,
+                    `enabled` TINYINT(1) DEFAULT 0,
+                    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """
+            self.cursor.execute(sql)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
 
     ## ---------------- Scheduler ---------------------
     def ban_user_for_one_hour(self, user_id, comment=None):
@@ -182,6 +255,46 @@ class Database:
             logging.error(f"General error: {err}")
 
     ## ------------------ Insert data ------------------ ##
+
+    def insert_feature(self, name: str, enabled: bool):
+        try:
+            sql = "INSERT INTO `features` (`name`, `enabled`) VALUES (%s, %s)"
+            values = (name, int(enabled))
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+    def insert_texts(self, hash_value: str, raw_text: str):
+        """
+        Insert a new text into the 'texts' table.
+        """
+        try:
+            sql = "INSERT INTO `texts` (`hash_value`, `raw_text`) VALUES (%s, %s)"
+            values = (to_hash(hash_value), raw_text)
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+            return self.cursor.lastrowid
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+    def insert_translations(self, text_id: int, dest_lang: str, translated_content: str):
+        try:
+            sql = "INSERT INTO `translations` (`text_id`, `dest_lang`, `translated_content`) VALUES (%s, %s, %s)"
+            values = (text_id, dest_lang, translated_content)
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
 
     def insert_settings(self, initiator_user_id, key, value):
         """
@@ -305,6 +418,47 @@ class Database:
             logging.error(err)
 
     ## ------------------ Select ------------------ ##
+    def select_feature(self, name: str):
+        """
+        Select a feature from the 'features' table.
+        """
+        try:
+            sql = "SELECT * FROM `features` WHERE `name` = %s"
+            values = (name,)
+            self.cursor.execute(sql, values)
+            result = self.cursor.fetchone()
+            return None if result is None else result['enabled']
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+    def select_texts(self, hash_value: str):
+        try:
+            sql = "SELECT * FROM `texts` WHERE `hash_value` = %s LIMIT 1"
+            values = (hash_value,)
+            self.cursor.execute(sql, values)
+            result = self.cursor.fetchone()
+            return None if result is None else result['id']
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+    def select_translations(self, text_id: int, dest_lang: str):
+        try:
+            sql = "SELECT * FROM `translations` WHERE `text_id` = %s AND `dest_lang` = %s LIMIT 1"
+            values = (text_id, dest_lang)
+            self.cursor.execute(sql, values)
+            result = self.cursor.fetchone()
+            return None if result is None else result['translated_content']
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
 
     def select_setting(self, key: str):
         """
@@ -411,6 +565,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+    
     def select_admins_by_id(self, start_id: int, end_id: int) -> list:
         """
         Select admins from the 'admins' table within a specific ID range.
@@ -619,3 +774,69 @@ class Database:
             self.reconnect()
         except Exception as err:
             logging.error(err)
+
+
+
+
+
+
+class MySQLHandler(logging.Handler):
+    def __init__(self, bot: Bot, connection: mysql.connector.MySQLConnection):
+        super().__init__()
+        try:
+            self.bot = bot
+            self.connection = connection
+            self.cursor = self.connection.cursor()
+            self.create_table()
+        except Exception as err:
+            print(err)
+
+    def create_table(self):
+        try:
+            create_table_query = """
+            CREATE TABLE IF NOT EXISTS `log_history` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `pathname` VARCHAR(255),
+                `filename` VARCHAR(255),
+                `funcname` VARCHAR(255),
+                `lineno` INT,
+                `logger_name` VARCHAR(255),
+                `level` VARCHAR(50),
+                `message` TEXT,
+                `create_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+            self.cursor.execute(create_table_query)
+            self.connection.commit()
+        except  Exception as err:
+            print(err)
+            
+        except Exception as err:
+            print(err)
+
+
+    def emit(self, record):
+        try:
+            sql = """
+            INSERT INTO `log_history` (`pathname`, `filename`, `funcname`, `lineno`, `logger_name`, `level`, `message`)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            values = (
+                record.pathname,
+                record.filename,
+                record.funcName,
+                record.lineno,
+                record.name,
+                record.levelname,
+                record.getMessage()
+            )
+            self.cursor.execute(sql, values)
+            self.connection.commit()
+        except Exception as err:
+            print(err)
+
+
+    def close(self):
+        self.cursor.close()
+        self.connection.close()
+        super().close()
