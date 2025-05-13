@@ -9,7 +9,7 @@ from aiogram.exceptions import (
     TelegramUnauthorizedError, TelegramForbiddenError
     # (In aiogram v3.18, specific errors like "MessageNotModified" are categorized under TelegramBadRequest)
 )
-from loader import root_logger
+from bot.loader import root_logger
 # from data.config import ADMINS  # your admin IDs
 
 

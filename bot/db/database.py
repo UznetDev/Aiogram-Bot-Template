@@ -1,11 +1,10 @@
 import logging
 import mysql.connector
 from aiogram import Bot
-from function.function import to_hash
+from bot.function.function import to_hash
 
 
 class Database:
-
     def __init__(self, host, user, password, database):
         """
         Initialize the Database object with connection parameters.
@@ -274,7 +273,7 @@ class Database:
         """
         try:
             sql = "INSERT INTO `texts` (`hash_value`, `raw_text`) VALUES (%s, %s)"
-            values = (to_hash(hash_value), raw_text)
+            values = (hash_value, raw_text)
             self.cursor.execute(sql, values)
             self.connection.commit()
             return self.cursor.lastrowid

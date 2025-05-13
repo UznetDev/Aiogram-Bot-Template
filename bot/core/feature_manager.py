@@ -1,6 +1,6 @@
 import logging
 from typing import Optional
-from db.database import Database
+from bot.db.database import Database
 from redis import Redis, RedisError
 
 

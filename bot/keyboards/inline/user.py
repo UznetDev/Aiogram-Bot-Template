@@ -1,20 +1,9 @@
 import logging
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from api.translator import translator
+from bot.loader import translator
 
 
 def send_url(language_code, url):
-    """
-    Creates an inline keyboard with a button to share a URL.
-
-    Args:
-        url (str): The URL to be shared.
-        language_code (str): The language code for translation.
-
-    Returns:
-        aiogram.types.InlineKeyboardMarkup: The markup for the inline keyboard with the share button,
-        or False if an error occurred.
-    """
     try:
         btn = InlineKeyboardBuilder()
         btn.button(

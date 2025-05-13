@@ -1,12 +1,12 @@
 import os
 import sys
 import asyncio
-import middlewares, handlers  # Import middlewares and handlers modules
-from utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup
 import logging
-from utils.set_bot_commands import set_default_commands  # Import the function to set default bot commands
-from loader import *  # Import all from loader module
-from data.config import log_file_name, FEATURES  # Import the log file name from config
+from bot.utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup
+from bot.utils.set_bot_commands import set_default_commands  # Import the function to set default bot commands
+from bot.loader import *  # Import all from loader module
+from bot.data.config import log_file_name
+from bot.db.database import MySQLHandler
 
 
 async def main():
@@ -19,15 +19,15 @@ async def main():
     try:
         # middlewares
         if FM.feature('middlewares'):
-            from middlewares.throttling import ThrottlingMiddleware
+            from bot.middlewares.throttling import ThrottlingMiddleware
             dp.update.middleware.register(ThrottlingMiddleware(db=db, bot=bot))  # Register the ThrottlingMiddleware
 
 
         # save_log
         if FM.feature('save_log'):
             mysql_handler = MySQLHandler(bot=bot, connection=db.connection)
-            log_format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
-            formatter = logging.Formatter(log_format)
+            # log_format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
+            # formatter = logging.Formatter(log_format)
             root_logger.addHandler(mysql_handler)
             
         mandatory_membership = db.select_setting('mandatory_membership')

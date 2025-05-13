@@ -4,10 +4,10 @@ from aiogram.enums import ParseMode
 from redis import Redis
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.client.bot import DefaultBotProperties  # Yangi versiyadagi default sozlamalar uchun
-from data.config import *  # Konfiguratsiyalarni import qilamiz
-from db.database import Database, MySQLHandler
-from api.translator import Translator
-from core.feature_manager import FeatureManager
+from bot.data.config import *
+from bot.db.database import Database
+from bot.api.translator import Translator
+from bot.core.feature_manager import FeatureManager
 
 
 # MySQL ma'lumotlar bazasi ulanishini yaratamiz

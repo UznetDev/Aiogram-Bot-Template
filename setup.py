@@ -100,12 +100,14 @@ def main_setup() -> None:
 
     print("🔧  Configuration complete.")
 
-    from loader import FM
+    from bot.loader import FM
 
     
     FEATURES = ['translator', 'middlewares', 'save_log']
     for feature in FEATURES:
-        FM.feature(feature)
+        x = FM.feature(feature)
+        print(f"🔧  {feature}: {x}")
+
     print("🔧  Features loaded.")
 
 

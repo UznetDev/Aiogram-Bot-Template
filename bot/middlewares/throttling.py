@@ -1,11 +1,11 @@
 import time
 import logging
-from data.config import ADMIN
-from keyboards.inline.close_btn import close_btn
+from bot.data.config import ADMIN
+from bot.keyboards.inline.close_btn import close_btn
 from aiogram import BaseMiddleware, types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from keyboards.inline.button import MainCallback
-from api.translator import translator
+from bot.keyboards.inline.button import MainCallback
+from bot.loader import translator
 
 
 class ThrottlingMiddleware(BaseMiddleware):

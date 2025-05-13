@@ -11,3 +11,8 @@ pytest-mock
 aioresponses
 deep_translator
 pandas
+pytest
+pytest-asyncio
+asynctest
+aioresponses
+aiogram_tests

@@ -1,7 +1,7 @@
 import logging, os
-from loader import bot
-from data.config import ADMIN, log_file_name
-from keyboards.inline.close_btn import close_btn
+from bot.loader import bot
+from bot.data.config import ADMIN, log_file_name
+from bot.keyboards.inline.close_btn import close_btn
 from aiogram import types
 
 

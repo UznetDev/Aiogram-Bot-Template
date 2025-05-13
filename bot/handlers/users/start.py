@@ -1,8 +1,8 @@
 import logging
 from aiogram import types
 from aiogram.filters import CommandStart
-from loader import dp, bot, translator
-from keyboards.inline.user import send_url
+from bot.loader import dp, bot, translator
+from bot.keyboards.inline.user import send_url
 
 
 @dp.message(CommandStart())

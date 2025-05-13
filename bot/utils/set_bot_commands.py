@@ -1,5 +1,5 @@
 from aiogram import types
-from loader import bot
+from bot.loader import bot
 
 
 async def set_default_commands():

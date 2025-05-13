@@ -1,8 +1,8 @@
 from typing import Optional
 from deep_translator import GoogleTranslator
-from db.database import Database
-from function.function import to_hash
-from core.feature_manager import FeatureManager
+from bot.db.database import Database
+from bot.function.function import to_hash
+from bot.core.feature_manager import FeatureManager
 
 
 class Translator:
@@ -45,7 +45,7 @@ class Translator:
                     self.db.insert_translations(text_id=hash_index, dest_lang=dest, translated_content=translated)
                     return translated
             else:
-                hash_index = self.db.insert_texts(hash_value=hash_value, text=text)
+                hash_index = self.db.insert_texts(hash_value=hash_value, raw_text=text)
                 translated = GoogleTranslator(source=src, target=dest).translate(text)
                 self.db.insert_translations(text_id=hash_index, dest_lang=dest, translated_content=translated)
                 return translated
