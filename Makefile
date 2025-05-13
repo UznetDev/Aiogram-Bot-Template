@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := setup
+.DEFAULT_GOAL := main
 SHELL := bash
 
 VENV := env
@@ -15,12 +15,18 @@ else
 	VENV_PY := $(VENV)/bin/python
 endif
 
-.PHONY: setup requirements venv
+.PHONY: main setup requirements venv
+
+main: setup
+	@echo "🚀 Running main.py…"
+	$(VENV_PY) main.py
 
 setup: requirements
+	@echo "⚙️  Running setup.py…"
 	$(VENV_PY) setup.py
 
 requirements: venv
+	@echo "📦 Installing/upgrading requirements…"
 	$(VENV_PY) -m pip install --upgrade pip
 	$(VENV_PY) -m pip install --upgrade mysql-connector-python
 

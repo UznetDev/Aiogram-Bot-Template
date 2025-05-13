@@ -2,6 +2,7 @@ import os
 import sys
 from getpass import getpass
 
+
 REQUIRED = [
     "BOT_TOKEN",
     "ADMIN",
@@ -96,6 +97,16 @@ def main_setup() -> None:
                 print("👋  Aborted. .env NOT saved.")
                 break
             cfg = prompt_for(REQUIRED, {})
+
+    print("🔧  Configuration complete.")
+
+    from loader import FM
+
+    
+    FEATURES = ['translator', 'middlewares', 'save_log']
+    for feature in FEATURES:
+        FM.feature(feature)
+    print("🔧  Features loaded.")
 
 
 if __name__ == "__main__":

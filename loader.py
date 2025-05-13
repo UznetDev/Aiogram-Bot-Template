@@ -1,7 +1,7 @@
 import logging
 from aiogram import Bot, Dispatcher, Router
 from aiogram.enums import ParseMode
-from redis.asyncio import Redis
+from redis import Redis
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.client.bot import DefaultBotProperties  # Yangi versiyadagi default sozlamalar uchun
 from data.config import *  # Konfiguratsiyalarni import qilamiz
@@ -20,14 +20,9 @@ root_logger.setLevel(logging.INFO)
 log_format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
 formatter = logging.Formatter(log_format)
 
-
-FM = FeatureManager(db=db, root_logger=root_logger)
-
-for feature in FEATURES:
-    FM.feature(feature)
-
-
 redis = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+
+FM = FeatureManager(db=db, root_logger=root_logger, redis_client=redis)
 
 
 # Botni token va default parametr orqali yaratamiz
@@ -43,20 +38,10 @@ dp = Dispatcher(bot=bot, storage=storage)
 router = Router()
 
 
-translator = Translator(db, FM=FM)
-
-# middlewares
-if FM.feature('middlewares'):
-    from middlewares.throttling import ThrottlingMiddleware
-    dp.update.middleware.register(ThrottlingMiddleware(db=db, bot=bot))  # Register the ThrottlingMiddleware
+translator = Translator(db=db, FM=FM)
 
 
-# save_log
-if FM.feature('save_log'):
-    mysql_handler = MySQLHandler(bot=bot, connection=db.connection)
-    log_format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
-    formatter = logging.Formatter(log_format)
-    root_logger.addHandler(mysql_handler)
+
 
 
 

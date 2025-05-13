@@ -17,14 +17,22 @@ async def main():
     await set_default_commands()  # Set the default commands for the bot
 
     try:
-        # Try to create necessary database tables
-        try:
-            mandatory_membership = db.select_setting('mandatory_membership')
-            if mandatory_membership is None:
-                db.insert_settings(initiator_user_id=1, key='mandatory_membership', value='False')
+        # middlewares
+        if FM.feature('middlewares'):
+            from middlewares.throttling import ThrottlingMiddleware
+            dp.update.middleware.register(ThrottlingMiddleware(db=db, bot=bot))  # Register the ThrottlingMiddleware
 
-        except Exception as err:
-            logging.error(err)  # Log any errors that occur during table creation
+
+        # save_log
+        if FM.feature('save_log'):
+            mysql_handler = MySQLHandler(bot=bot, connection=db.connection)
+            log_format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
+            formatter = logging.Formatter(log_format)
+            root_logger.addHandler(mysql_handler)
+            
+        mandatory_membership = db.select_setting('mandatory_membership')
+        if mandatory_membership is None:
+            db.insert_settings(initiator_user_id=1, key='mandatory_membership', value='False')
 
         # Delete any existing webhook and start polling
         await bot.delete_webhook(drop_pending_updates=True)

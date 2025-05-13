@@ -20,6 +20,14 @@ class Translator:
         self.default_src = default_src
         self.FM = FM
 
+    def __call__(
+        self,
+        text: str,
+        dest: Optional[str] = None,
+        src: Optional[str] = None,
+    ) -> str:
+        return self.translate(text, dest=dest, src=src)
+
     def translate(self,
                  text: str,
                  dest: Optional[str] = 'en',
