@@ -1,7 +1,6 @@
 # tests/test_admins_manager_int.py
 import random
 import pytest
-import mysql.connector
 
 from bot.loader import db, redis, AM
 
