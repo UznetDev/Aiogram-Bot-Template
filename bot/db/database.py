@@ -19,7 +19,6 @@ class Database:
         self.create_table_settings()
         self.create_table_texts()
         self.create_table_translations()
-        self.create_table_features()
 
     def reconnect(self):
         try:
@@ -170,25 +169,6 @@ class Database:
         except Exception as err:
             self.root_logger.error(err)
 
-    def create_table_features(self):
-        try:
-            sql = """
-                CREATE TABLE IF NOT EXISTS `features` (
-                    `id` INT AUTO_INCREMENT PRIMARY KEY,
-                    `name` VARCHAR(255) NOT NULL UNIQUE,
-                    `enabled` TINYINT(1) DEFAULT 0,
-                    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
-                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
 
     ## ---------------- Scheduler ---------------------
     def ban_user_for_one_hour(self, user_id, comment=None):
@@ -224,18 +204,6 @@ class Database:
             self.root_logger.error(f"General error: {err}")
 
     ## ------------------ Insert data ------------------ ##
-
-    def insert_feature(self, name: str, enabled: bool):
-        try:
-            sql = "INSERT INTO `features` (`name`, `enabled`) VALUES (%s, %s)"
-            values = (name, int(enabled))
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
 
     def insert_texts(self, hash_value: str, raw_text: str):
         """
@@ -360,21 +328,6 @@ class Database:
             self.root_logger.error(err)
 
     ## ------------------ Select ------------------ ##
-    def select_feature(self, name: str):
-        """
-        Select a feature from the 'features' table.
-        """
-        try:
-            sql = "SELECT * FROM `features` WHERE `name` = %s"
-            values = (name,)
-            self.cursor.execute(sql, values)
-            result = self.cursor.fetchone()
-            return None if result is None else result['enabled']
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
 
     def select_texts(self, hash_value: str):
         try:
