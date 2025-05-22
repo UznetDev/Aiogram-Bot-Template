@@ -19,6 +19,9 @@ class SettingsManager:
         self.log: logging.Logger = root_logger
         self._ensure_table()
 
+    def __call__(self, key: str) -> Optional[str]:
+        return self.get(key)
+        
     def get(self, key: str) -> Optional[str]:
         """Kesh → DB tartibida o‘qish."""
         try:

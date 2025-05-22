@@ -29,7 +29,6 @@ class Translator:
     ) -> str:
         return self.translate(text, dest=dest, src=src)
 
-
     def translate(self,
                  text: str,
                  dest: Optional[str] = 'en',
@@ -63,9 +62,6 @@ class Translator:
             self.root_logger.info(f"Error in translator.py: {e}")
             return text
         
-
-
-
     def create_table_texts(self):
         try:
             sql = """

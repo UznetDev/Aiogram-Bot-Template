@@ -13,6 +13,9 @@ class FeatureManager:
         self.log = root_logger
         self._create_table_features()
 
+    def __call__(self, name: str) -> bool:
+        return self.feature(name)
+
     def feature(self, name: str) -> bool:
         """Kesh → DB → (birinchi marta bo‘lsa) foydalanuvchidan so‘rash."""
         try:
