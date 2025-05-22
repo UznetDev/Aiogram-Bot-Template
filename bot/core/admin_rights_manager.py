@@ -23,6 +23,9 @@ class AdminsManager:
         self.create_table_admins()
         self.create_table_admin_rights()
 
+    def __call__(self, user_id: int, feature: str) -> Optional[bool]:
+        return self.get(user_id, feature)
+
     def get(self, user_id: int, feature: str) -> Optional[bool]:
         key = self._redis_key(user_id, feature)
 
