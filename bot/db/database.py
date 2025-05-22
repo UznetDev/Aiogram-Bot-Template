@@ -16,7 +16,6 @@ class Database:
         self.reconnect()
         self.create_table_users()
         self.create_table_channel()
-        self.create_table_settings()
         self.create_table_texts()
         self.create_table_translations()
 
@@ -100,32 +99,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             self.root_logger.error(err)
-            
-    def create_table_settings(self):
-        """
-        Create the 'settings' table if it does not already exist.
-        """
-        try:
-            sql = """
-            CREATE TABLE IF NOT EXISTS `settings` (
-                `id` INT AUTO_INCREMENT PRIMARY KEY,
-                `updater_user_id` BIGINT,
-                `initiator_user_id` BIGINT,
-                `key` VARCHAR(255) NOT NULL,
-                `value` VARCHAR(255) NOT NULL,
-                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                `deleted_at` TIMESTAMP NULL
-            )
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-    
+
     def create_table_texts(self):
         try:
             sql = """
@@ -233,21 +207,6 @@ class Database:
         except Exception as err:
             self.root_logger.error(err)
 
-    def insert_settings(self, initiator_user_id, key, value):
-        """
-        Add a setting to the 'settings' table.
-        """
-        try:
-            sql = "INSERT INTO `settings` (`updater_user_id`, `initiator_user_id`, `key`, `value`) VALUES (%s, %s, %s, %s)"
-            values = (initiator_user_id, initiator_user_id, key, value)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
     def insert_user(self, user_id, language_code):
         """
         Add a user to the 'users' table.
@@ -283,19 +242,6 @@ class Database:
             self.root_logger.error(err)
 
     ## ------------------ Update ------------------ ##
-    def update_settings_key(self, updater_user_id, key, value):
-        try:
-            sql = """
-            UPDATE settings SET `value` = %s, `updater_user_id` = %s WHERE `key` = %s
-            """
-            values = (value, updater_user_id, key)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
 
     def update_user_status(self, user_id, status, updater_user_id):
         """
@@ -334,19 +280,6 @@ class Database:
             self.cursor.execute(sql, values)
             result = self.cursor.fetchone()
             return None if result is None else result['translated_content']
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def select_setting(self, key: str):
-        try:
-            sql = "SELECT `value` FROM `settings` WHERE `key` = %s"
-            values = (key,)
-            self.cursor.execute(sql, values)
-            result = self.cursor.fetchone()
-            return None if result is None else result['value']
         except mysql.connector.Error as err:
             self.root_logger.error(err)
             self.reconnect()
