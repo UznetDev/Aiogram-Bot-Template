@@ -1,12 +1,12 @@
-import logging
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from .button import AdminCallback, EditAdminSetting, AdminSetting, BlockUser
 from .close_btn import close_btn
-from api.translator import translator
-from filters.admin import SelectAdmin
-from data.config import ADMIN
-from loader import db, bot
-from function.function import x_or_y
+
+from bot.data.config import ADMIN
+from bot.loader import db, bot, translator, FM, root_logger
+from bot.function.function import x_or_y
+from bot.filters.admin import SelectAdmin
 
 
 def main_btn():
@@ -16,7 +16,7 @@ def main_btn():
                    callback_data=AdminCallback(action="main_adm_panel", data="").pack())
         return btn.as_markup()
     except Exception as err:
-        logging.error(err)
+        root_logger.error(err)
         return False
 
 
@@ -26,7 +26,7 @@ def main_admin_panel_btn(user_id, language_code):
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
         is_admin = SelectAdmin(user_id=user_id)
-        if is_admin.add_admin():
+        if is_admin.add_admin() and FM.feature('admin_settings'):
             btn.button(text=translator(text=f"👮‍♂️ Admins settings!",
                                        dest=language_code),
                        callback_data=AdminCallback(action="admin_settings", data="").pack())
@@ -50,7 +50,7 @@ def main_admin_panel_btn(user_id, language_code):
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
     except Exception as err:
-        logging.error(err)
+        root_logger.error(err)
         return False
 
 
@@ -74,7 +74,7 @@ async def admin_setting(user_id, language_code):
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
     except Exception as err:
-        logging.error(err)
+        root_logger.error(err)
         return False
 
 
@@ -117,7 +117,7 @@ def attach_admin(user_id, language_code):
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
     except Exception as err:
-        logging.error(err)
+        root_logger.error(err)
         return False
 
 
@@ -160,7 +160,7 @@ def attach_admin_btn(user_id, language_code):
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
     except Exception as err:
-        logging.error(err)
+        root_logger.error(err)
         return False
 
 
@@ -188,7 +188,7 @@ def channel_settings(language_code):
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
     except Exception as err:
-        logging.error(err)
+        root_logger.error(err)
         return False
 
 
@@ -213,7 +213,7 @@ def block_user(attention_user_id, language_code, user_id):
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
     except Exception as err:
-        logging.error(err)
+        root_logger.error(err)
         return False
 
 
@@ -230,7 +230,7 @@ def download_statistika(user_id, language_code):
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
     except Exception as err:
-        logging.error(err)
+        root_logger.error(err)
         return False
 
 
@@ -250,7 +250,7 @@ def stop_advertisement():
 
     except Exception as err:
         # Log any exceptions that occur during the button creation process
-        logging.error(f"Error in stop_ads function: {err}")
+        root_logger.error(f"Error in stop_ads function: {err}")
 
         # Return False to indicate the failure of the operation
         return False

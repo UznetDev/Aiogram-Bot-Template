@@ -1,58 +1,38 @@
-import logging
-from loader import dp, bot
+from bot.loader import dp, bot, translator, root_logger
+from bot.keyboards.inline.admin_btn import main_admin_panel_btn
+from bot.filters.admin import IsAdmin
+
 from aiogram.filters import Command
 from aiogram import types
-from keyboards.inline.admin_btn import main_admin_panel_btn
-from filters.admin import IsAdmin
+
 from aiogram.fsm.context import FSMContext
-from api.translator import translator
 
 
 @dp.message(Command(commands='admin'), IsAdmin())
 async def main_panel(msg: types.Message, state: FSMContext):
-    """
-    Handles the '/admin' command for admin users. Sends a welcome message with an admin panel inline keyboard.
-
-    - Retrieves the user ID and message ID from the incoming message.
-    - Translates and sends a welcome message to the user with an inline keyboard.
-    - Deletes any previous message stored in the state to avoid clutter.
-    - Updates the state with the new message ID.
-    - Deletes the original command message to keep the chat clean.
-
-    Args:
-        msg (types.Message): The incoming message object.
-        state (FSMContext): The finite state machine context to manage state data.
-
-    Raises:
-        Exception: Logs any errors encountered during the process.
-    """
     try:
         user_id = msg.from_user.id
         message_id = msg.message_id
         language_code = msg.from_user.language_code
 
-        # Translate and send the welcome message with admin panel buttons
         welcome_text = translator(text=f'👩‍💻Hello, dear admin, welcome to the main panel!',
                                   dest=language_code)
         response_msg = await msg.answer(text=f'<b>{welcome_text}</b>',
                                         reply_markup=main_admin_panel_btn(user_id=user_id, language_code=language_code))
 
-        # Manage previous message
         state_data = await state.get_data()
         try:
             if 'message_id' in state_data and state_data['message_id'] > 1:
                 await bot.delete_message(chat_id=user_id, message_id=state_data['message_id'])
         except Exception as err:
-            logging.error(f"Error deleting previous message: {err}")
+            root_logger.error(f"Error deleting previous message: {err}")
 
-        # Update the state with the new message ID
         await state.update_data({
             "message_id": response_msg.message_id
         })
 
-        # Delete the original command message
         await bot.delete_message(chat_id=user_id, message_id=message_id)
 
     except Exception as err:
-        logging.error(f"Unhandled error: {err}")
+        root_logger.error(f"Unhandled error: {err}")
 

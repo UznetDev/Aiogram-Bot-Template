@@ -27,4 +27,6 @@ if __name__ == "__main__":
     stream_handler.setFormatter(formatter)
     root_logger.addHandler(stream_handler)
 
+    
+
     asyncio.run(main())
