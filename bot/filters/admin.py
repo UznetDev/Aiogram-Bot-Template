@@ -86,21 +86,3 @@ class SelectAdmin:
             return True
         else:
             return False
-
-
-    def set_data(self) -> bool:
-        if self.user_id == self.super_admin:
-            return True
-        elif self.dada['set_data'] == 1:
-            return True
-        else:
-            return False
-        
-        
-    def get_data(self) -> bool:
-        if self.user_id == self.super_admin:
-            return True
-        elif self.dada['get_data'] == 1:
-            return True
-        else:
-            return False
