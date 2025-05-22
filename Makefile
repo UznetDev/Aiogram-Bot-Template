@@ -19,7 +19,7 @@ endif
 
 main: setup
 	@echo "🚀 Running main.py…"
-	$(VENV_PY) -m  bot.main
+	$(VENV_PY) -m  bot
 
 setup: requirements
 	@echo "⚙️  Running setup.py…"

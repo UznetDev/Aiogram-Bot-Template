@@ -1,5 +1,4 @@
 # import pytest
-
 # from bot.handlers.users.start import start_handler
 
 # from aiogram_tests import MockedBot

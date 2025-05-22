@@ -24,7 +24,7 @@ redis = Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
 FM = FeatureManager(db=db, root_logger=root_logger, redis_client=redis)
 
-
+print(f"({BOT_TOKEN})")
 # Botni token va default parametr orqali yaratamiz
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 

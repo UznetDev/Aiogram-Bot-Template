@@ -16,3 +16,4 @@ pytest-asyncio
 asynctest
 aioresponses
 aiogram_tests
+redis

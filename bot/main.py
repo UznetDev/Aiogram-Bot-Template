@@ -1,11 +1,7 @@
-import os
-import sys
-import asyncio
 import logging
+from bot.loader import * 
 from bot.utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup
 from bot.utils.set_bot_commands import set_default_commands  # Import the function to set default bot commands
-from bot.loader import *  # Import all from loader module
-from bot.data.config import log_file_name
 from bot.db.database import MySQLHandler
 
 
@@ -44,26 +40,6 @@ async def main():
         await bot.session.close()  # Close the bot session
 
 
-if __name__ == "__main__":
-
-    if not os.path.exists('logs'):
-        os.mkdir('logs')
-
-    if not os.path.exists(log_file_name):
-        with open(log_file_name, 'w') as f:
-            pass
-        
-    file_handler = logging.FileHandler(log_file_name)
-    file_handler.setLevel(logging.INFO)
-    file_handler.setFormatter(formatter)
-    root_logger.addHandler(file_handler)
-
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging.INFO)
-    stream_handler.setFormatter(formatter)
-    root_logger.addHandler(stream_handler)
-
-    asyncio.run(main())
 
     
 
