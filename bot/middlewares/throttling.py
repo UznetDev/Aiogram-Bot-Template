@@ -1,43 +1,31 @@
 import time
-import logging
-from bot.data.config import ADMIN
-from bot.keyboards.inline.close_btn import close_btn
 from aiogram import BaseMiddleware, types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram import Bot
+
+from bot.data.config import ADMIN
+from bot.keyboards.inline.close_btn import close_btn
 from bot.keyboards.inline.button import MainCallback
-from bot.loader import translator
+from bot.loader import translator, root_logger, FM
+from bot.db.database import Database
 
 
 class ThrottlingMiddleware(BaseMiddleware):
-    """
-    Middleware class to manage throttling of requests to prevent overloading.
-    This middleware limits the rate of incoming requests from users.
-    If a user exceeds the allowed request rate, they will receive a message indicating that they are making too many requests.
-    If a user receives the throttling warning 3 times within 1 minute, they are banned for 1 hour.
-    """
-
-    def __init__(self, bot, db, default_rate: float = 0.5) -> None:
-        """
-        Initializes the ThrottlingMiddleware instance.
-
-        Parameters:
-        - default_rate (float): The minimal interval between allowed requests (in seconds), default is 0.5 seconds.
-        """
-        self.limiters = {}  # Dictionary to store per-user throttling data.
+    def __init__(self, 
+                 bot: Bot, 
+                 db: Database, 
+                 default_rate: float = 0.5) -> None:
+        
+        self.limiters = {}
         self.default_rate = default_rate
         self.bot = bot
         self.db = db
 
 
-    async def __call__(self, handler, event: types.Message, data):
-        """
-        Processes incoming messages and enforces throttling rules.
-        If a user triggers throttling 3 times in 1 minute, they will be banned for 1 hour.
-        """
+    async def __call__(self, handler, event: types, data):
         real_handler = data["handler"]
         skip_pass = True
 
-        # Determine user id and language code.
         if event.message:
             user_id = event.message.from_user.id
             language_code = event.message.from_user.language_code
@@ -57,7 +45,8 @@ class ThrottlingMiddleware(BaseMiddleware):
             is_ban = await self.check_ban(user_data)
             if is_ban:
                 return 
-            is_member = await self.check_member(user_id=user_id, language_code=language_code)
+            is_member = await self.check_member(user_id=user_id, 
+                                                language_code=language_code)
             if is_member:
                 return
 
@@ -65,28 +54,22 @@ class ThrottlingMiddleware(BaseMiddleware):
                 skip_pass = real_handler.flags.get("skip_pass")
 
             now = time.time()
-            # For each user we track:
-            # "last": timestamp of the last request,
-            # "count": number of throttled events in the current window,
-            # "first": start timestamp of the current 1-minute window.
+
             user_data = self.limiters.get(user_id, {"last": now, "count": 0, "first": now})
 
             if skip_pass:
-                # If enough time has passed since the last request, reset the throttling counter.
                 if now - user_data["last"] >= self.default_rate:
                     user_data["last"] = now
-                    user_data["count"] = 0  # Reset counter.
+                    user_data["count"] = 0
                     user_data["first"] = now
                     self.limiters[user_id] = user_data
                     return await handler(event, data)
                 else:
-                    # Update the throttling counter. If the current window is over 60 seconds, reset it.
                     if now - user_data["first"] > 60:
                         user_data["count"] = 0
                         user_data["first"] = now
                     user_data["count"] += 1
 
-                    # Agar throttling hisobi 3 yoki undan ko'p bo'lsa, foydalanuvchini ban qilamiz.
                     if user_data["count"] >= 3:
                         try:
                             self.db.ban_user_for_one_hour(user_id, comment="1 hour due to too many requests.")
@@ -96,8 +79,7 @@ class ThrottlingMiddleware(BaseMiddleware):
                             )
                             await self.bot.send_message(chat_id=user_id, text=tx)
                         except Exception as err:
-                            logging.error(f"Error banning user {user_id}: {err}")
-                        # Reset the counter to oldindan qayta-ban qilishdan saqlanish uchun.
+                            root_logger.error(f"Error banning user {user_id}: {err}")
                         user_data["count"] = 0
                     else:
                         try:
@@ -111,7 +93,7 @@ class ThrottlingMiddleware(BaseMiddleware):
                                     reply_markup=close_btn()
                                 )
                         except Exception as err:
-                            logging.error(err)
+                            root_logger.error(err)
 
                     user_data["last"] = now
                     self.limiters[user_id] = user_data
@@ -161,7 +143,9 @@ class ThrottlingMiddleware(BaseMiddleware):
         try:
             is_mandatory = self.db.select_setting('mandatory_membership')
             if is_mandatory is None:
-                self.db.update_settings_key(updater_user_id=1, key='mandatory_membership', value=False)
+                self.db.update_settings_key(updater_user_id=1, 
+                                            key='mandatory_membership', 
+                                            value=False)
                 return False
             elif is_mandatory == 'False':
                 return False
@@ -169,7 +153,7 @@ class ThrottlingMiddleware(BaseMiddleware):
                 try:
                     channels = self.db.select_channels()
                 except Exception as err:
-                    logging.error(f"Error selecting channels: {err}")
+                    root_logger.error(f"Error selecting channels: {err}")
                     return False
 
                 for channel in channels:
@@ -190,10 +174,9 @@ class ThrottlingMiddleware(BaseMiddleware):
                                 try:
                                     chat_member_status = await self.bot.get_chat_member(chat_id=channel_id, user_id=user_id)
                                 except Exception as e:
-                                    logging.error(f"Error getting chat member status: {e}")
+                                    root_logger.error(f"Error getting chat member status: {e}")
                                     continue
 
-                                # Check if the user is a member of the channel
                                 if chat_member_status.status not in ('member', 'administrator', 'creator'):
                                     count += 1
                                     message_text += f"\n{count}. ⭕ <b>{channel.full_name}</b> <i>@{channel.username} ❓</i>\n"
@@ -211,12 +194,11 @@ class ThrottlingMiddleware(BaseMiddleware):
                                                             reply_markup=keyboard.as_markup())
                             return True
                     except Exception as err:
-                        logging.error(f"Error checking membership for channel {channel.get('channel_id')}: {err}")
+                        root_logger.error(f"Error checking membership for channel {channel.get('channel_id')}: {err}")
                         continue
 
-                # If all channels checked and no problems found, return False.
                 return False
 
         except Exception as err:
-            logging.error(err)
+            root_logger.error(err)
             return False

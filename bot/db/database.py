@@ -1,11 +1,10 @@
 import logging
 import mysql.connector
 from aiogram import Bot
-from bot.function.function import to_hash
 
 
 class Database:
-    def __init__(self, host, user, password, database):
+    def __init__(self, host, user, password, database, root_logger: logging.Logger):
         """
         Initialize the Database object with connection parameters.
         """
@@ -13,19 +12,17 @@ class Database:
         self.user = user
         self.password = password
         self.database = database
+        self.root_logger = root_logger
         self.reconnect()
-        self.create_table_admins()  # Create the admins table
-        self.create_table_users()  # Create the users table
-        self.create_table_channel()  # Create the channel table
-        self.create_table_settings()  # Create the settings table
-        self.create_table_texts()  # Create the texts table
-        self.create_table_translations()  # Create the translations table
-        self.create_table_features()  # Create the features table
+        self.create_table_admins()
+        self.create_table_users()
+        self.create_table_channel()
+        self.create_table_settings()
+        self.create_table_texts()
+        self.create_table_translations()
+        self.create_table_features()
 
     def reconnect(self):
-        """
-        Reconnect to the MySQL database.
-        """
         try:
             self.connection = mysql.connector.connect(
                 host=self.host,
@@ -37,7 +34,7 @@ class Database:
             )
             self.cursor = self.connection.cursor(dictionary=True, buffered=True)
         except mysql.connector.Error as err:
-            logging.error(f"Database connection error: {err}")
+            self.root_logger.error(f"Database connection error: {err}")
             raise
 
     def __del__(self):
@@ -48,9 +45,9 @@ class Database:
             if hasattr(self, 'connection') and self.connection.is_connected():
                 self.connection.close()
         except mysql.connector.Error as err:
-            logging.error(f"MySQL Error in __del__: {err}")
+            self.root_logger.error(f"MySQL Error in __del__: {err}")
         except Exception as err:
-            logging.error(f"General Error in __del__: {err}")
+            self.root_logger.error(f"General Error in __del__: {err}")
 
     ## --------------------- Create table ------------------##
 
@@ -76,10 +73,10 @@ class Database:
             self.cursor.execute(sql)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def create_table_channel(self):
         """
@@ -99,10 +96,10 @@ class Database:
             self.cursor.execute(sql)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def create_table_admins(self):
         """
@@ -128,10 +125,10 @@ class Database:
             self.cursor.execute(sql)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def create_table_settings(self):
         """
@@ -152,10 +149,10 @@ class Database:
             self.cursor.execute(sql)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
     
     def create_table_texts(self):
         try:
@@ -173,10 +170,10 @@ class Database:
             self.cursor.execute(sql)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def create_table_translations(self):
         try:
@@ -195,10 +192,10 @@ class Database:
             self.cursor.execute(sql)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def create_table_features(self):
         try:
@@ -215,10 +212,10 @@ class Database:
             self.cursor.execute(sql)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     ## ---------------- Scheduler ---------------------
     def ban_user_for_one_hour(self, user_id, comment=None):
@@ -248,10 +245,10 @@ class Database:
             _ = self.cursor.fetchall()  # Natijani o‘qish orqali tozalaymiz
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(f"MySQL error: {err}")
+            self.root_logger.error(f"MySQL error: {err}")
             self.reconnect()
         except Exception as err:
-            logging.error(f"General error: {err}")
+            self.root_logger.error(f"General error: {err}")
 
     ## ------------------ Insert data ------------------ ##
 
@@ -262,10 +259,10 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def insert_texts(self, hash_value: str, raw_text: str):
         """
@@ -278,10 +275,10 @@ class Database:
             self.connection.commit()
             return self.cursor.lastrowid
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def insert_translations(self, text_id: int, dest_lang: str, translated_content: str):
         try:
@@ -290,10 +287,10 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def insert_settings(self, initiator_user_id, key, value):
         """
@@ -305,10 +302,10 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def insert_user(self, user_id, language_code):
         """
@@ -322,10 +319,10 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def insert_channel(self, channel_id, initiator_user_id):
         """
@@ -339,10 +336,10 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def insert_admin(self, user_id, initiator_user_id):
         """
@@ -356,10 +353,10 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     ## ------------------ Update ------------------ ##
     def update_feature(self, name: str, enabled: bool):
@@ -372,17 +369,13 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def update_settings_key(self, updater_user_id, key, value):
-        """
-        Update a setting in the 'settings' table.
-        """
         try:
-            # Removed the extra comma before WHERE clause
             sql = """
             UPDATE settings SET `value` = %s, `updater_user_id` = %s WHERE `key` = %s
             """
@@ -390,10 +383,10 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def update_admin_data(self, user_id, column, value, updater_user_id):
         """
@@ -402,7 +395,7 @@ class Database:
         """
         allowed_columns = {'send_message', 'statistika', 'download_statistika', 'block_user', 'channel_settings', 'add_admin'}
         if column not in allowed_columns:
-            logging.error(f"Invalid column '{column}' specified for update_admin_data")
+            self.root_logger.error(f"Invalid column '{column}' specified for update_admin_data")
             return
         try:
             sql = f"UPDATE admins SET {column} = %s, updater_user_id = %s WHERE user_id = %s"
@@ -410,10 +403,10 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def update_user_status(self, user_id, status, updater_user_id):
         """
@@ -425,10 +418,10 @@ class Database:
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     ## ------------------ Select ------------------ ##
     def select_feature(self, name: str):
@@ -442,10 +435,10 @@ class Database:
             result = self.cursor.fetchone()
             return None if result is None else result['enabled']
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_texts(self, hash_value: str):
         try:
@@ -455,10 +448,10 @@ class Database:
             result = self.cursor.fetchone()
             return None if result is None else result['id']
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_translations(self, text_id: int, dest_lang: str):
         try:
@@ -468,15 +461,12 @@ class Database:
             result = self.cursor.fetchone()
             return None if result is None else result['translated_content']
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_setting(self, key: str):
-        """
-        Select a setting from the 'settings' table.
-        """
         try:
             sql = "SELECT `value` FROM `settings` WHERE `key` = %s"
             values = (key,)
@@ -484,10 +474,10 @@ class Database:
             result = self.cursor.fetchone()
             return None if result is None else result['value']
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_all_users_ban(self):
         """
@@ -499,10 +489,10 @@ class Database:
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def stat_ban(self):
         """
@@ -514,10 +504,10 @@ class Database:
             result = self.cursor.fetchone()
             return result['user_count']
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def check_user_ban(self, user_id):
         """
@@ -529,10 +519,10 @@ class Database:
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def delete_user_ban(self, user_id):
         """
@@ -543,10 +533,10 @@ class Database:
             self.cursor.execute(sql, (user_id,))
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_all_users(self):
         """
@@ -558,10 +548,10 @@ class Database:
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_users_by_id(self, start_id: int, end_id: int) -> list:
         """
@@ -574,10 +564,10 @@ class Database:
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
     
     def select_admins_by_id(self, start_id: int, end_id: int) -> list:
         """
@@ -590,10 +580,10 @@ class Database:
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def stat(self):
         """
@@ -605,10 +595,10 @@ class Database:
             result = self.cursor.fetchone()
             return result['total_users']
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def check_user(self, user_id):
         """
@@ -620,10 +610,10 @@ class Database:
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_admin_column(self, user_id, column):
         """
@@ -635,10 +625,10 @@ class Database:
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_admin(self, user_id):
         """
@@ -650,10 +640,10 @@ class Database:
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_add_admin(self, user_id):
         """
@@ -665,10 +655,10 @@ class Database:
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_all_admins(self):
         """
@@ -680,10 +670,10 @@ class Database:
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def stat_admins(self):
         """
@@ -695,10 +685,10 @@ class Database:
             result = self.cursor.fetchone()
             return result[list(result.keys())[0]]
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def delete_admin(self, user_id):
         """
@@ -709,10 +699,10 @@ class Database:
             self.cursor.execute(sql, (user_id,))
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_channels(self):
         """
@@ -724,10 +714,10 @@ class Database:
             results = self.cursor.fetchall()
             return results
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_channels_initiator_user_id(self, initiator_user_id):
         """
@@ -739,10 +729,10 @@ class Database:
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def check_channel(self, channel_id):
         """
@@ -754,10 +744,10 @@ class Database:
             result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def select_all_channel(self):
         """
@@ -769,10 +759,10 @@ class Database:
             result = self.cursor.fetchall()
             return result
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
     def delete_channel(self, channel_id):
         """
@@ -783,10 +773,10 @@ class Database:
             self.cursor.execute(sql, (channel_id,))
             self.connection.commit()
         except mysql.connector.Error as err:
-            logging.error(err)
+            self.root_logger.error(err)
             self.reconnect()
         except Exception as err:
-            logging.error(err)
+            self.root_logger.error(err)
 
 
 
