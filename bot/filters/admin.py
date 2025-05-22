@@ -2,7 +2,7 @@ from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
 from bot.data.config import ADMIN
-from bot.loader import db
+from bot.loader import db, radis
 
 
 class IsSuperAdmin(BaseFilter):
@@ -32,12 +32,18 @@ class IsAdmin(BaseFilter):
             return False
 
 
-class SelectAdmin:
+class AdminFilter:
 
     def __init__(self, user_id):
         self.user_id = user_id
         self.super_admin = ADMIN
         self.dada = db.select_admin(user_id=self.user_id)
+
+    def __call__(self):
+        if self.dada is not None:
+            return True
+        else:
+            return False
 
     def send_message(self) -> bool:
         if self.user_id == self.super_admin:

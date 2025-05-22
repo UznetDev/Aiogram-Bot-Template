@@ -1,7 +1,7 @@
 import logging
 from aiogram import types
 from aiogram.fsm.context import FSMContext
-from bot.filters.admin import IsAdmin, SelectAdmin
+from bot.filters.admin import IsAdmin, AdminFilter
 from bot.keyboards.inline.admin_btn import admin_setting
 from bot.keyboards.inline.close_btn import close_btn
 from bot.loader import dp, bot, db, translator
@@ -15,7 +15,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
         user_id = msg.from_user.id
         mid = msg.message_id 
         language_code = msg.from_user.language_code
-        data = SelectAdmin(user_id=user_id)
+        data = AdminFilter(user_id=user_id)
         add_admin_db = data.add_admin()
         target_user_id = int(msg.text)
 

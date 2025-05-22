@@ -2,7 +2,7 @@ from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 
 from bot.data.config import ADMIN
-from bot.filters.admin import IsAdmin, SelectAdmin
+from bot.filters.admin import IsAdmin, AdminFilter
 from bot.function.function import x_or_y
 from bot.keyboards.inline.admin_btn import attach_admin_btn
 from bot.keyboards.inline.button import AdminSetting
@@ -20,7 +20,7 @@ async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, 
         mid = call.message.message_id
         language_code = call.from_user.language_code
         admin_user_id = callback_data.user_id
-        data = SelectAdmin(user_id=user_id)
+        data = AdminFilter(user_id=user_id)
         btn = close_btn()
 
         if data.add_admin():
@@ -28,7 +28,7 @@ async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, 
             if admin_data['initiator_user_id'] == user_id or user_id == ADMIN:
                 btn = attach_admin_btn(user_id=admin_user_id, 
                                        language_code=language_code)
-                is_admin = SelectAdmin(user_id=admin_user_id)
+                is_admin = AdminFilter(user_id=admin_user_id)
 
 
                 send_message_tx = x_or_y(is_admin.send_message())

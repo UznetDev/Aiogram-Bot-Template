@@ -2,7 +2,7 @@ import logging
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 
-from bot.filters.admin import IsAdmin, SelectAdmin
+from bot.filters.admin import IsAdmin, AdminFilter
 from bot.keyboards.inline.admin_btn import admin_setting
 from bot.keyboards.inline.button import AdminCallback
 from bot.keyboards.inline.close_btn import close_btn
@@ -16,7 +16,7 @@ async def admin_settings(call: types.CallbackQuery, state: FSMContext):
         user_id = call.from_user.id
         mid = call.message.message_id
         language_code = call.from_user.language_code
-        admin = SelectAdmin(user_id=user_id)
+        admin = AdminFilter(user_id=user_id)
 
         if admin.add_admin():
             text = translator(text="❗ You are in the Admin settings section!", dest=language_code)

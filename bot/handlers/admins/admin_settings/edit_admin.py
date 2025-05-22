@@ -2,7 +2,7 @@ from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 
 from bot.data.config import ADMIN
-from bot.filters.admin import IsAdmin, SelectAdmin
+from bot.filters.admin import IsAdmin, AdminFilter
 from bot.function.function import x_or_y
 from bot.keyboards.inline.close_btn import close_btn
 from bot.loader import dp, bot, db, root_logger, translator
@@ -19,7 +19,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
         language_code = call.from_user.language_code
         admin_user_id = callback_data.user_id
         edit_key = callback_data.data
-        data = SelectAdmin(user_id=user_id)
+        data = AdminFilter(user_id=user_id)
         add_admin = data.add_admin()
         btn = close_btn()
 
@@ -39,7 +39,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
                         new_value = 0 if select_column['result'] == 1 else 1
                         db.update_admin_data(user_id=admin_user_id, column=edit_key, value=new_value, updater_user_id=user_id)
                         btn = attach_admin_btn(user_id=admin_user_id, language_code=language_code)
-                        is_admin = SelectAdmin(user_id=admin_user_id)
+                        is_admin = AdminFilter(user_id=admin_user_id)
                         send_message_tx = x_or_y(is_admin.send_message())
                         view_statistika_tx = x_or_y(is_admin.view_statistika())
                         download_statistika_tx = x_or_y(is_admin.download_statistika())

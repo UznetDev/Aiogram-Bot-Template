@@ -6,7 +6,7 @@ from .close_btn import close_btn
 from bot.data.config import ADMIN
 from bot.loader import db, bot, translator, FM, root_logger
 from bot.function.function import x_or_y
-from bot.filters.admin import SelectAdmin
+from bot.filters.admin import AdminFilter
 
 
 def main_btn():
@@ -25,7 +25,7 @@ def main_admin_panel_btn(user_id, language_code):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = SelectAdmin(user_id=user_id)
+        is_admin = AdminFilter(user_id=user_id)
         if is_admin.add_admin() and FM.feature('admin_settings'):
             btn.button(text=translator(text=f"👮‍♂️ Admins settings!",
                                        dest=language_code),
@@ -82,7 +82,7 @@ def attach_admin(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = SelectAdmin(user_id=user_id)
+        is_admin = AdminFilter(user_id=user_id)
         send_message_tx = x_or_y(is_admin.send_message())
         wiew_statistika_tx = x_or_y(is_admin.view_statistika())
         download_statistika_tx = x_or_y(is_admin.download_statistika())
@@ -125,7 +125,7 @@ def attach_admin_btn(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = SelectAdmin(user_id=user_id)
+        is_admin = AdminFilter(user_id=user_id)
         send_message_tx = x_or_y(is_admin.send_message())
         wiew_statistika_tx = x_or_y(is_admin.view_statistika())
         download_statistika_tx = x_or_y(is_admin.download_statistika())
@@ -197,7 +197,7 @@ def block_user(attention_user_id, language_code, user_id):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = SelectAdmin(user_id=user_id)
+        is_admin = AdminFilter(user_id=user_id)
         if is_admin.block_user():
             data = db.check_user_ban(user_id=attention_user_id)
             if data is None:
@@ -221,7 +221,7 @@ def download_statistika(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = SelectAdmin(user_id=user_id)
+        is_admin = AdminFilter(user_id=user_id)
         if is_admin.download_statistika():
             btn.button(text=translator(text=f"📜 Dowload statistika!",
                                        dest=language_code),
