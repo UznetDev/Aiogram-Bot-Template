@@ -103,7 +103,7 @@ def main_setup() -> None:
     from bot.loader import FM
 
     
-    FEATURES = ['translator', 'middlewares', 'save_log']
+    FEATURES = ['translator', 'middlewares', 'save_log', 'admin_settings', 'error_handler', 'start']
     for feature in FEATURES:
         x = FM.feature(feature)
         print(f"🔧  {feature}: {x}")

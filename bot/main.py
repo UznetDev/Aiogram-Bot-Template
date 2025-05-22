@@ -1,3 +1,4 @@
+import bot.handlers
 import logging
 from bot.loader import * 
 from bot.utils.notify_admins import on_startup_notify  # Import the function to notify admins on startup

@@ -2,6 +2,7 @@ import logging
 from aiogram import Bot, Dispatcher, Router
 from aiogram.enums import ParseMode
 from redis import Redis
+from redis.asyncio import Redis as AsyncRedis
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.client.bot import DefaultBotProperties  # Yangi versiyadagi default sozlamalar uchun
 from bot.data.config import *
@@ -21,15 +22,16 @@ log_format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)
 formatter = logging.Formatter(log_format)
 
 redis = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+async_redis = AsyncRedis(host="localhost", port=6379, db=1, decode_responses=True)
 
 FM = FeatureManager(db=db, root_logger=root_logger, redis_client=redis)
 
-print(f"({BOT_TOKEN})")
+
 # Botni token va default parametr orqali yaratamiz
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 # Xotira asosidagi storage ni yaratamiz
-storage = RedisStorage(redis=redis)
+storage = RedisStorage(redis=async_redis)
 
 # Dispatcher obyektini yaratishda bot va storage ni uzatamiz
 dp = Dispatcher(bot=bot, storage=storage)
