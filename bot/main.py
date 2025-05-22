@@ -12,8 +12,6 @@ async def main():
 
     try:
         # middlewares
-        SM.update(key='test', value='test')
-        print(db.select_setting('test'))
         if FM.feature('middlewares'):
             from bot.middlewares.throttling import ThrottlingMiddleware
             dp.update.middleware.register(ThrottlingMiddleware(db=db, bot=bot))
@@ -23,9 +21,6 @@ async def main():
             mysql_handler = MySQLHandler(bot=bot, connection=db.connection)
             root_logger.addHandler(mysql_handler)
             
-        mandatory_membership = db.select_setting('mandatory_membership')
-        if mandatory_membership is None:
-            db.insert_settings(initiator_user_id=1, key='mandatory_membership', value='False')
 
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
