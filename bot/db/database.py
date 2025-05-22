@@ -16,8 +16,6 @@ class Database:
         self.reconnect()
         self.create_table_users()
         self.create_table_channel()
-        self.create_table_texts()
-        self.create_table_translations()
 
     def reconnect(self):
         try:
@@ -100,50 +98,6 @@ class Database:
         except Exception as err:
             self.root_logger.error(err)
 
-    def create_table_texts(self):
-        try:
-            sql = """
-            CREATE TABLE IF NOT EXISTS texts (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                hash_value BIGINT UNSIGNED,
-                raw_text TEXT NOT NULL,
-                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                deleted_at TIMESTAMP NULL DEFAULT NULL,
-                INDEX(hash_value)
-            )
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def create_table_translations(self):
-        try:
-            sql = """
-                CREATE TABLE IF NOT EXISTS `translations` (
-                    `id` INT AUTO_INCREMENT PRIMARY KEY,
-                    `text_id` INT NOT NULL,
-                    `dest_lang` CHAR(5) NOT NULL,
-                    `translated_content` TEXT NOT NULL,
-                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                    deleted_at TIMESTAMP NULL DEFAULT NULL,
-                    FOREIGN KEY (text_id) REFERENCES texts(id)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-
     ## ---------------- Scheduler ---------------------
     def ban_user_for_one_hour(self, user_id, comment=None):
         """
@@ -179,33 +133,6 @@ class Database:
 
     ## ------------------ Insert data ------------------ ##
 
-    def insert_texts(self, hash_value: str, raw_text: str):
-        """
-        Insert a new text into the 'texts' table.
-        """
-        try:
-            sql = "INSERT INTO `texts` (`hash_value`, `raw_text`) VALUES (%s, %s)"
-            values = (hash_value, raw_text)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-            return self.cursor.lastrowid
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def insert_translations(self, text_id: int, dest_lang: str, translated_content: str):
-        try:
-            sql = "INSERT INTO `translations` (`text_id`, `dest_lang`, `translated_content`) VALUES (%s, %s, %s)"
-            values = (text_id, dest_lang, translated_content)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
 
     def insert_user(self, user_id, language_code):
         """
@@ -260,31 +187,6 @@ class Database:
 
     ## ------------------ Select ------------------ ##
 
-    def select_texts(self, hash_value: str):
-        try:
-            sql = "SELECT * FROM `texts` WHERE `hash_value` = %s LIMIT 1"
-            values = (hash_value,)
-            self.cursor.execute(sql, values)
-            result = self.cursor.fetchone()
-            return None if result is None else result['id']
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def select_translations(self, text_id: int, dest_lang: str):
-        try:
-            sql = "SELECT * FROM `translations` WHERE `text_id` = %s AND `dest_lang` = %s LIMIT 1"
-            values = (text_id, dest_lang)
-            self.cursor.execute(sql, values)
-            result = self.cursor.fetchone()
-            return None if result is None else result['translated_content']
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
 
     def select_all_users_ban(self):
         """

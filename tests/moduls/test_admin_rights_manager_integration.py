@@ -1,4 +1,3 @@
-# tests/test_admins_manager_int.py
 import random
 import pytest
 

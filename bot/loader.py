@@ -46,7 +46,7 @@ FM = FeatureManager(db=db, root_logger=root_logger, redis_client=redis)
 AM = AdminsManager(db=db, redis_client=redis, root_logger=root_logger)
 SM = SettingsManager(db=db, redis_client=redis, root_logger=root_logger)
 
-translator = Translator(db=db, FM=FM)
+translator = Translator(db=db, FM=FM, root_logger=root_logger)
 
 
 
