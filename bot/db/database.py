@@ -283,21 +283,6 @@ class Database:
             self.root_logger.error(err)
 
     ## ------------------ Update ------------------ ##
-    def update_feature(self, name: str, enabled: bool):
-        """
-        Update a feature in the 'features' table.
-        """
-        try:
-            sql = "UPDATE `features` SET `enabled` = %s WHERE `name` = %s"
-            values = (int(enabled), name)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
     def update_settings_key(self, updater_user_id, key, value):
         try:
             sql = """
