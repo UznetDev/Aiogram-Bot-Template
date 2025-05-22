@@ -1,8 +1,9 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
+from typing import Optional, Any
 
 from bot.data.config import ADMIN
-from bot.loader import db, radis
+from bot.loader import db, redis
 
 
 class IsSuperAdmin(BaseFilter):

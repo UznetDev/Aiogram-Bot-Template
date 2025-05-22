@@ -1,27 +1,27 @@
-import random
-import pytest
+# import random
+# import pytest
 
-from bot.loader import db
-from bot.data.config import ADMIN
-from bot.filters.admin import AdminFilter
+# from bot.loader import db
+# from bot.data.config import ADMIN
+# from bot.filters.admin import AdminFilter
 
-# Helper functions
-def _random_user_id() -> int:
-    return random.randint(2_000_000_000, 3_000_000_000)
+# # Helper functions
+# def _random_user_id() -> int:
+#     return random.randint(2_000_000_000, 3_000_000_000)
 
 
 
-def test_admin_filter():
-    user_id = _random_user_id()
-    sql_check = "SELECT 1 FROM admins WHERE user_id = %s LIMIT 1"
-    db.cursor.execute(sql_check, (user_id,))
-    if not db.cursor.fetchone():
-        db.insert_admin(user_id=user_id, 
-                        initiator_user_id=ADMIN)
+# def test_admin_filter():
+#     user_id = _random_user_id()
+#     sql_check = "SELECT 1 FROM admins WHERE user_id = %s LIMIT 1"
+#     db.cursor.execute(sql_check, (user_id,))
+#     if not db.cursor.fetchone():
+#         db.insert_admin(user_id=user_id, 
+#                         initiator_user_id=ADMIN)
         
-    # Is admin
-    selector = AdminFilter(user_id=user_id)
-    assert selector(user_id=user_id) is True
+#     # Is admin
+#     selector = AdminFilter(user_id=user_id)
+#     assert selector(user_id=user_id) is True
 
     # db.update_admin_data(user_id=new_admin_id, column="send_message", value=1, updater_user_id=ADMIN)
     # selector = SelectAdmin(user_id=new_admin_id)

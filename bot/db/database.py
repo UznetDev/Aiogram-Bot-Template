@@ -14,7 +14,6 @@ class Database:
         self.database = database
         self.root_logger = root_logger
         self.reconnect()
-        self.create_table_admins()
         self.create_table_users()
         self.create_table_channel()
         self.create_table_settings()
@@ -65,8 +64,9 @@ class Database:
                 `updater_user_id` BIGINT,
                 `comment` TEXT,
                 `ban_time` TIMESTAMP NULL DEFAULT NULL,
-                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                `deleted_at` TIMESTAMP NULL DEFAULT NULL,
                 `language_code` VARCHAR(5)
             )
             """
@@ -89,8 +89,9 @@ class Database:
                     `channel_id` BIGINT,
                     `initiator_user_id` BIGINT,
                     `updater_user_id` BIGINT,
-                    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                    `deleted_at` TIMESTAMP NULL DEFAULT NULL
                 );
             """
             self.cursor.execute(sql)
@@ -100,36 +101,7 @@ class Database:
             self.reconnect()
         except Exception as err:
             self.root_logger.error(err)
-
-    def create_table_admins(self):
-        """
-        Create the 'admins' table if it does not already exist.
-        """
-        try:
-            sql = """
-                CREATE TABLE IF NOT EXISTS `admins` (
-                    `id` INT AUTO_INCREMENT PRIMARY KEY,
-                    `user_id` BIGINT NOT NULL UNIQUE,
-                    `initiator_user_id` BIGINT,
-                    `updater_user_id` BIGINT,
-                    `send_message` TINYINT(1) DEFAULT 0,
-                    `statistika` TINYINT(1) DEFAULT 0,
-                    `download_statistika` TINYINT(1) DEFAULT 0,
-                    `block_user` TINYINT(1) DEFAULT 0,
-                    `channel_settings` TINYINT(1) DEFAULT 0,
-                    `add_admin` TINYINT(1) DEFAULT 0,
-                    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
+            
     def create_table_settings(self):
         """
         Create the 'settings' table if it does not already exist.
@@ -143,7 +115,8 @@ class Database:
                 `key` VARCHAR(255) NOT NULL,
                 `value` VARCHAR(255) NOT NULL,
                 `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                `deleted_at` TIMESTAMP NULL
             )
             """
             self.cursor.execute(sql)
@@ -341,23 +314,6 @@ class Database:
         except Exception as err:
             self.root_logger.error(err)
 
-    def insert_admin(self, user_id, initiator_user_id):
-        """
-        Add an admin to the 'admins' table.
-        """
-        try:
-            sql = """
-            INSERT INTO admins (user_id, initiator_user_id) VALUES (%s, %s)
-            """
-            values = (user_id, initiator_user_id)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
     ## ------------------ Update ------------------ ##
     def update_feature(self, name: str, enabled: bool):
         """
@@ -380,26 +336,6 @@ class Database:
             UPDATE settings SET `value` = %s, `updater_user_id` = %s WHERE `key` = %s
             """
             values = (value, updater_user_id, key)
-            self.cursor.execute(sql, values)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def update_admin_data(self, user_id, column, value, updater_user_id):
-        """
-        Update an admin's data in the 'admins' table.
-        Only allowed columns may be updated.
-        """
-        allowed_columns = {'send_message', 'statistika', 'download_statistika', 'block_user', 'channel_settings', 'add_admin'}
-        if column not in allowed_columns:
-            self.root_logger.error(f"Invalid column '{column}' specified for update_admin_data")
-            return
-        try:
-            sql = f"UPDATE admins SET {column} = %s, updater_user_id = %s WHERE user_id = %s"
-            values = (value, updater_user_id, user_id)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except mysql.connector.Error as err:
@@ -553,39 +489,6 @@ class Database:
         except Exception as err:
             self.root_logger.error(err)
 
-    def select_users_by_id(self, start_id: int, end_id: int) -> list:
-        """
-        Select users from the 'users' table within a specific ID range.
-        """
-        try:
-            sql = "SELECT * FROM `users` WHERE `id` >= %s AND `id` < %s;"
-            values = (start_id, end_id)
-            self.cursor.execute(sql, values)
-            result = self.cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-    
-    def select_admins_by_id(self, start_id: int, end_id: int) -> list:
-        """
-        Select admins from the 'admins' table within a specific ID range.
-        """
-        try:
-            sql = "SELECT * FROM `admins` WHERE `id` >= %s AND `id` < %s;"
-            values = (start_id, end_id)
-            self.cursor.execute(sql, values)
-            result = self.cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def stat(self):
         """
         Get the total number of users.
         """
@@ -614,171 +517,6 @@ class Database:
             self.reconnect()
         except Exception as err:
             self.root_logger.error(err)
-
-    def select_admin_column(self, user_id, column):
-        """
-        Select a specific column for an admin from the 'admins' table.
-        """
-        try:
-            sql = f"SELECT {column} AS result FROM admins WHERE user_id = %s"
-            self.cursor.execute(sql, (user_id,))
-            result = self.cursor.fetchone()
-            return result
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def select_admin(self, user_id):
-        """
-        Select an admin from the 'admins' table.
-        """
-        try:
-            sql = "SELECT * FROM admins WHERE user_id = %s LIMIT 1"
-            self.cursor.execute(sql, (user_id,))
-            result = self.cursor.fetchone()
-            return result
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def select_add_admin(self, user_id):
-        """
-        Select all admins added by a specific admin.
-        """
-        try:
-            sql = "SELECT * FROM admins WHERE initiator_user_id = %s"
-            self.cursor.execute(sql, (user_id,))
-            result = self.cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def select_all_admins(self):
-        """
-        Select all admins from the 'admins' table.
-        """
-        try:
-            sql = "SELECT * FROM admins"
-            self.cursor.execute(sql)
-            result = self.cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def stat_admins(self):
-        """
-        Get the total number of admins.
-        """
-        try:
-            sql = "SELECT COUNT(*) FROM admins"
-            self.cursor.execute(sql)
-            result = self.cursor.fetchone()
-            return result[list(result.keys())[0]]
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def delete_admin(self, user_id):
-        """
-        Delete an admin from the 'admins' table.
-        """
-        try:
-            sql = "DELETE FROM admins WHERE user_id = %s"
-            self.cursor.execute(sql, (user_id,))
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def select_channels(self):
-        """
-        Select all channels from the 'channels' table.
-        """
-        try:
-            sql = "SELECT * FROM channels"
-            self.cursor.execute(sql)
-            results = self.cursor.fetchall()
-            return results
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def select_channels_initiator_user_id(self, initiator_user_id):
-        """
-        Select all channels added by a specific admin.
-        """
-        try:
-            sql = "SELECT * FROM channels WHERE initiator_user_id = %s"
-            self.cursor.execute(sql, (initiator_user_id,))
-            result = self.cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def check_channel(self, channel_id):
-        """
-        Check if a channel exists in the 'channels' table.
-        """
-        try:
-            sql = "SELECT * FROM channels WHERE channel_id = %s"
-            self.cursor.execute(sql, (channel_id,))
-            result = self.cursor.fetchone()
-            return result
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def select_all_channel(self):
-        """
-        Select all channels from the 'channels' table.
-        """
-        try:
-            sql = "SELECT * FROM channels"
-            self.cursor.execute(sql)
-            result = self.cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-    def delete_channel(self, channel_id):
-        """
-        Delete a channel from the 'channels' table.
-        """
-        try:
-            sql = "DELETE FROM channels WHERE channel_id = %s"
-            self.cursor.execute(sql, (channel_id,))
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
-
-
 
 
 
