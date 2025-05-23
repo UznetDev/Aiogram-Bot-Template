@@ -28,7 +28,7 @@ db = Database(host=HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, database=MYSQ
 log_format = '%(filename)s - %(funcName)s - %(lineno)d - %(name)s - %(levelname)s - %(message)s'
 formatter = logging.Formatter(log_format)
 
-redis = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+redis = Redis(host="localhost", port=6379, db=5, decode_responses=True)
 async_redis = AsyncRedis(host="localhost", port=6379, db=1, decode_responses=True)
 
 
@@ -46,10 +46,7 @@ FM = FeatureManager(db=db, root_logger=root_logger, redis_client=redis)
 AM = AdminsManager(db=db, redis_client=redis, root_logger=root_logger)
 SM = SettingsManager(db=db, redis_client=redis, root_logger=root_logger)
 
-translator = Translator(db=db, FM=FM, root_logger=root_logger)
-
-
-
+translator = Translator(db=db, FM=FM, root_logger=root_logger, redis_client=redis)
 
 
 
