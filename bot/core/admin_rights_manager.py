@@ -6,6 +6,7 @@ import mysql.connector
 from redis import Redis
 
 from bot.db.database import Database
+from bot.data.config import ADMIN
 
 
 class AdminsManager:
@@ -24,9 +25,13 @@ class AdminsManager:
         self.create_table_admin_rights()
 
     def __call__(self, user_id: int, feature: str) -> Optional[bool]:
-        return self.get(user_id, feature)
+        return self.get(user_id, feature) or user_id == ADMIN
 
-    def get(self, user_id: int, feature: str) -> Optional[bool]:
+    def get(self, user_id: int, feature: str = None) -> Optional[bool]:
+        
+        if user_id == ADMIN: return True
+        if feature is None: return self.is_admin(user_id)
+
         key = self._redis_key(user_id, feature)
 
         if (cached := self.redis.get(key)) is not None:
@@ -54,6 +59,31 @@ class AdminsManager:
             self.log.error(f"MySQL (get) xatosi: {err}")
             self.db.reconnect()
             return None
+
+    def is_admin(self, user_id: int) -> bool:
+        if user_id == ADMIN: return True
+
+        key = f"{self.ns}:{user_id}:__is_admin__"
+        cached = self.redis.get(key)
+        if cached is not None:
+            return cached == "1"
+        try:
+            sql = """
+                SELECT 1
+                FROM   admins
+                WHERE  user_id = %s
+                  AND  is_active = TRUE
+                LIMIT 1;
+            """
+            self.db.cursor.execute(sql, (user_id,))
+            row = self.db.cursor.fetchone()
+            is_admin = bool(row)
+            self.redis.set(key, "1" if is_admin else "0")
+            return is_admin
+        except mysql.connector.Error as err:
+            self.log.error(f"MySQL (is_admin) xatosi: {err}")
+            self.db.reconnect()
+            return False
 
     def update(self, user_id: int, feature: str, value: bool, is_active: bool = True) -> None:
         try:
@@ -88,6 +118,8 @@ class AdminsManager:
                 (user_id,),
             )
             self.db.connection.commit()
+            key = f"{self.ns}:{user_id}:__is_admin__"
+            self.redis.set(key, "1")
         except mysql.connector.Error as err:
             self.log.error(f"MySQL (add) xatosi: {err}")
             self.db.reconnect()

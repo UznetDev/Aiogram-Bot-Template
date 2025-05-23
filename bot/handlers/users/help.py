@@ -9,16 +9,6 @@ from keyboards.inline.user import send_url
 
 @dp.message(Command(commands='help'))
 async def help_handler(msg: types.Message):
-    """
-    Handles the /help command to provide users with information about the bot
-    and a button to share the bot's URL.
-
-    Args:
-        msg (types.Message): The incoming message object.
-
-    Returns:
-        None
-    """
     try:
         # Get the user's language code
         user_language = msg.from_user.language_code

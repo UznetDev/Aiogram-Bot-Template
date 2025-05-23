@@ -2,6 +2,7 @@ import random
 import pytest
 
 from bot.loader import db, redis, AM
+from bot.data.config import ADMIN
 
 
 @pytest.mark.integration
@@ -56,6 +57,15 @@ def test_admins_manager_full_cycle():
 
         redis.delete(AM._redis_key(user_id, feat))
         assert AM.get(user_id, feat) is None
+
+
+        assert AM.is_admin(ADMIN) is True
+        assert AM(user_id=ADMIN, feature="test") is True
+
+        AM.update(user_id=ADMIN, feature="test", value=False)
+        assert AM.get(user_id=ADMIN, feature="test") is True
+        assert AM.get(user_id=ADMIN) is True
+        
 
     db.cursor.execute("DELETE FROM admin_rights WHERE admin_id=%s", (admin_pk,))
     db.cursor.execute("DELETE FROM admins WHERE id=%s", (admin_pk,))

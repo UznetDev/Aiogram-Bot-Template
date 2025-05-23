@@ -33,63 +33,63 @@ class IsAdmin(BaseFilter):
             return False
 
 
-class AdminFilter:
+# class AdminFilter:
 
-    def __init__(self, user_id):
-        self.user_id = user_id
-        self.super_admin = ADMIN
-        self.dada = db.select_admin(user_id=self.user_id)
+#     def __init__(self, user_id):
+#         self.user_id = user_id
+#         self.super_admin = ADMIN
+#         self.dada = db.select_admin(user_id=self.user_id)
 
-    def __call__(self):
-        if self.dada is not None:
-            return True
-        else:
-            return False
+#     def __call__(self):
+#         if self.dada is not None:
+#             return True
+#         else:
+#             return False
 
-    def send_message(self) -> bool:
-        if self.user_id == self.super_admin:
-            return True
-        elif self.dada['send_message'] == 1:
-            return True
-        else:
-            return False
+#     def send_message(self) -> bool:
+#         if self.user_id == self.super_admin:
+#             return True
+#         elif self.dada['send_message'] == 1:
+#             return True
+#         else:
+#             return False
 
-    def view_statistika(self) -> bool:
-        if self.user_id == self.super_admin:
-            return True
-        elif self.dada['statistika'] == 1:
-            return True
-        else:
-            return False
+#     def view_statistika(self) -> bool:
+#         if self.user_id == self.super_admin:
+#             return True
+#         elif self.dada['statistika'] == 1:
+#             return True
+#         else:
+#             return False
 
-    def download_statistika(self) -> bool:
-        if self.user_id == self.super_admin:
-            return True
-        elif self.dada['download_statistika'] == 1:
-            return True
-        else:
-            return False
+#     def download_statistika(self) -> bool:
+#         if self.user_id == self.super_admin:
+#             return True
+#         elif self.dada['download_statistika'] == 1:
+#             return True
+#         else:
+#             return False
 
-    def block_user(self) -> bool:
-        if self.user_id == self.super_admin:
-            return True
-        elif self.dada['block_user'] == 1:
-            return True
-        else:
-            return False
+#     def block_user(self) -> bool:
+#         if self.user_id == self.super_admin:
+#             return True
+#         elif self.dada['block_user'] == 1:
+#             return True
+#         else:
+#             return False
 
-    def channel_settings(self) -> bool:
-        if self.user_id == self.super_admin:
-            return True
-        elif self.dada['channel_settings'] == 1:
-            return True
-        else:
-            return False
+#     def channel_settings(self) -> bool:
+#         if self.user_id == self.super_admin:
+#             return True
+#         elif self.dada['channel_settings'] == 1:
+#             return True
+#         else:
+#             return False
 
-    def add_admin(self) -> bool:
-        if self.user_id == self.super_admin:
-            return True
-        elif self.dada['add_admin'] == 1:
-            return True
-        else:
-            return False
+#     def add_admin(self) -> bool:
+#         if self.user_id == self.super_admin:
+#             return True
+#         elif self.dada['add_admin'] == 1:
+#             return True
+#         else:
+#             return False
