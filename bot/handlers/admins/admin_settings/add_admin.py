@@ -24,9 +24,8 @@ async def add_admin(msg: types.Message, state: FSMContext):
 
             try:
                 user = await bot.get_chat(chat_id=target_user_id)
-                check = AM.get(target_user_id)
-
-                if check is None:
+                is_admin, initiator_user_id, created_at  = AM(target_user_id)
+                if is_admin is None:
                     AM.add(user_id=target_user_id,)
                     text = translator(text="✅ Admin has been successfully added\n\nName: ",
                                       dest=language_code)
@@ -44,7 +43,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
                     text += f'Username:  @{user.username}\n'
                     text += translator(text="Add date: ",
                                        dest=language_code)
-                    text += f'{check[9]}\n<code>{check[2]}</code>'
+                    text += f'{created_at}\n<code>{check[2]}</code>'
                     text += translator(text="Added by",
                                        dest=language_code)
             except Exception as err:

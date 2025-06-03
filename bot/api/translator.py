@@ -10,12 +10,6 @@ from bot.core.feature_manager import FeatureManager
 
 
 class Translator:
-    """
-    Tarjima servisi: Redis → MySQL → GoogleTranslator
-    * Redis:   texts, translations  (hash)
-    * MySQL:   texts, translations  (tablalar)
-    """
-
     _REDIS_HASH_TEXTS = "texts"
     _REDIS_HASH_TRANSLATIONS = "translations"
 

@@ -4,9 +4,8 @@ from .button import AdminCallback, EditAdminSetting, AdminSetting, BlockUser
 from .close_btn import close_btn
 
 from bot.data.config import ADMIN
-from bot.loader import db, bot, translator, FM, root_logger
+from bot.loader import db, bot, translator, root_logger, FM, AM, SM
 from bot.function.function import x_or_y
-from bot.filters.admin import AdminFilter
 
 
 def main_btn():
@@ -25,24 +24,24 @@ def main_admin_panel_btn(user_id, language_code):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = AdminFilter(user_id=user_id)
-        if is_admin.add_admin() and FM.feature('admin_settings'):
+        
+        if AM['add_admin', user_id]:
             btn.button(text=translator(text=f"👮‍♂️ Admins settings!",
                                        dest=language_code),
                        callback_data=AdminCallback(action="admin_settings", data="").pack())
-        if is_admin.send_message():
+        if AM('send_message', user_id):
             btn.button(text=translator(text=f"✈Send advertisement!",
                                        dest=language_code),
                        callback_data=AdminCallback(action="send_advertisement", data="").pack())
-        if is_admin.view_statistika():
+        if AM('view_statistika', user_id):
             btn.button(text=translator(text=f"📜Statistika!",
                                        dest=language_code),
                        callback_data=AdminCallback(action="statistika", data="").pack())
-        if is_admin.block_user():
+        if AM('block_user', user_id):
             btn.button(text=translator(text=f"👁‍🗨Check user!",
                                        dest=language_code),
                        callback_data=AdminCallback(action="check_user", data="").pack())
-        if is_admin.channel_settings():
+        if AM('channel_settings', user_id):
             btn.button(text=translator(text=f"🔰Channel setting!",
                                        dest=language_code),
                        callback_data=AdminCallback(action="channel_setting", data="").pack())
@@ -82,13 +81,12 @@ def attach_admin(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = AdminFilter(user_id=user_id)
-        send_message_tx = x_or_y(is_admin.send_message())
-        wiew_statistika_tx = x_or_y(is_admin.view_statistika())
-        download_statistika_tx = x_or_y(is_admin.download_statistika())
-        block_user_tx = x_or_y(is_admin.block_user())
-        channel_settings_tx = x_or_y(is_admin.channel_settings())
-        add_admin_tx = x_or_y(is_admin.add_admin())
+        send_message_tx = x_or_y(AM('send_message', user_id))
+        wiew_statistika_tx = x_or_y(AM('view_statistika', user_id))
+        download_statistika_tx = x_or_y(AM('download_statistika', user_id))
+        block_user_tx = x_or_y(AM('block_user', user_id))
+        channel_settings_tx = x_or_y(AM('channel_settings', user_id))
+        add_admin_tx = x_or_y(AM('add_admin', user_id))
         btn.button(text=translator(text=f"{send_message_tx} Send a message!",
                                    dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='send_message').pack())
@@ -125,13 +123,12 @@ def attach_admin_btn(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = AdminFilter(user_id=user_id)
-        send_message_tx = x_or_y(is_admin.send_message())
-        wiew_statistika_tx = x_or_y(is_admin.view_statistika())
-        download_statistika_tx = x_or_y(is_admin.download_statistika())
-        block_user_tx = x_or_y(is_admin.block_user())
-        channel_settings_tx = x_or_y(is_admin.channel_settings())
-        add_admin_tx = x_or_y(is_admin.add_admin())
+        send_message_tx = x_or_y(AM('send_message', user_id))
+        wiew_statistika_tx = x_or_y(AM('view_statistika', user_id))
+        download_statistika_tx = x_or_y(AM('download_statistika', user_id))
+        block_user_tx = x_or_y(AM('block_user', user_id))
+        channel_settings_tx = x_or_y(AM('channel_settings', user_id))
+        add_admin_tx = x_or_y(AM('add_admin', user_id))
         btn.button(text=translator(text=f"{send_message_tx} Send a message!",
                                    dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='send_message').pack())
@@ -168,7 +165,7 @@ def channel_settings(language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        mandatory_membership = db.select_setting('mandatory_membership')
+        mandatory_membership = SM('mandatory_membership')
         if mandatory_membership == 'True':
             text = translator(text=f'✅ Mandatory membership of',
                               dest=language_code)
@@ -197,8 +194,7 @@ def block_user(attention_user_id, language_code, user_id):
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
 
-        is_admin = AdminFilter(user_id=user_id)
-        if is_admin.block_user():
+        if AM('block_user', user_id):
             data = db.check_user_ban(user_id=attention_user_id)
             if data is None:
                 btn.button(text=translator(text=f"🚫Block user!",
@@ -221,8 +217,7 @@ def download_statistika(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        is_admin = AdminFilter(user_id=user_id)
-        if is_admin.download_statistika():
+        if AM('download_statistika', user_id):
             btn.button(text=translator(text=f"📜 Dowload statistika!",
                                        dest=language_code),
                        callback_data=AdminCallback(action="download_statistika", data="").pack())
@@ -236,21 +231,16 @@ def download_statistika(user_id, language_code):
 
 def stop_advertisement():
     try:
-        # Initialize the inline keyboard builder
         btn = InlineKeyboardBuilder()
 
-        # Add a button labeled "🚫 Stop!" with callback data to handle the stop_ads action
+
         btn.button(
             text='🚫 Stop!',
             callback_data=AdminCallback(action="stop_ads", data="").pack()
         )
 
-        # Return the constructed inline keyboard markup
         return btn.as_markup()
 
     except Exception as err:
-        # Log any exceptions that occur during the button creation process
         root_logger.error(f"Error in stop_ads function: {err}")
-
-        # Return False to indicate the failure of the operation
         return False
