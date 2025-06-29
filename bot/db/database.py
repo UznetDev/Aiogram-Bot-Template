@@ -292,6 +292,40 @@ class Database:
             self.root_logger.error(err)
 
 
+    def select_channels(self):
+        """
+        Select all channels from the 'channels' table.
+
+        Returns:
+        list: A list of tuples containing all channels' information.
+        """
+        try:
+            self.cursor.execute("SELECT * FROM `channels`")
+            results = self.cursor.fetchall()
+            return results
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class MySQLHandler(logging.Handler):
@@ -354,3 +388,5 @@ class MySQLHandler(logging.Handler):
         self.cursor.close()
         self.connection.close()
         super().close()
+
+

@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from bot.filters.admin import IsAdmin
 from bot.keyboards.inline.admin_btn import admin_setting
 from bot.keyboards.inline.close_btn import close_btn
-from bot.loader import dp, bot, db, translator, AM
+from bot.loader import dp, bot, translator, AM
 from bot.states.admin_state import AdminState
 
 
@@ -24,9 +24,9 @@ async def add_admin(msg: types.Message, state: FSMContext):
 
             try:
                 user = await bot.get_chat(chat_id=target_user_id)
-                is_admin, initiator_user_id, created_at  = AM(target_user_id)
+                is_admin, initiator_user_id, role, created_at  = AM[target_user_id]
                 if is_admin is None:
-                    AM.add(user_id=target_user_id,)
+                    AM.add(user_id=target_user_id, initiator_user_id=user_id)
                     text = translator(text="✅ Admin has been successfully added\n\nName: ",
                                       dest=language_code)
                     text += f"{user.full_name}\n"
@@ -43,7 +43,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
                     text += f'Username:  @{user.username}\n'
                     text += translator(text="Add date: ",
                                        dest=language_code)
-                    text += f'{created_at}\n<code>{check[2]}</code>'
+                    text += f'{created_at}\n<code>{initiator_user_id}</code>'
                     text += translator(text="Added by",
                                        dest=language_code)
             except Exception as err:

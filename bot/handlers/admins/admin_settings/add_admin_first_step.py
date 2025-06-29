@@ -1,7 +1,7 @@
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 
-from bot.filters.admin import IsAdmin, AdminFilter
+from bot.filters.admin import IsAdmin
 from bot.keyboards.inline.admin_btn import admin_setting
 from bot.keyboards.inline.button import AdminCallback
 from bot.keyboards.inline.close_btn import close_btn

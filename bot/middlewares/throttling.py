@@ -6,7 +6,7 @@ from aiogram import Bot
 from bot.data.config import ADMIN
 from bot.keyboards.inline.close_btn import close_btn
 from bot.keyboards.inline.button import MainCallback
-from bot.loader import translator, root_logger, FM
+from bot.loader import translator, root_logger, FM, AM
 from bot.db.database import Database
 
 
@@ -135,17 +135,15 @@ class ThrottlingMiddleware(BaseMiddleware):
             else:
                 return False
         except Exception as err:
-            logging.error(err)
+            root_logger.error(err)
             return False
         
 
     async def check_member(self, user_id, language_code):
         try:
-            is_mandatory = self.db.select_setting('mandatory_membership')
+            is_mandatory = FM('mandatory_membership')
             if is_mandatory is None:
-                self.db.update_settings_key(updater_user_id=1, 
-                                            key='mandatory_membership', 
-                                            value=False)
+                FM.upsert_feature('mandatory_membership', enabled=False)
                 return False
             elif is_mandatory == 'False':
                 return False

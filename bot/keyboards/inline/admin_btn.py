@@ -23,28 +23,14 @@ def main_admin_panel_btn(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-
-        
-        if AM['add_admin', user_id]:
-            btn.button(text=translator(text=f"👮‍♂️ Admins settings!",
-                                       dest=language_code),
-                       callback_data=AdminCallback(action="admin_settings", data="").pack())
-        if AM('send_message', user_id):
-            btn.button(text=translator(text=f"✈Send advertisement!",
-                                       dest=language_code),
-                       callback_data=AdminCallback(action="send_advertisement", data="").pack())
-        if AM('view_statistika', user_id):
-            btn.button(text=translator(text=f"📜Statistika!",
-                                       dest=language_code),
-                       callback_data=AdminCallback(action="statistika", data="").pack())
-        if AM('block_user', user_id):
-            btn.button(text=translator(text=f"👁‍🗨Check user!",
-                                       dest=language_code),
-                       callback_data=AdminCallback(action="check_user", data="").pack())
-        if AM('channel_settings', user_id):
-            btn.button(text=translator(text=f"🔰Channel setting!",
-                                       dest=language_code),
-                       callback_data=AdminCallback(action="channel_setting", data="").pack())
+        rights = AM.list_features()
+        for right in rights:
+                if AM.__call__(user_id=user_id, feature=right['key']):
+                    text = translator(text=right['name'],
+                                       dest=language_code)
+                    btn.button(text='👮‍♂️ ' + text,
+                                callback_data=AdminCallback(action="admin_settings", data="").pack())
+                    
         btn.adjust(1, 2)
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
         return btn.as_markup()
@@ -52,20 +38,15 @@ def main_admin_panel_btn(user_id, language_code):
         root_logger.error(err)
         return False
 
-
 async def admin_setting(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        if user_id == ADMIN:
-            data = db.select_all_admins()
-        else:
-            data = db.select_add_admin(user_id=user_id)
-        if data is not None:
-            for x in data:
-                info = await bot.get_chat(chat_id=x['user_id'])
-                btn.button(text=f"👮‍♂️ @{info.username}: {info.full_name}!",
-                           callback_data=AdminSetting(action="attach_admin", user_id=x['user_id']).pack())
+        admins = AM.my_admins(user_id=user_id)
+        for x in admins:
+            info = await bot.get_chat(chat_id=x['user_id'])
+            btn.button(text=f"{x_or_y(x['is_active'])} @{info.username}: {info.full_name}!",
+                        callback_data=AdminSetting(action="attach_admin", user_id=x['user_id']).pack())
         btn.button(text=translator(text=f"👮‍♂️ ADD Admin!",
                                    dest=language_code),
                    callback_data=AdminCallback(action="add_admin", data="").pack())
@@ -75,7 +56,6 @@ async def admin_setting(user_id, language_code):
     except Exception as err:
         root_logger.error(err)
         return False
-
 
 def attach_admin(user_id, language_code):
     try:
@@ -118,38 +98,23 @@ def attach_admin(user_id, language_code):
         root_logger.error(err)
         return False
 
-
 def attach_admin_btn(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        send_message_tx = x_or_y(AM('send_message', user_id))
-        wiew_statistika_tx = x_or_y(AM('view_statistika', user_id))
-        download_statistika_tx = x_or_y(AM('download_statistika', user_id))
-        block_user_tx = x_or_y(AM('block_user', user_id))
-        channel_settings_tx = x_or_y(AM('channel_settings', user_id))
-        add_admin_tx = x_or_y(AM('add_admin', user_id))
-        btn.button(text=translator(text=f"{send_message_tx} Send a message!",
-                                   dest=language_code),
-                   callback_data=EditAdminSetting(action="edit", user_id=user_id, data='send_message').pack())
 
-        btn.button(text=translator(text=f"{wiew_statistika_tx} Wiew statistics!",
-                                   dest=language_code),
-                   callback_data=EditAdminSetting(action="edit", user_id=user_id, data='statistika').pack())
-
-        btn.button(text=translator(text=f"{download_statistika_tx} Download statistics!",
-                                   dest=language_code),
-                   callback_data=EditAdminSetting(action="edit", user_id=user_id, data='download_statistika').pack())
-
-        btn.button(text=translator(text=f"{block_user_tx} Block user!",
-                                   dest=language_code),
-                   callback_data=EditAdminSetting(action="edit", user_id=user_id, data='block_user').pack())
-        btn.button(text=translator(text=f"{channel_settings_tx} Channel settings!",
-                                   dest=language_code),
-                   callback_data=EditAdminSetting(action="edit", user_id=user_id, data='channel_settings').pack())
-        btn.button(text=translator(text=f"{add_admin_tx} Add a admin!",
-                                   dest=language_code),
-                   callback_data=EditAdminSetting(action="edit", user_id=user_id, data='add_admin').pack())
+        rights = AM.list_features()
+        for right in rights:
+            check = AM.__call__(user_id=user_id, feature=right['key'])
+            text = x_or_y(check) + ' ' + translator(text=right['name'],
+                                dest=language_code)
+            
+            btn.button(text=text,
+                        callback_data=EditAdminSetting(
+                            action="edit", 
+                            user_id=user_id, 
+                            data=right['key']).pack())
+   
         btn.button(text=translator(text=f"🔪Delete admin!",
                                    dest=language_code),
                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='delete_admin').pack())
@@ -159,7 +124,6 @@ def attach_admin_btn(user_id, language_code):
     except Exception as err:
         root_logger.error(err)
         return False
-
 
 def channel_settings(language_code):
     try:
@@ -188,7 +152,6 @@ def channel_settings(language_code):
         root_logger.error(err)
         return False
 
-
 def block_user(attention_user_id, language_code, user_id):
     try:
         btn = InlineKeyboardBuilder()
@@ -212,7 +175,6 @@ def block_user(attention_user_id, language_code, user_id):
         root_logger.error(err)
         return False
 
-
 def download_statistika(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
@@ -227,7 +189,6 @@ def download_statistika(user_id, language_code):
     except Exception as err:
         root_logger.error(err)
         return False
-
 
 def stop_advertisement():
     try:
