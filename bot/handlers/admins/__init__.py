@@ -13,3 +13,7 @@ if FM.feature('admin_settings'):
 # statistika
 if FM.feature('statistika'):
     from . import statistika
+
+# mandatory_membership
+if FM.feature('mandatory_membership'):
+    from . import mandatory_membership

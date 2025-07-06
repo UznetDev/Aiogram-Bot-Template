@@ -19,6 +19,7 @@ async def main():
             ('add_rights', '✳️ Add rights.', 'Adminlar uchun qushimcha huqqu qushish.'),
             ('add_features', '📛 Add features', 'Bot uchun yangi imkoniyatlar qushish.'),
             ('view_statistika', '📜 View statistika', 'Wiew bot statistiks'),
+            ('mandatory_membership', '🔁 Channels mandatory', 'Manage channels mandatory membership'),
 
         ]
         
