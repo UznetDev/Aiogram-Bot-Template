@@ -33,7 +33,8 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
                         text = f'🔪 @{admin_info.username} {translator(text="✅ Removed from admin!", dest=language_code)}'
                         await bot.send_message(chat_id=target_user_id, text='😪 Your admin rights have been revoked!')
                     else:
-                        feature = AM(user_id=edit_key, feature=edit_key)
+                        feature = AM(user_id=target_user_id, feature=edit_key)
+                        # root_logger.info(feature)
                         value = False if feature else True
                         AM.update(user_id=target_user_id, feature=edit_key, value=value, initiator_user_id=user_id)
 

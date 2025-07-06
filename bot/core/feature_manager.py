@@ -39,7 +39,7 @@ class FeatureManager:
     def upsert_feature(self, name: str, enabled: bool) -> None:
         try:
             sql = """
-                INSERT INTO features        (name, enabled)
+                INSERT INTO `features` (name, enabled)
                 VALUES                      (%s,   %s)
                 ON DUPLICATE KEY UPDATE
                     enabled    = VALUES(enabled),
@@ -83,13 +83,13 @@ class FeatureManager:
         try:
             self.db.cursor.execute(
                 """
-                CREATE TABLE IF NOT EXISTS features (
-                    id         INT AUTO_INCREMENT PRIMARY KEY,
-                    name       VARCHAR(255) NOT NULL UNIQUE,
-                    enabled    TINYINT(1)  NOT NULL DEFAULT 0,
-                    updated_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    deleted_at TIMESTAMP            DEFAULT NULL,
-                    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+                CREATE TABLE IF NOT EXISTS `features` (
+                    `id`         INT AUTO_INCREMENT PRIMARY KEY,
+                    `name`       VARCHAR(255) NOT NULL UNIQUE,
+                    `enabled`    TINYINT(1)  NOT NULL DEFAULT 0,
+                    `updated_at` TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    `deleted_at` TIMESTAMP            DEFAULT NULL,
+                    `created_at` TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
                 """
             )

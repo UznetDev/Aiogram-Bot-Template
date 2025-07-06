@@ -10,35 +10,20 @@ from bot.data.config import ADMIN
 
 
 class AdminsManager:
-    """
-    Telegram botida administratorlarni va ularning huquqlarini boshqarish uchun klass.
-    Redis va MySQL ma'lumotlar bazalaridan foydalanadi.
-    """
     
     def __init__(self, db: Database, 
                  redis_client: Redis, 
                  root_logger: logging.Logger, 
                  redis_namespace: str = "admin_setting"):
-        """
-        Klass konstruktori
-        
-        Args:
-            db: MySQL bilan ishlash uchun abstraksiya obyekti
-            redis_client: Redis bilan muloqot qiluvchi obyekt
-            root_logger: Loyihaviy loglar uchun logger
-            redis_namespace: Redis kalitlari prefiksi
-        """
         self.db = db
         self.redis = redis_client
         self.logger = root_logger
         self.ns = redis_namespace
         self.now = datetime.now()
         
-        # Kerakli jadvallarni yaratish
         self._create_tables()
     
     def _create_tables(self):
-        """Ma'lumotlar bazasida kerakli jadvallarni yaratish"""
         tables = [
             """
             CREATE TABLE IF NOT EXISTS `admins` (
@@ -111,6 +96,10 @@ class AdminsManager:
             (is_active, initiator_user_id) yoki (is_active,) yoki (None, None)
         """
         try:
+
+            if not isinstance(user_id, int) or not isinstance(feature, str) :
+                return None, None if return_initiator else None
+             
             if user_id == ADMIN:
                 return True, None if return_initiator else True
             
@@ -133,18 +122,19 @@ class AdminsManager:
             
             if not feature_active:
                 return None, None if return_initiator else None
-            
-            # Redis dan qidirish
+
             redis_key = f"{self.ns}:admin_rights:{user_id}:{feature}"
             cached_data = self.redis.get(redis_key)
             
             if cached_data:
                 data = json.loads(cached_data)
+
+                
                 if return_initiator:
                     return data.get('value', False), data.get('initiator_user_id')
+
                 return data.get('value', False)
             
-            # MySQL dan qidirish
             query = """
                 SELECT ar.value, ar.initiator_user_id 
                 FROM admin_rights ar
@@ -160,7 +150,6 @@ class AdminsManager:
             result = self.db.cursor.fetchone()
             
             if result:
-                # Redis ga saqlash
                 cache_data = {
                     'value': result['value'],
                     'initiator_user_id': result['initiator_user_id']
@@ -228,23 +217,11 @@ class AdminsManager:
             return None, None, None, None
     
     def update(self, user_id: int, feature: str, value: bool, initiator_user_id: int) -> None:
-        """
-        Admin huquqini yangilash yoki yaratish
-        
-        Args:
-            user_id: Yangilanayotgan admin telegram user ID
-            feature: Yangilanayotgan xususiyat
-            value: Huquq qiymati
-            initiator_user_id: Huquq berayotgan admin telegram user ID
-        """
         try:
-            # Admin ekanligini tekshirish
             is_admin, _, _, _ = self.__getitem__(user_id)
             if not is_admin:
                 self.logger.warning(f"User {user_id} admin emas")
                 return
-            
-            # Rights mavjudligini tekshirish
             rights_query = "SELECT id FROM rights WHERE `key` = %s AND is_active = TRUE AND deleted_at IS NULL"
             self.db.cursor.execute(rights_query, (feature,))
             right_result = self.db.cursor.fetchone()

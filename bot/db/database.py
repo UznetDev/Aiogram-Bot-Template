@@ -184,8 +184,6 @@ class Database:
             self.root_logger.error(err)
 
     ## ------------------ Select ------------------ ##
-
-
     def select_all_users_ban(self):
         """
         Select all banned users from the 'users' table.
@@ -322,6 +320,12 @@ class Database:
 
 
 
+    def nuke_schema(self):
+        tables = ['admins', 'admin_rights', 'channels', 'features', 'log_history', 'rights', 'settings', 'texts', 'translations', 'users']
+        self.cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
+        for t in tables:
+            self.cursor.execute(f"DROP TABLE IF EXISTS `{t}`;")
+        self.cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
 
 
 

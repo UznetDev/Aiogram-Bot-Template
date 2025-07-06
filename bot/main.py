@@ -12,7 +12,8 @@ async def main():
     await set_default_commands()
 
     try:
-
+        
+        
         admin_rights = [
             ('admin_settings', '👮‍♂️ Admins settings!', 'Yangi adminlar qo\'shish imkoniyati.'),
             ('add_rights', '✳️ Add rights.', 'Adminlar uchun qushimcha huqqu qushish.'),
