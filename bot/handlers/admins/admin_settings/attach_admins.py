@@ -22,7 +22,7 @@ async def attach_admins(call: types.CallbackQuery, callback_data: AdminSetting, 
         target_user_id = callback_data.user_id
         btn = close_btn()
 
-        if AM[user_id]:
+        if AM(user_id=user_id, feature='admin_settings'):
             is_admin, initiator_user_id, role, created_at  = AM[target_user_id]
             if initiator_user_id == user_id or user_id == ADMIN:
                 btn = attach_admin_btn(user_id=target_user_id, 

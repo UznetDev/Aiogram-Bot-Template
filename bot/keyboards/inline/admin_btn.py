@@ -28,7 +28,7 @@ def main_admin_panel_btn(user_id, language_code):
             if AM.__call__(user_id=user_id, feature=right['key']):
                 text = translator(text=right['name'],
                                     dest=language_code)
-                btn.button(text='👮‍♂️ ' + text,
+                btn.button(text=text,
                             callback_data=AdminCallback(action=right['key'], data="").pack())
                     
         btn.adjust(1, 2)
@@ -179,7 +179,7 @@ def download_statistika(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-        if AM('download_statistika', user_id):
+        if AM('view_statistika', user_id):
             btn.button(text=translator(text=f"📜 Dowload statistika!",
                                        dest=language_code),
                        callback_data=AdminCallback(action="download_statistika", data="").pack())

@@ -14,11 +14,10 @@ async def main():
     try:
 
         admin_rights = [
-            ('add_admin', 'Add admins.', 'Yangi adminlar qo\'shish imkoniyati.'),
-            ('add_rights', 'Add rights.', 'Adminlar uchun qushimcha huqqu qushish.'),
-            ('add_features', 'Add features', 'Bot uchun yangi imkoniyatlar qushish.'),
-            ('view_statistika', 'View statistika', 'Wiew bot statistiks'),
-            ('download_statistika', 'Download statistika', 'Download bot statistiks')
+            ('admin_settings', '👮‍♂️ Admins settings!', 'Yangi adminlar qo\'shish imkoniyati.'),
+            ('add_rights', '✳️ Add rights.', 'Adminlar uchun qushimcha huqqu qushish.'),
+            ('add_features', '📛 Add features', 'Bot uchun yangi imkoniyatlar qushish.'),
+            ('view_statistika', '📜 View statistika', 'Wiew bot statistiks'),
 
         ]
         

@@ -17,7 +17,7 @@ async def admin_settings(call: types.CallbackQuery, state: FSMContext):
         mid = call.message.message_id
         language_code = call.from_user.language_code
 
-        if AM[user_id]:
+        if AM(user_id=user_id, feature='admin_settings'):
             text = translator(text="❗ You are in the Admin settings section!", dest=language_code)
             btn = await admin_setting(user_id=user_id, language_code=language_code)
         else:

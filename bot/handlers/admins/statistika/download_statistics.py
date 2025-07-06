@@ -20,7 +20,7 @@ async def download_statistics(call: types.CallbackQuery, state: FSMContext):
         message_id = call.message.message_id
         language = call.from_user.language_code
 
-        if AM(user_id=user_id, feature='download_statistika'):
+        if AM(user_id=user_id, feature='view_statistika'):
             data = db.select_all_users()
             id_list = []
             user_id_list = []

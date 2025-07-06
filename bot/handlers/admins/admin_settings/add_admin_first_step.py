@@ -17,7 +17,7 @@ async def add_admin_first(call: types.CallbackQuery, state: FSMContext):
         language_code = call.from_user.language_code
 
 
-        if AM(user_id=user_id, feature='add_admin'):
+        if AM(user_id=user_id, feature='admin_settings'):
             text = translator(text="🔰 Please send the admin ID number you want to add...", dest=language_code)
             btn = await admin_setting(user_id=user_id, language_code=language_code)
             await state.set_state(AdminState.add_admin)

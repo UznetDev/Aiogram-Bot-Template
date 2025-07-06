@@ -21,7 +21,7 @@ async def edit_admin(call: types.CallbackQuery, callback_data: EditAdminSetting,
         edit_key = callback_data.data
         btn = close_btn()
 
-        if AM(user_id=user_id, feature='add_admin'):
+        if AM(user_id=user_id, feature='admin_settings'):
             is_admin, initiator_user_id, role, created_at  = AM.__getitem__(target_user_id)
             if not is_admin:
                 text = f'⛔{target_user_id} {translator(text="😪 Not available in admin list!", dest=language_code)}'

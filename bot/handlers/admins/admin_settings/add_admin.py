@@ -17,7 +17,7 @@ async def add_admin(msg: types.Message, state: FSMContext):
         language_code = msg.from_user.language_code
         target_user_id = int(msg.text)
 
-        if AM(user_id=user_id, feature='add_admin_db'):
+        if AM(user_id=user_id, feature='admin_settings'):
             data_state = await state.get_data()
             btn = await admin_setting(user_id=user_id, language_code=language_code)
             text = "🔴 Failed because admin was not found!\n"

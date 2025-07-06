@@ -15,3 +15,4 @@ __pycache__/*
 *.log
 *.xls
 .bins
+my_test.py
