@@ -25,11 +25,11 @@ def main_admin_panel_btn(user_id, language_code):
         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
         rights = AM.list_features()
         for right in rights:
-                if AM.__call__(user_id=user_id, feature=right['key']):
-                    text = translator(text=right['name'],
-                                       dest=language_code)
-                    btn.button(text='👮‍♂️ ' + text,
-                                callback_data=AdminCallback(action="admin_settings", data="").pack())
+            if AM.__call__(user_id=user_id, feature=right['key']):
+                text = translator(text=right['name'],
+                                    dest=language_code)
+                btn.button(text='👮‍♂️ ' + text,
+                            callback_data=AdminCallback(action=right['key'], data="").pack())
                     
         btn.adjust(1, 2)
         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))

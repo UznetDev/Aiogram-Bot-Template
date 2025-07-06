@@ -132,8 +132,6 @@ class Database:
             self.root_logger.error(f"General error: {err}")
 
     ## ------------------ Insert data ------------------ ##
-
-
     def insert_user(self, user_id, language_code):
         """
         Add a user to the 'users' table.
@@ -291,7 +289,6 @@ class Database:
         except Exception as err:
             self.root_logger.error(err)
 
-
     def select_channels(self):
         """
         Select all channels from the 'channels' table.
@@ -309,8 +306,19 @@ class Database:
         except Exception as err:
             logging.error(err)
 
+# Statistics
 
-
+    def stat(self):
+        try:
+            sql = "SELECT COUNT(*) FROM `users`;"
+            self.cursor.execute(sql)
+            result = self.cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            logging.error(err)
+            self.reconnect()
+        except Exception as err:
+            logging.error(err)
 
 
 

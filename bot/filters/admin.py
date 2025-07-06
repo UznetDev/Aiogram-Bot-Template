@@ -25,6 +25,5 @@ class IsAdmin(BaseFilter):
     async def __call__(self, message: Message) -> bool:
         self.user_id = message.from_user.id
         is_admin, _, _, _ = AM.__getitem__(self.user_id)
-        print(is_admin)
         return True if is_admin  else False
 

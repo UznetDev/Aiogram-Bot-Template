@@ -110,6 +110,7 @@ def main_setup() -> None:
                 'error_handler', 
                 'admin_panel',
                 'admin_settings', 
+                'statistika'
                 ]
     for feature in FEATURES:
         x = FM.feature(feature)
