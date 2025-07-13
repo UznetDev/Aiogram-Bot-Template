@@ -11,7 +11,7 @@ from bot.api.translator import Translator
 from bot.core.feature_manager import FeatureManager
 from bot.core.settings_manager import SettingsManager
 from bot.core.admin_rights_manager import AdminsManager
-
+from bot.core.manage_mandatory_membership import ManageMandatoryMembership
 
 
 
@@ -49,5 +49,4 @@ SM = SettingsManager(db=db, redis_client=redis, root_logger=root_logger)
 translator = Translator(db=db, FM=FM, root_logger=root_logger, redis_client=redis)
 
 
-
-
+MMM = ManageMandatoryMembership(db=db, redis_client=redis)
