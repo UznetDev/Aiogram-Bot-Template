@@ -1,44 +1,24 @@
-import logging
-from loader import dp, bot, db
 from aiogram import types, F
-from keyboards.inline.button import AdminCallback
-from keyboards.inline.admin_btn import channel_settings
-from keyboards.inline.close_btn import close_btn
-from filters.admin import IsAdmin, SelectAdmin
 from aiogram.fsm.context import FSMContext
-from api.translator import translator
-from data.config import ADMIN
 
 
-@dp.callback_query(AdminCallback.filter(F.action == "channel_setting"), IsAdmin())
+from bot.data.config import ADMIN
+from bot.filters.admin import IsAdmin
+from bot.loader import dp, bot, db, translator, root_logger, AM
+from bot.keyboards.inline.close_btn import close_btn
+from bot.keyboards.inline.button import AdminCallback
+from bot.keyboards.inline.admin_btn import channel_settings
+
+
+@dp.callback_query(AdminCallback.filter(F.action == "mandatory_membership"), IsAdmin())
 async def channel_setting(call: types.CallbackQuery, state: FSMContext):
-    """
-    Handles the display of channel settings for an admin in a Telegram bot.
-
-    Parameters:
-    - call (types.CallbackQuery): The callback query object containing details about the callback.
-    - state (FSMContext): Finite State Machine context used to manage the current state of the admin.
-
-    Functionality:
-    - Extracts the admin's ID, message ID, and language code from the callback query.
-    - Verifies if the admin has the necessary permissions to manage channel settings using the `SelectAdmin` filter.
-    - If the admin is the main ADMIN, retrieves all channels from the database; otherwise, retrieves channels added by the admin.
-    - Constructs a message displaying the list of channels, including details such as the channel's name, username, added date, and the admin who added it.
-    - If no channels are found, sends a message indicating the list is empty.
-    - Updates the message with channel settings and appropriate buttons.
-    - Logs any exceptions that occur during execution.
-
-    Returns:
-    - This function is asynchronous and does not return a value but performs actions such as sending messages and updating states.
-    """
     try:
         user_id = call.from_user.id  # The ID of the admin initiating the action
         mid = call.message.message_id  # The ID of the message triggering the callback
         language_code = call.from_user.language_code  # The language code of the admin for message translation
-        data = SelectAdmin(user_id=user_id)  # Check if the admin has permission to manage channel settings
         btn = close_btn()  # Inline button to close the message
 
-        if data.channel_settings():
+        if AM(user_id=user_id, feature='mandatory_membership'):
             if user_id == ADMIN:
                 # Retrieve all channels if the admin is the main ADMIN
                 data = db.select_channels()
@@ -63,7 +43,7 @@ async def channel_setting(call: types.CallbackQuery, state: FSMContext):
                                  f"<b>Added date:</b> <i>{x['created_at']}\n</i>"
                                  f"<b>Added by user_id:</b> <i>{x['initiator_user_id']}\n\n</i>")
                     except Exception as err:
-                        logging.error(err)  # Log any errors in retrieving channel details
+                        root_logger.error(err)  # Log any errors in retrieving channel details
             btn = channel_settings(language_code=language_code)  # Button for channel settings
         else:
             # Inform the admin that they do not have the necessary permissions

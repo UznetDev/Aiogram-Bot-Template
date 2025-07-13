@@ -11,25 +11,6 @@ from data.config import yil_oy_kun, soat_minut_sekund
 
 @dp.message(AdminState.add_channel, IsAdmin())
 async def add_channel2(msg: types.Message, state: FSMContext):
-    """
-    Handles the addition of a new channel to the bot's database by an authorized admin.
-
-    Parameters:
-    - msg (types.Message): The message object containing the channel ID input by the user.
-    - state (FSMContext): FSM context used to manage the bot's state for the current conversation.
-
-    Functionality:
-    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the message.
-    - Checks if the user has the necessary permissions to manage channel settings using the `SelectAdmin` filter.
-    - If authorized, attempts to convert the input text into a channel ID, checks if the channel is already in the database, and adds it if not.
-    - If the channel is already in the database, provides details about the existing entry.
-    - If the bot is not an admin in the channel or other errors occur, logs the error and informs the user.
-    - Clears the state and updates the bot message with the result of the operation and a close button (`close_btn`).
-    - Catches and logs any exceptions that occur during the execution.
-
-    Returns:
-    - This function is asynchronous and does not return a value. It interacts with the Telegram API to send and edit messages.
-    """
     try:
         user_id = msg.from_user.id  # The ID of the admin making the request
         mid = msg.message_id  # The ID of the message associated with the request

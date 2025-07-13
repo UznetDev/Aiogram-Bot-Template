@@ -12,24 +12,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 @dp.callback_query(IsAdmin(), AdminCallback.filter(F.action == "remove_channel"))
 async def remove_channel(call: types.CallbackQuery, state: FSMContext):
-    """
-    Handles the removal of channels by displaying a list of channels and allowing the admin to choose one to delete.
-
-    Parameters:
-    - call (types.CallbackQuery): The callback query object containing information about the user's action.
-    - state (FSMContext): The FSM context to manage the bot's state during the conversation.
-
-    Functionality:
-    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the callback query.
-    - Checks if the user has the necessary permissions to access channel settings using the `SelectAdmin` filter.
-    - If authorized, retrieves the list of channels either for all admins (if the user is the main admin) or for channels added by the specific admin.
-    - If the channel list is empty, informs the admin. If not, displays a list of channels with options to delete them.
-    - Creates an inline keyboard with buttons to choose channels for deletion and a close button.
-    - Updates the message in the chat with the channel list and the inline keyboard.
-
-    Returns:
-    - This function is asynchronous and does not return a value. It interacts with the Telegram API to update messages and with the database to retrieve channel information.
-    """
     try:
         user_id = call.from_user.id  # The ID of the admin who initiated the action
         mid = call.message.message_id  # The ID of the message to be updated

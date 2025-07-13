@@ -15,7 +15,6 @@ class Database:
         self.root_logger = root_logger
         self.reconnect()
         self.create_table_users()
-        self.create_table_channel()
 
     def reconnect(self):
         try:
@@ -74,29 +73,6 @@ class Database:
         except Exception as err:
             self.root_logger.error(err)
 
-    def create_table_channel(self):
-        """
-        Create the 'channels' table if it does not already exist.
-        """
-        try:
-            sql = """
-                CREATE TABLE IF NOT EXISTS `channels` (
-                    `id` INT AUTO_INCREMENT PRIMARY KEY,
-                    `channel_id` BIGINT,
-                    `initiator_user_id` BIGINT,
-                    `updater_user_id` BIGINT,
-                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                    `deleted_at` TIMESTAMP NULL DEFAULT NULL
-                );
-            """
-            self.cursor.execute(sql)
-            self.connection.commit()
-        except mysql.connector.Error as err:
-            self.root_logger.error(err)
-            self.reconnect()
-        except Exception as err:
-            self.root_logger.error(err)
 
     ## ---------------- Scheduler ---------------------
     def ban_user_for_one_hour(self, user_id, comment=None):

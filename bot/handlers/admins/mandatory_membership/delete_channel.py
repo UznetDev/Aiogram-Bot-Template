@@ -10,26 +10,6 @@ from data.config import ADMIN
 
 @dp.callback_query(IsAdmin(), AdminCallback.filter(F.action == "delete_channel"))
 async def delete_channel(call: types.CallbackQuery, callback_data: AdminCallback, state: FSMContext):
-    """
-    Handles the deletion of a channel in a Telegram bot by an authorized admin.
-
-    Parameters:
-    - call (types.CallbackQuery): The callback query object containing details about the interaction.
-    - callback_data (AdminCallback): Contains the action and additional data, including the channel ID.
-    - state (FSMContext): FSM context used to manage the bot's state for the current conversation.
-
-    Functionality:
-    - Retrieves the admin's user ID (`user_id`), the message ID (`mid`), and the language code (`lang`) from the callback query.
-    - Checks if the user has the necessary permissions to manage channel settings using the `SelectAdmin` filter.
-    - If authorized, retrieves the channel ID from `callback_data`, formats it, and checks its existence in the database.
-    - If the channel exists and the user is authorized, deletes the channel from the database and notifies the user.
-    - If the channel does not exist or the user is not authorized, sends an appropriate message to the user.
-    - Updates the bot message with the result of the operation and a close button (`close_btn`).
-    - Catches and logs any exceptions that occur during the execution.
-
-    Returns:
-    - This function is asynchronous and does not return a value. It interacts with the Telegram API to send and edit messages.
-    """
     try:
         user_id = call.from_user.id  # The ID of the admin making the request
         mid = call.message.message_id  # The ID of the message associated with the callback
