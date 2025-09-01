@@ -1,0 +1,35 @@
+from aiogram import types, F
+from aiogram.fsm.context import FSMContext
+
+from bot.filters.admin import IsAdmin
+from bot.keyboards.inline.admin_btn import admin_setting
+from bot.keyboards.inline.button import AdminCallback
+from bot.keyboards.inline.close_btn import close_btn
+from bot.loader import dp, bot, root_logger, translator, AM
+from bot.states.admin_state import AdminState
+
+
+@dp.callback_query(AdminCallback.filter(F.action == "add_admin"), IsAdmin())
+async def add_admin_first(call: types.CallbackQuery, state: FSMContext):
+    try:
+        user_id = call.from_user.id
+        message_id = call.message.message_id 
+        language_code = call.from_user.language_code
+
+
+        if AM(user_id=user_id, feature='admin_settings'):
+            text = translator(text="🔰 Please send the admin ID number you want to add...", dest=language_code)
+            btn = await admin_setting(user_id=user_id, language_code=language_code)
+            await state.set_state(AdminState.add_admin)
+        else:
+            text = translator(text="❌ Unfortunately, you do not have this right!", dest=language_code)
+            btn = close_btn()
+
+        await bot.edit_message_text(chat_id=user_id,
+                                    message_id=message_id,
+                                    text=f'<b>{text}</b>',
+                                    reply_markup=btn)
+        await state.update_data({"message_id": call.message.message_id})
+    except Exception as err:
+        root_logger.error(err)
+
