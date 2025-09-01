@@ -57,47 +57,6 @@ async def admin_setting(user_id, language_code):
         root_logger.error(err)
         return False
 
-# def attach_admin(user_id, language_code):
-#     try:
-#         btn = InlineKeyboardBuilder()
-#         btn.attach(InlineKeyboardBuilder.from_markup(main_btn()))
-#         send_message_tx = x_or_y(AM('send_message', user_id))
-#         wiew_statistika_tx = x_or_y(AM('view_statistika', user_id))
-#         download_statistika_tx = x_or_y(AM('download_statistika', user_id))
-#         block_user_tx = x_or_y(AM('block_user', user_id))
-#         channel_settings_tx = x_or_y(AM('channel_settings', user_id))
-#         add_admin_tx = x_or_y(AM('add_admin', user_id))
-#         btn.button(text=translator(text=f"{send_message_tx} Send a message!",
-#                                    dest=language_code),
-#                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='send_message').pack())
-
-#         btn.button(text=translator(text=f"{wiew_statistika_tx} Wiew statistics!",
-#                                    dest=language_code),
-#                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='statistika').pack())
-
-#         btn.button(text=translator(text=f"{download_statistika_tx} Download statistics!",
-#                                    dest=language_code),
-#                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='download_statistika').pack())
-
-#         btn.button(text=translator(text=f"{block_user_tx} Block user!",
-#                                    dest=language_code),
-#                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='block_user').pack())
-#         btn.button(text=translator(text=f"{channel_settings_tx} Channel settings!",
-#                                    dest=language_code),
-#                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='channel_settings').pack())
-#         btn.button(text=translator(text=f"{add_admin_tx} Add a admin!",
-#                                    dest=language_code),
-#                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='add_admin').pack())
-#         btn.button(text=translator(text=f"🔪Delete admin!",
-#                                    dest=language_code),
-#                    callback_data=EditAdminSetting(action="edit", user_id=user_id, data='delete_admin').pack())
-#         btn.adjust(1)
-#         btn.attach(InlineKeyboardBuilder.from_markup(close_btn()))
-#         return btn.as_markup()
-#     except Exception as err:
-#         root_logger.error(err)
-#         return False
-
 def attach_admin_btn(user_id, language_code):
     try:
         btn = InlineKeyboardBuilder()

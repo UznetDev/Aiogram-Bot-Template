@@ -1,50 +1,62 @@
-import logging
-from loader import dp, bot, db
 from aiogram import types, F
-from keyboards.inline.button import AdminCallback
-from keyboards.inline.admin_btn import channel_settings
-from keyboards.inline.close_btn import close_btn
-from filters.admin import IsAdmin, SelectAdmin
 from aiogram.fsm.context import FSMContext
-from api.translator import translator
+
+
+from bot.data.config import ADMIN
+from bot.filters.admin import IsAdmin
+from bot.loader import dp, bot, db, translator, root_logger, AM, MMM
+from bot.keyboards.inline.close_btn import close_btn
+from bot.keyboards.inline.button import AdminCallback
+from bot.keyboards.inline.admin_btn import channel_settings
 
 
 @dp.callback_query(AdminCallback.filter(F.action == "mandatory_membership"), IsAdmin())
-async def mandatory_membership(call: types.CallbackQuery, state: FSMContext):
+async def channel_setting(call: types.CallbackQuery, state: FSMContext):
     try:
-        user_id = call.from_user.id  # The ID of the admin who initiated the action
-        mid = call.message.message_id  # The ID of the message to be updated
-        language_code = call.from_user.language_code  # The language_codeuage code for translation
-        data = SelectAdmin(user_id=user_id)  # Check if the user has admin permissions
-        btn = close_btn()  # Create a button for closing the message
-
-        if data.channel_settings():
-            # Read the current setting for mandatory membership from the database
-            mandatory_membership = db.select_setting('mandatory_membership')
-            if mandatory_membership == 'True':
-                # If mandatory membership is enabled, disable it
-                text = translator(text='☑️ Forced membership disabled!', dest=language_code)
-                nex_mandatory_membership = 'False'
+        user_id = call.from_user.id
+        mid = call.message.message_id
+        language_code = call.from_user.language_code 
+        btn = close_btn()  # Inline button to close the message
+    
+        if AM(user_id=user_id, feature='mandatory_membership'):
+            if user_id == ADMIN:
+                # Retrieve all channels if the admin is the main ADMIN
+                data = db.select_channels()
             else:
-                # If mandatory membership is disabled, enable it
-                text = translator(text='✅ Mandatory membership enabled!', dest=language_code)
-                nex_mandatory_membership = 'True'
+                # Retrieve channels added by the current admin
+                data = MMM.channels(initiator_user_id=user_id)
 
-            # Update the database with the new membership status
-            db.update_settings_key(updater_user_id=user_id, key='mandatory_membership', value=nex_mandatory_membership)
-            btn = channel_settings(language_code=language_code)  # Update the button to reflect the new settings
+            if not data:
+                # If no channels are found, indicate that the list is empty
+                text = translator(text="❔ The channel list is empty!\n\n", dest=language_code)
+            else:
+                # Construct a message listing the channels
+                text = translator(text="🔰 List of channels:\n\n", dest=language_code)
+                count = 0
+                for x in data:
+                    try:
+                        count += 1
+                        chat_id = str(-100) + str(x['channel_id'])  # Telegram channel ID
+                        channel = await bot.get_chat(chat_id=chat_id)  # Get channel details
+                        text += (f"<b><i>{count}</i>. Name:</b> <i>{channel.full_name}</i>\n"
+                                 f"<b>Username:</b> <i>@{channel.username}\n</i>"
+                                 f"<b>Added date:</b> <i>{x['created_at']}\n</i>"
+                                 f"<b>Added by user_id:</b> <i>{x['initiator_user_id']}\n\n</i>")
+                    except Exception as err:
+                        root_logger.error(err)  # Log any errors in retrieving channel details
+            btn = channel_settings(language_code=language_code)  # Button for channel settings
         else:
+            # Inform the admin that they do not have the necessary permissions
             text = translator(text='❌ Unfortunately, you do not have this right!', dest=language_code)
 
-        # Edit the message with the new status and close button
-        await bot.edit_message_text(chat_id=user_id,
-                                    message_id=mid,
-                                    text=f'<b><i>{text}</i></b>',
-                                    reply_markup=btn)
-        # Update FSM state with the current message ID
-        await state.update_data({
-            "message_id": call.message.message_id
-        })
+        await bot.edit_message_text(
+            chat_id=user_id,
+            message_id=mid,
+            text=f'<b><i>{text}</i></b>',
+            reply_markup=btn  # Update the message with a translated response and appropriate buttons
+        )
+
+        await state.update_data({"message_id": call.message.message_id})  # Save the message ID in the FSM context
     except Exception as err:
-        # Log any errors that occur during the execution
-        logging.error(err)
+        logging.error(err)  # Log any exceptions that occur
+
